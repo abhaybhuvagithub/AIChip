@@ -16,9 +16,10 @@ Five tabs:
 | **Nodes** | 180 nm to 2 nm, with the transistor architecture that made each generation possible, and a drawn cross-section showing how many sides of the channel the gate controls. |
 | **Compute** | Turns the die you configured into operations per second, and climbs from one die to a 100,000-die cluster. Shows why headline throughput outran Moore's law: precision and sparsity, not density. |
 | **Quantum** | A surface code resource calculator — drag the physical error rate and watch the qubit count go vertical at threshold — plus five hardware modalities and a side-by-side of classical against quantum fabrication. |
+| **3D & beyond** | The architecture ladder with drawn cross-sections — planar, FinFET, nanosheet, forksheet, CFET, 2D-material channel — plus backside power delivery, four levels of circuit stacking, and an interactive thermal-wall calculator. Every entry carries a status badge, because "demonstrated at IEDM" and "in a product" are five to ten years apart. |
 | **Silicon** | Twenty real parts — Apple A-series and M-series, Google TPU v1 through the eighth generation, NVIDIA H100/Blackwell/Rubin, AMD MI300X, Cerebras WSE-3 — drawn at true relative area on one 300 mm wafer. Load any of them into the yield lab. |
 | **Value chain** | The seven layers that actually produce a chip, and how few suppliers each has. Arm's licensing model and its 2026 move into shipping its own silicon. Three business models — IDM, fabless plus foundry, and the vertical re-integration Terafab is betting on. A fab-scale calculator that turns wafer starts per month into chips, silicon and compute per year. |
-| **Quiz** | Twenty-six questions, self-explaining. |
+| **Quiz** | Thirty questions, self-explaining. |
 
 ## What is actually modelled
 
@@ -32,6 +33,12 @@ Five tabs:
   clustering mode, so a wafer stays stable while you drag a slider.
 - **Cost** — wafer cost amortised across good dies, plus per-die packaging,
   against a settable selling price.
+- **Cell footprint** — relative standard-cell area per architecture at
+  iso-node, planar as baseline, from vendor and imec publications.
+- **Thermal wall** — power density as tiers stack, against approximate cooling
+  capability bands. Density scales with tier count; heat-removal surface does
+  not, which is the arithmetic behind why 3D memory shipped a decade before 3D
+  logic.
 - **Material chain** — wafer mass from geometry and silicon density
   (π·r²·t·2.329), then each stage's mass worked backwards from one good die
   through published loss factors, with energy charged on the mass entering
@@ -62,6 +69,14 @@ Loss factors in the material chain are published rough figures and vary
 considerably by producer — wire-saw kerf alone destroys 30–40% of a finished
 crystal as dust. The compounded ratio, roughly eight grams of rock per gram of
 shipped silicon, is the figure worth carrying; the individual digits are not.
+
+Roadmap positions for forksheet, CFET and 2D-material channels come from imec,
+IEDM and vendor publications through 2026 and carry an explicit status badge.
+Cell-area figures are approximate and vary by cell and by claimant — read the
+ratio between generations. Cooling capability bands are order-of-magnitude
+only; real limits depend on hot-spot distribution rather than average density.
+Verify checks assert that only the three shipping architectures are marked
+production and that no beyond-CMOS option is.
 
 Terafab is an announced project, not an operating factory. The tab separates
 what is committed (site, permits, phase-one capital, jobs) from what is stated
@@ -105,10 +120,11 @@ npm run build    # production build into dist/
 npm test         # build, then run the verification suite
 ```
 
-`npm run verify` runs 217 checks across wafer geometry, yield model
+`npm run verify` runs 258 checks across wafer geometry, yield model
 correctness (pinned against hand-computed values), economics invariants,
-defect scatter determinism, material chain mass balance, published specs for
-real parts, value-chain sourcing separation, compute-model
+defect scatter determinism, architecture and thermal-wall arithmetic, material
+chain mass balance, published specs for real parts, value-chain sourcing
+separation, compute-model
 calibration, surface code arithmetic, content completeness, and the contents of the built bundle. A
 failure blocks deployment — see `.github/workflows/deploy.yml`.
 

@@ -235,3 +235,29 @@ per-die economics.
   tension text mentions both, and another asserts that RISC-V share figures
   are hedged — published estimates differ enormously depending on whether you
   count chips, cores or dollars.
+
+---
+
+## Sixth pass: 3D transistors and beyond
+
+- **The status badge is the most important element on the tab.** Writing about
+  CFET, forksheet and 2D-material channels is where this subject usually goes
+  wrong: a working device at IEDM and a shipping product are routinely five to
+  ten years apart, and prose that treats them alike is misinformation with
+  good grammar. Every entry carries an explicit status, and verify asserts
+  that exactly the three shipping architectures are marked production and that
+  no beyond-CMOS option is.
+- **Each speculative technology gets an honest note, not a caveat.** Tunnel
+  FETs have demonstrated steep switching for twenty years and never delivered
+  on-current. Negative capacitance is still disputed in the literature.
+  Writing only the promise would have been the easy version and the useless
+  one, so a check asserts every entry's limitation runs past forty characters.
+- **The thermal wall had to be computed, not asserted.** It would have been
+  simple to write "stacking is hard because of heat". Instead the tier slider
+  multiplies power density while heat-removal area stays fixed, and the
+  cooling table shows each approach buying roughly one more tier. The activity
+  slider is the honest part: drag it down and the problem vanishes, which is
+  precisely the trick stacked memory plays and stacked logic cannot.
+- **A stray CJK character appeared mid-sentence in the copy** — an artefact,
+  not a decision. Caught on a read-back before shipping, and there is now a
+  bundle check for non-Latin characters so it cannot recur silently.

@@ -19,6 +19,9 @@ const { NODES, PRODUCTS, ARCHITECTURES, FOUNDRIES } = await import(join(root, 's
 const { QUIZ, TOUR } = await import(join(root, 'src/data/learn.js'))
 const { computeThroughput, ops, watts, PRECISIONS, LADDER, SCALE_NAMES, DEFAULT_COMPUTE } =
   await import(join(root, 'src/lib/compute.js'))
+const { ARCH, STATUS, BACKSIDE, STACKING, BEYOND_CMOS, THERMAL_LIMITS } =
+  await import(join(root, 'src/data/arch3d.js'))
+const { cellArea, areaReduction, stackThermal, coolingFor } = await import(join(root, 'src/lib/thermal.js'))
 const { LAYERS, ARM, MODELS, FAB_TIERS, TERAFAB } = await import(join(root, 'src/data/value-chain.js'))
 const { SILICON, MAKERS, CATEGORIES, COUNTED } = await import(join(root, 'src/data/silicon.js'))
 const { CHAIN, AUTOMATION, WHY_NO_HUMANS } = await import(join(root, 'src/data/sand.js'))
@@ -174,15 +177,113 @@ group('Content')
   ok('quiz answers all point at a real option', QUIZ.every((q) => q.opts[q.a] !== undefined))
   ok('every quiz question explains itself', QUIZ.every((q) => q.why && q.why.length > 40))
   ok('quiz options are distinct', QUIZ.every((q) => new Set(q.opts).size === q.opts.length))
-  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', 'silicon', 'chain', 'compute', 'quantum', 'quiz'].includes(t.tab)))
-  ok('the tour visits every tab', ['sand', 'line', 'wafer', 'economics', 'nodes', 'silicon', 'chain', 'compute', 'quantum', 'quiz']
+  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz'].includes(t.tab)))
+  ok('the tour visits every tab', ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz']
     .every((t) => TOUR.some((s) => s.tab === t)))
   ok('quiz covers the material chain', QUIZ.some((q) => /purity|distill|polysilicon|particle/i.test(q.q)))
   ok('quiz covers real silicon', QUIZ.some((q) => /Cerebras|MI300X|wafer-scale/i.test(q.q)))
   ok('quiz covers the value chain', QUIZ.some((q) => /Arm|EUV scanners|Terafab/i.test(q.q)))
-  ok('quiz covers compute and quantum', QUIZ.length >= 26 &&
+  ok('quiz covers 3D transistors and the thermal wall',
+    QUIZ.some((q) => /CFET|backside power/i.test(q.q)) && QUIZ.some((q) => /3D memory|3D logic/i.test(q.q)))
+  ok('quiz covers compute and quantum', QUIZ.length >= 30 &&
     QUIZ.some((q) => /FP4|sparsity|precision/i.test(q.q)) &&
     QUIZ.some((q) => /qubit|surface code|threshold/i.test(q.q)))
+}
+
+/* ---------- 3D and beyond ---------- */
+group('3D and beyond')
+{
+  ok('all six architectures are populated', ARCH.length === 6 && ARCH.every((a) =>
+    a.id && a.name && a.era && a.one && a.what && a.why && a.cost && a.node &&
+    STATUS[a.status] && a.gated >= 1 && a.cellArea > 0))
+  ok('architecture ids are unique', new Set(ARCH.map((a) => a.id)).size === ARCH.length)
+  ok('the ladder runs planar to 2D material',
+    ARCH[0].id === 'planar' && ARCH[ARCH.length - 1].id === '2d')
+  ok('gated faces increase then saturate at four',
+    ARCH.every((a, i) => i === 0 || a.gated >= ARCH[i - 1].gated) && ARCH.every((a) => a.gated <= 4))
+  ok('planar gates one face, FinFET three, nanosheet four',
+    ARCH.find((a) => a.id === 'planar').gated === 1 &&
+    ARCH.find((a) => a.id === 'finfet').gated === 3 &&
+    ARCH.find((a) => a.id === 'nanosheet').gated === 4)
+  ok('cell footprint shrinks monotonically down the ladder',
+    ARCH.every((a, i) => i === 0 || a.cellArea < ARCH[i - 1].cellArea))
+  ok('planar is the footprint baseline', ARCH[0].cellArea === 1)
+  ok('CFET roughly halves the cell against nanosheet',
+    (() => { const r = areaReduction('nanosheet', 'cfet'); return r > 0.35 && r < 0.6 })())
+  ok('cellArea() resolves known ids and defaults safely',
+    cellArea('cfet') === ARCH.find((a) => a.id === 'cfet').cellArea && cellArea('nonsense') === 1)
+
+  // The status discipline: shipping and lab-demonstrated must not blur.
+  ok('every status maps to a defined badge', ARCH.every((a) => STATUS[a.status]))
+  ok('production architectures are exactly the three that ship',
+    ARCH.filter((a) => a.status === 'production').map((a) => a.id).join() === 'planar,finfet,nanosheet')
+  ok('forksheet and CFET are demonstrated, not claimed as production',
+    ARCH.find((a) => a.id === 'forksheet').status === 'demonstrated' &&
+    ARCH.find((a) => a.id === 'cfet').status === 'demonstrated')
+  ok('2D-material channels are marked research', ARCH.find((a) => a.id === '2d').status === 'research')
+
+  ok('backside power section is complete',
+    BACKSIDE.what && BACKSIDE.how && BACKSIDE.cost && BACKSIDE.where && BACKSIDE.gains.length >= 3)
+  ok('backside power names who actually ships it',
+    /Intel|PowerVia/.test(BACKSIDE.where) && /TSMC|Super Power Rail/.test(BACKSIDE.where))
+  ok('the cost of backside power is stated, not glossed',
+    /thinning|bonding|fragile/i.test(BACKSIDE.cost))
+
+  ok('stacking approaches are ordered by connection density',
+    STACKING.length >= 4 && STACKING.every((s) => s.name && s.what && s.pitch && STATUS[s.status] && s.note))
+  ok('hybrid bonding is present and in production',
+    STACKING.find((s) => s.id === 'hybrid')?.status === 'production')
+  ok('sequential 3D is marked research and names the thermal budget',
+    STACKING.find((s) => s.id === 'sequential')?.status === 'research' &&
+    /thermal budget|°C/.test(STACKING.find((s) => s.id === 'sequential').note))
+
+  ok('beyond-CMOS entries each carry an honest limitation',
+    BEYOND_CMOS.length >= 4 && BEYOND_CMOS.every((b) => b.name && b.idea && b.why && b.honest.length > 40))
+  ok('no beyond-CMOS option is claimed as production',
+    BEYOND_CMOS.every((b) => b.status === 'research'))
+}
+
+group('Thermal wall')
+{
+  ok('cooling limits are ordered and positive',
+    THERMAL_LIMITS.every((l, i) => l.wPerMm2 > 0 && (i === 0 || l.wPerMm2 > THERMAL_LIMITS[i - 1].wPerMm2)))
+
+  const base = { areaMm2: 800, wattsTier: 700 }
+  const one = stackThermal({ ...base, tiers: 1, activity: 1 })
+  ok('a single tier gives power over area', near(one.density, 700 / 800, 1e-9))
+  ok('a single tier needs no stacking allowance', one.activeTiers === 1)
+
+  const four = stackThermal({ ...base, tiers: 4, activity: 1 })
+  ok('four tiers at full activity quadruple power density', near(four.density, one.density * 4, 1e-9))
+  ok('density gain equals the tier count regardless of activity',
+    stackThermal({ ...base, tiers: 4, activity: 0.2 }).densityGain === 4)
+  // The whole point: low activity is the escape, and memory takes it.
+  ok('lower simultaneous activity lowers density but not density gain', (() => {
+    const idle = stackThermal({ ...base, tiers: 4, activity: 0.1 })
+    return idle.density < four.density && idle.densityGain === four.densityGain
+  })())
+  ok('stacking never reduces power density',
+    stackThermal({ ...base, tiers: 6, activity: 0.5 }).density >= one.density)
+
+  ok('an extreme stack exceeds every listed cooling approach', (() => {
+    const hot = stackThermal({ areaMm2: 100, wattsTier: 700, tiers: 8, activity: 1 })
+    return hot.beyondAll === true && hot.needed === null
+  })())
+  ok('a modest die finds a cooling approach with headroom', (() => {
+    const cool = stackThermal({ areaMm2: 800, wattsTier: 100, tiers: 1, activity: 1 })
+    return cool.needed !== null && cool.headroom > 1 && cool.beyondAll === false
+  })())
+  ok('coolingFor picks the cheapest sufficient approach',
+    coolingFor(0.1).id === 'passive' && coolingFor(1.0).id === 'cold' && coolingFor(100) === null)
+  ok('zero area is refused rather than producing Infinity',
+    stackThermal({ areaMm2: 0, wattsTier: 700, tiers: 2 }).ok === false)
+  ok('density is finite across a wide sweep', (() => {
+    for (const t of [1, 2, 4, 8]) for (const act of [0.05, 0.5, 1]) {
+      const r = stackThermal({ areaMm2: 500, wattsTier: 300, tiers: t, activity: act })
+      if (!Number.isFinite(r.density) || r.density <= 0) return false
+    }
+    return true
+  })())
 }
 
 /* ---------- value chain ---------- */
@@ -542,6 +643,9 @@ group('Build output')
       ok('author meta tag shipped', html.includes('name="author"') && html.includes('Abhay Bhuva'))
       ok('the provenance note shipped', bundle.includes('Anthropic') && bundle.includes('publicly available'))
       ok('the no-confidential-data statement shipped', /confidential/i.test(bundle))
+      ok('the 3D architecture ladder shipped', bundle.includes('CFET') && bundle.includes('Forksheet'))
+      ok('backside power shipped', bundle.includes('PowerVia') || bundle.includes('Backside power'))
+      ok('no stray non-latin characters in the copy', !/[\u4e00-\u9fff\u3040-\u30ff]/.test(bundle))
       ok('the value chain shipped', bundle.includes('Terafab') && bundle.includes('Neoverse'))
       ok('the silicon catalogue shipped', bundle.includes('Cerebras') && bundle.includes('Ironwood'))
       ok('the sand-to-silicon chain shipped', bundle.includes('Czochralski') && bundle.includes('Siemens'))

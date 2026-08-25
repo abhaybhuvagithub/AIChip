@@ -14,6 +14,9 @@ export const TOUR = [
   { id: 't6', tab: 'wafer', title: 'Read the edge', body: 'Raise edge exclusion. Those outer dies were never countable, and the ring you lose grows with wafer diameter — one of several reasons 450 mm never paid for itself.' },
   { id: 't7', tab: 'economics', title: 'Follow the money to the good die', body: 'Cost per good die, not yield, is what a fab is run to. A 40% yield on a cheap wafer can beat 80% on an expensive one. Try the automotive MCU against the AI accelerator.' },
   { id: 't8', tab: 'nodes', title: 'See why the names stopped meaning anything', body: 'From 22 nm the number stops describing a measurable dimension. What kept improving is density and the transistor architecture — planar to fin to nanosheet, one more side of the channel each time.' },
+  { id: 't8a1', tab: '3d', title: 'Count the gated faces', body: 'Step along the ladder and watch the cross-section. Planar gates one face of the channel, FinFET three, nanosheet four. Each step buys back electrostatic control that short channels took away.' },
+  { id: 't8a2', tab: '3d', title: 'Find the step that shrinks nothing', body: 'CFET is the only rung that reduces cell area without reducing any dimension — the pitch stays the same and one device moves underneath the other. That is why it needs backside power to arrive with it.' },
+  { id: 't8a3', tab: '3d', title: 'Hit the wall', body: 'Drag the tier slider up on the thermal section. Density scales with tiers; the surface you can remove heat through does not. Then drag activity down and watch the problem vanish — that is exactly the trick stacked memory plays and stacked logic cannot.' },
   { id: 't8b', tab: 'silicon', title: 'See what all of this is actually about', body: 'Every part is drawn at true relative area on one 300 mm wafer. An A17 Pro is the small square near the middle; the Cerebras WSE-3 is the wafer. Both are called a chip.' },
   { id: 't8c', tab: 'silicon', title: 'Notice what is missing', body: 'Several cells are empty rather than estimated. Google publishes pod throughput freely and die geometry almost never, and Apple has never published a die size — every Apple area here is someone else measuring a die shot.' },
   { id: 't8d', tab: 'chain', title: 'Count the suppliers', body: 'Click through the seven layers and read the concentration line on each. Three EDA companies worldwide. One company making EUV scanners. That last fact explains more about semiconductor geopolitics than any other single thing.' },
@@ -23,7 +26,7 @@ export const TOUR = [
   { id: 't10', tab: 'compute', title: 'Climb to the trillions and past them', body: 'Move the scale selector from one die to a cluster. Note the power column keeping pace: past a rack, what you can build is set by the substation, not the fab.' },
   { id: 't11', tab: 'quantum', title: 'Meet the other exchange rate', body: 'Pick Shor on RSA-2048, then drag the physical error rate. Between 0.8% and 1.2% the qubit count goes vertical and then to infinity — that cliff is the surface code threshold.' },
   { id: 't12', tab: 'quantum', title: 'See what a fab cannot fix', body: 'Read the comparison table. A logic fab is a statistical discipline that expects failures and designs around them. A quantum chip has no binning and no redundancy, so the same tools do not buy the same safety.' },
-  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Twenty-six questions. Everything needed to answer them is on the other nine tabs.' },
+  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Thirty questions. Everything needed to answer them is on the other ten tabs.' },
 ]
 
 export const QUIZ = [
@@ -134,6 +137,30 @@ export const QUIZ = [
     opts: ['Sorting wafers by lot', 'Selling the same die as different products by grade or fused-off blocks', 'Discarding failed dies at sort', 'Grouping masks by layer'],
     a: 1,
     why: 'A die with one failed core is not scrap, it is a cheaper SKU. Harvesting turns a yield distribution into a product ladder, which is why yield alone does not decide profit.',
+  },
+  {
+    q: 'CFET stacks the n device on top of the p device. What makes it different from every scaling step before it?',
+    opts: ['It uses a finer pitch than nanosheet', 'It shrinks the cell without shrinking any dimension', 'It removes the need for EUV', 'It increases drive current per device'],
+    a: 1,
+    why: 'The pitch stays the same and the footprint roughly halves, because one device hides under the other. That is also why getting power and signal to the buried device is the central problem, and why CFET and backside power delivery arrive together.',
+  },
+  {
+    q: 'What does backside power delivery actually free up?',
+    opts: ['Die area on the back of the wafer', 'Front-side metal routing tracks, which power rails were competing with signal for', 'Thermal headroom', 'Mask layers'],
+    a: 1,
+    why: 'For sixty years signal and power came down through the same metal stack. Moving power to a grid on the reverse of a thinned wafer relieves front-side congestion, cuts IR drop, and lets standard cells shrink in track count — scaling without a new transistor.',
+  },
+  {
+    q: 'Why did 3D memory ship a decade before 3D logic?',
+    opts: ['Memory dies are smaller', 'Most of a memory stack is idle at any moment, so power density stays manageable', 'Memory needs fewer through-silicon vias', 'Memory tolerates higher temperatures'],
+    a: 1,
+    why: 'Stacking multiplies power per unit footprint while the surface available to remove heat stays fixed. Memory gets away with it because simultaneous activity is low. Logic does not have that escape.',
+  },
+  {
+    q: 'Why are 2D materials like MoS₂ being considered for the channel at all?',
+    opts: ['They conduct better than silicon at any thickness', 'Below about 5 nm body thickness silicon mobility collapses and thickness variation becomes uncontrollable', 'They are cheaper to deposit', 'They tolerate higher gate voltages'],
+    a: 1,
+    why: 'A monolayer is as thin as matter allows and its thickness is set by chemistry rather than by process tolerance. The open problems are contact resistance to a monolayer and growing device-grade film at 300 mm.',
   },
   {
     q: 'Gate-all-around wraps the gate on how many sides of the channel?',
