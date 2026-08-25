@@ -575,3 +575,34 @@ process variation seen twice.
   reachable from the sliders. It surfaced only because the smoke test renders a
   deliberate extremes configuration. Replaced with iteration, and there is now
   a verify check that runs the whole binning path on a 100k-die wafer.
+
+---
+
+## Seventeenth pass: zero to market
+
+The site modelled the physics and the factory and never the business case,
+which is the thing that actually decides whether a chip exists. A design that
+yields beautifully is still a bad idea if the money to reach it can never be
+earned back.
+
+- **Build the whole tab around one equation.** Break-even units = NRE ÷ (price
+  − cost per unit). Everything else — the phase timeline, the node table, the
+  cash curve — is decoration on that, and the tab says so rather than
+  presenting six coequal charts.
+- **Wire it to the models already here.** Cost per unit is not an input; it
+  comes from the die configured in the yield lab, through the same yield model.
+  Changing the die changes the business case, which is the point.
+- **Cross-check the build-up against an independent figure.** NRE is computed
+  from engineer-years, mask cost, EDA and IP — then compared against the
+  commonly cited total-design-cost estimate for that node, which is a genuinely
+  separate number. A verify check asserts they agree within a factor of two.
+  Agreement is reassurance, not proof, and the tab says that too.
+- **The model produced the lesson rather than being told it.** A low-price part
+  that pays back at 28 nm never pays back at 3 nm — not because the chip is
+  worse but because the NRE cannot be amortised over the volume the market
+  absorbs. That is the honest reason most silicon is not leading-edge, and it
+  falls out of the arithmetic. There is a check asserting it stays true.
+- **Estimates that vary by 2× are labelled as such.** Nobody publishes their
+  real mask bill. The ratios between nodes are more trustworthy than any single
+  figure and the shape of the cash curve more trustworthy than either, and the
+  closing note says exactly that instead of implying precision.

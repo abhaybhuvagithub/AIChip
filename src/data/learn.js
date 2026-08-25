@@ -35,11 +35,13 @@ export const TOUR = [
   { id: 't8d', tab: 'chain', title: 'Count the suppliers', body: 'Click through the seven layers and read the concentration line on each. Three EDA companies worldwide. One company making EUV scanners. That last fact explains more about semiconductor geopolitics than any other single thing.' },
   { id: 't8e', tab: 'chain', title: 'Find the layer that owns nothing', body: 'Arm has never owned a fab and until 2026 never sold a chip, yet its cores are in nearly every phone on Earth. Selling the design rather than the object is what made the fabless world possible.' },
   { id: 't8f', tab: 'chain', title: 'Watch the argument reopen', body: 'The industry settled on specialisation decades ago. Terafab is a bet that specialisation became a liability once capacity itself turned scarce. Note the two tables: what is committed, and what is so far only stated.' },
+  { id: 't8z1', tab: 'business', title: 'See what it costs to start', body: 'Four years and hundreds of millions before a single part ships, and over 80% of it spent before anyone knows whether the silicon works. Click through the phases and watch where the money goes.' },
+  { id: 't8z2', tab: 'business', title: 'Find the node that kills the product', body: 'Pick the IoT SoC market, then walk down the node table. There is a node above which the programme never pays back — not because the chip is worse, but because the NRE cannot be amortised over the units the market will absorb.' },
   { id: 't9', tab: 'compute', title: 'Turn silicon into operations', body: 'The die you configured now becomes a throughput number. Watch the top-left figure as you change nothing but the precision dropdown — the silicon is identical and the number moves by 64x.' },
   { id: 't10', tab: 'compute', title: 'Climb to the trillions and past them', body: 'Move the scale selector from one die to a cluster. Note the power column keeping pace: past a rack, what you can build is set by the substation, not the fab.' },
   { id: 't11', tab: 'quantum', title: 'Meet the other exchange rate', body: 'Pick Shor on RSA-2048, then drag the physical error rate. Between 0.8% and 1.2% the qubit count goes vertical and then to infinity — that cliff is the surface code threshold.' },
   { id: 't12', tab: 'quantum', title: 'See what a fab cannot fix', body: 'Read the comparison table. A logic fab is a statistical discipline that expects failures and designs around them. A quantum chip has no binning and no redundancy, so the same tools do not buy the same safety.' },
-  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Forty-two questions. Everything needed to answer them is on the other thirteen tabs.' },
+  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Forty-five questions. Everything needed to answer them is on the other thirteen tabs.' },
 ]
 
 export const QUIZ = [
@@ -198,6 +200,24 @@ export const QUIZ = [
     opts: ['Smaller dies yield far better, and only known-good ones get packaged', 'Chiplets use cheaper wafers', 'Packaging is always cheaper than silicon', 'They need fewer mask layers'],
     a: 0,
     why: 'Yield falls sharply with area, so four small dies beat one large one — and each is tested before assembly, so you are not packaging failures.',
+  },
+  {
+    q: 'Most of the world\'s chips are made on older nodes rather than the leading edge. Why is that rational?',
+    opts: ['Older fabs are already paid for', 'NRE at the leading edge cannot be amortised over the volume most markets absorb', 'Older nodes yield better', 'Leading-edge capacity is unavailable'],
+    a: 1,
+    why: 'Moving from 28 nm to 3 nm multiplies mask cost more than tenfold and engineering cost more than tenfold again. For a low-price part there is a node above which the programme never pays back — the older node genuinely makes the better product.',
+  },
+  {
+    q: 'At what point in a chip programme has most of the money already been spent?',
+    opts: ['After the production ramp', 'Before first silicon exists', 'During qualification', 'At the concept stage'],
+    a: 1,
+    why: 'The mask bill lands at tapeout and engineering runs for years before it. By the time the lab powers up the first part and learns whether the design works, over 80% of the budget is gone — which is why verification headcount looks absurd until you price a respin.',
+  },
+  {
+    q: 'A chip company with a profitable, selling product can still run out of cash. Why?',
+    opts: ['Tax timing', 'Wafers are paid for months before the parts can be sold, and foundry capacity is take-or-pay', 'Royalties are paid up front', 'Depreciation on test equipment'],
+    a: 1,
+    why: 'Cycle time is three to four months and booked capacity must be paid for whether you use it or not. Working capital, not profitability, is what kills companies at the ramp stage.',
   },
   {
     q: 'What is binning?',

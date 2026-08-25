@@ -29,12 +29,14 @@ const dist = join(root, 'dist')
 //   138 kB  the science tab (physics library, two SVG plotters, ~6 kB)
 //   148 kB  the clock tab and speed binning (frequency model, per-die Fmax,
 //           histogram, and speed colouring on the wafer map, ~9 kB)
+//   156 kB  the business tab (NRE build-up, break-even, ramp and cash-flow
+//           model with a lifetime chart, ~7 kB)
 // Each rise is a feature that bought the bytes, named in the commit.
 const BUDGET = {
-  'js.gzip': 148 * 1024,
+  'js.gzip': 156 * 1024,
   'css.gzip': 7 * 1024,
   'html.raw': 6 * 1024,
-  'total.gzip': 156 * 1024,
+  'total.gzip': 164 * 1024,
 }
 
 let fail = 0

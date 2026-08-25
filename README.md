@@ -22,8 +22,9 @@ Five tabs:
 | **Quantum** | A surface code resource calculator — drag the physical error rate and watch the qubit count go vertical at threshold — plus five hardware modalities and a side-by-side of classical against quantum fabrication. |
 | **3D & beyond** | The architecture ladder with drawn cross-sections — planar, FinFET, nanosheet, forksheet, CFET, 2D-material channel — plus backside power delivery, four levels of circuit stacking, and an interactive thermal-wall calculator. Every entry carries a status badge, because "demonstrated at IEDM" and "in a product" are five to ten years apart. |
 | **Silicon** | Twenty real parts — Apple A-series and M-series, Google TPU v1 through the eighth generation, NVIDIA H100/Blackwell/Rubin, AMD MI300X, Cerebras WSE-3 — drawn at true relative area on one 300 mm wafer. Load any of them into the yield lab. |
+| **0 → market** | The business case: seven phases from concept to ramp, an NRE build-up by node, and the one calculation that decides whether a chip exists — break-even units = NRE ÷ margin. Plus a lifetime cash-flow chart showing the four-year hole before the climb. Unit cost comes from the die you configured in the yield lab. |
 | **Value chain** | The seven layers that actually produce a chip, and how few suppliers each has. Arm's licensing model and its 2026 move into shipping its own silicon. Three business models — IDM, fabless plus foundry, and the vertical re-integration Terafab is betting on. A fab-scale calculator that turns wafer starts per month into chips, silicon and compute per year. |
-| **Quiz** | Forty-two questions, self-explaining. |
+| **Quiz** | Forty-five questions, self-explaining. |
 
 ## What is actually modelled
 
@@ -44,6 +45,10 @@ Five tabs:
 - **Device physics** — thermal voltage, Varshni bandgap, intrinsic carriers,
   mass action, oxide capacitance and EOT, square-law drain current,
   subthreshold swing, WKB gate tunnelling, and dynamic power.
+- **Business case** — NRE built up from mask set, engineer-years, EDA and IP
+  by node; break-even volume; an S-curve ramp with annual price erosion and
+  yield learning; and quarter-by-quarter cumulative cash flow to a payback
+  quarter.
 - **Speed binning** — per-die maximum clock from three variation sources:
   systematic radial (anneal, CMP and focus vary with wafer radius), random
   die-to-die, and within-die worst-path statistics, where the slowest of N
@@ -124,6 +129,14 @@ only; real limits depend on hot-spot distribution rather than average density.
 Verify checks assert that only the three shipping architectures are marked
 production and that no beyond-CMOS option is.
 
+Business-tab costs are widely-cited industry estimates and vary by a factor of
+two or more between sources and between companies — nobody publishes their
+real mask bill. The ratios between nodes are more reliable than any single
+figure, and the shape of the cash curve is more reliable than either. The NRE
+build-up is computed independently from engineer-years and mask cost, then
+cross-checked against the published total-design-cost estimate for that node;
+a verify check asserts the two agree within a factor of two.
+
 Terafab is an announced project, not an operating factory. The tab separates
 what is committed (site, permits, phase-one capital, jobs) from what is stated
 ambition (2 nm target, the terawatt output framing, which does not originate
@@ -194,7 +207,7 @@ that fails fastest:
 | --- | --- |
 | `npm run lint` | Dead imports, unused props, hook misuse. Found three real bugs the first time it ran. |
 | `npm run build` | Anything that does not compile. |
-| `npm run verify` | 498 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
+| `npm run verify` | 530 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
 | `npm run smoke` | Renders all sixteen tabs across five configurations, including an unmakeable die and a zero-yield process. Catches components that throw on first render, and output that leaks `NaN` or `undefined` — which reads as broken while passing every other check. |
 | `npm run budget` | Bundle size against a gzipped budget. This bundle grew 206 kB → 331 kB across six feature passes with nothing watching. |
 
@@ -214,7 +227,7 @@ publish means the push succeeded, not that the bytes are being served — a
 sister repo shipped the previous build for weeks with green checks the whole
 time, because nothing closed that loop.
 
-`npm run verify` runs 498 checks across wafer geometry, yield model
+`npm run verify` runs 530 checks across wafer geometry, yield model
 correctness (pinned against hand-computed values), economics invariants,
 defect scatter determinism, a named type scale with a 14px floor and a pinned
 prose tier, WCAG contrast across all ten themes, architecture and thermal-wall arithmetic, material

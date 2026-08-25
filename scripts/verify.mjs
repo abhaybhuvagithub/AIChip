@@ -177,12 +177,13 @@ group('Content')
   ok('quiz answers all point at a real option', QUIZ.every((q) => q.opts[q.a] !== undefined))
   ok('every quiz question explains itself', QUIZ.every((q) => q.why && q.why.length > 40))
   ok('quiz options are distinct', QUIZ.every((q) => new Set(q.opts).size === q.opts.length))
-  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science', 'clock'].includes(t.tab)))
+  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science', 'clock', 'business'].includes(t.tab)))
   ok('the tour visits every tab', ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz']
     .every((t) => TOUR.some((s) => s.tab === t)))
   ok('quiz covers the material chain', QUIZ.some((q) => /purity|distill|polysilicon|particle/i.test(q.q)))
   ok('quiz covers real silicon', QUIZ.some((q) => /Cerebras|MI300X|wafer-scale/i.test(q.q)))
   ok('quiz covers the value chain', QUIZ.some((q) => /Arm|EUV scanners|Terafab/i.test(q.q)))
+  ok('quiz covers the business case', QUIZ.some((q) => /NRE|amortis|cash|node above which/i.test(q.q)))
   ok('quiz covers speed binning', QUIZ.some((q) => /bin|slow dies|blended/i.test(q.q)))
   ok('quiz covers clock frequency', QUIZ.some((q) => /GHz|THz|clock/i.test(q.q)))
   ok('quiz covers the underlying physics',
@@ -191,7 +192,7 @@ group('Content')
     QUIZ.some((q) => /X-factor|cycle time|bottleneck|scanners/i.test(q.q)))
   ok('quiz covers 3D transistors and the thermal wall',
     QUIZ.some((q) => /CFET|backside power/i.test(q.q)) && QUIZ.some((q) => /3D memory|3D logic/i.test(q.q)))
-  ok('quiz covers compute and quantum', QUIZ.length >= 42 &&
+  ok('quiz covers compute and quantum', QUIZ.length >= 45 &&
     QUIZ.some((q) => /FP4|sparsity|precision/i.test(q.q)) &&
     QUIZ.some((q) => /qubit|surface code|threshold/i.test(q.q)))
 }
@@ -973,6 +974,107 @@ group('Physics')
     P.LITHO.every((l, i) => i === 0 || l.year > P.LITHO[i - 1].year))
 }
 
+/* ---------- business ---------- */
+group('Business case')
+{
+  const Bz = await import(join(root, 'src/lib/business.js'))
+
+  ok('all seven phases are described', Bz.PHASES.length >= 7 && Bz.PHASES.every((p) =>
+    p.id && p.name && p.months > 0 && p.cashShare > 0 && p.what && p.risk && p.kills))
+  ok('phase cash shares sum to one',
+    near(Bz.PHASES.reduce((n, p) => n + p.cashShare, 0), 1, 0.001))
+  ok('the programme takes three to five years',
+    (() => { const m = Bz.PHASES.reduce((n, p) => n + p.months, 0); return m >= 36 && m <= 60 })())
+  ok('verification and physical design dominate the budget', (() => {
+    const heavy = Bz.PHASES.filter((p) => p.id === 'rtl' || p.id === 'physical')
+      .reduce((n, p) => n + p.cashShare, 0)
+    return heavy > 0.5
+  })())
+  ok('most money is spent before first silicon', (() => {
+    const i = Bz.PHASES.findIndex((p) => p.id === 'silicon')
+    return Bz.PHASES.slice(0, i).reduce((n, p) => n + p.cashShare, 0) > 0.8
+  })())
+
+  ok('node costs rise monotonically with each generation',
+    Bz.NODE_COSTS.every((n, i) => i === 0 ||
+      (n.maskUsd > Bz.NODE_COSTS[i - 1].maskUsd &&
+       n.designUsd > Bz.NODE_COSTS[i - 1].designUsd &&
+       n.engineerYears > Bz.NODE_COSTS[i - 1].engineerYears)))
+  ok('28 nm to 3 nm multiplies mask cost by more than ten', (() => {
+    const a = Bz.NODE_COSTS.find((n) => n.node === '28 nm').maskUsd
+    const b = Bz.NODE_COSTS.find((n) => n.node === '3 nm').maskUsd
+    return b / a > 10
+  })())
+
+  const nre = Bz.totalNre({ node: '5 nm' })
+  ok('NRE components sum to the total',
+    near(nre.mask + nre.people + nre.eda + nre.ip + nre.respin, nre.total, 1))
+  ok('leading-edge NRE is in the hundreds of millions',
+    nre.total > 200e6 && nre.total < 1.5e9, (nre.total / 1e6).toFixed(0) + 'M')
+  // The build-up is independent of the published figure, so agreeing with it
+  // is a real cross-check rather than a tautology.
+  ok('the build-up lands within a factor of two of the published estimate', (() => {
+    const pub = Bz.NODE_COSTS.find((n) => n.node === '5 nm').designUsd
+    const r = nre.total / pub
+    return r > 0.5 && r < 2
+  })(), (nre.total / Bz.NODE_COSTS.find((n) => n.node === '5 nm').designUsd).toFixed(2) + 'x')
+  ok('engineering is the largest NRE line at the leading edge',
+    nre.people > nre.mask && nre.people > nre.eda && nre.people > nre.ip)
+  ok('a base-layer respin costs more than a metal-only one',
+    Bz.totalNre({ node: '5 nm', respins: 1, respinIsBase: true }).total >
+    Bz.totalNre({ node: '5 nm', respins: 1, respinIsBase: false }).total)
+  ok('respins add cost linearly',
+    near(Bz.totalNre({ node: '5 nm', respins: 2 }).total - Bz.totalNre({ node: '5 nm', respins: 1 }).total,
+         Bz.totalNre({ node: '5 nm', respins: 1 }).total - Bz.totalNre({ node: '5 nm', respins: 0 }).total, 1))
+
+  ok('break-even is NRE over margin',
+    near(Bz.breakEvenUnits(100e6, 120, 40).units, 100e6 / 80, 1e-6))
+  ok('a negative margin can never break even',
+    Bz.breakEvenUnits(100e6, 30, 40).units === Infinity)
+  ok('a higher price lowers the break-even volume',
+    Bz.breakEvenUnits(100e6, 200, 40).units < Bz.breakEvenUnits(100e6, 120, 40).units)
+
+  ok('prices erode over time', Bz.priceAtQuarter(100, 4, 0.2) < 100 &&
+    near(Bz.priceAtQuarter(100, 4, 0.2), 80, 0.01))
+  ok('defect density falls toward its mature value',
+    Bz.d0AtQuarter(0) > Bz.d0AtQuarter(6) && Bz.d0AtQuarter(6) > Bz.d0AtQuarter(24) &&
+    Bz.d0AtQuarter(60) > 0.07 && Bz.d0AtQuarter(60) < 0.075)
+  ok('the ramp rises then declines', (() => {
+    const v = (q) => Bz.rampVolume(q, { peakUnitsPerQ: 1e6, rampQuarters: 5, lifeQuarters: 16 })
+    return v(0) < v(5) && v(5) > 0 && v(15) < v(8) && v(0) >= 0
+  })())
+
+  const cf = Bz.cashFlow({ nre: 300e6, asp: 120, costPerUnit: 42, peakUnitsPerQ: 25e6, lifeQuarters: 16, erosionPerYear: 0.25 })
+  ok('cash flow covers development then market',
+    cf.rows.filter((r) => r.phase === 'develop').length === cf.devQuarters &&
+    cf.rows.some((r) => r.phase === 'market'))
+  ok('no revenue arrives during development',
+    cf.rows.filter((r) => r.phase === 'develop').every((r) => r.revenue === 0))
+  ok('cumulative cash is monotonically negative through development',
+    cf.rows.filter((r) => r.phase === 'develop').every((r, i, a) => i === 0 || r.cum < a[i - 1].cum))
+  ok('the peak deficit is at least the full NRE', cf.peakDeficit <= -300e6 + 1)
+  ok('development spend totals the NRE',
+    near(cf.rows.filter((r) => r.phase === 'develop').reduce((n, r) => n + r.spend, 0), 300e6, 1))
+  ok('a high-volume part pays back', cf.payback !== null && cf.everProfitable)
+
+  // The lesson the tab exists to deliver: node choice is a business decision.
+  ok('a low-price part viable at an old node fails at a new one', (() => {
+    const mk = { asp: 4, costPerUnit: 1.6, peakUnitsPerQ: 8e6, lifeQuarters: 20, erosionPerYear: 0.18 }
+    const old = Bz.cashFlow({ nre: Bz.totalNre({ node: '28 nm' }).total, ...mk })
+    const leading = Bz.cashFlow({ nre: Bz.totalNre({ node: '3 nm' }).total, ...mk })
+    return old.everProfitable && !leading.everProfitable
+  })())
+  ok('markets are populated and varied',
+    Bz.MARKETS.length >= 5 && Bz.MARKETS.every((x) => x.name && x.peakUnitsPerQ > 0 && x.life > 0 && x.note))
+  ok('automotive erodes slowest and lives longest', (() => {
+    const a = Bz.MARKETS.find((x) => x.id === 'auto')
+    return Bz.MARKETS.every((x) => x.id === 'auto' || a.erosion <= x.erosion) &&
+      Bz.MARKETS.every((x) => x.id === 'auto' || a.life >= x.life)
+  })())
+  ok('the four rules are stated at length',
+    Bz.RULES.length === 4 && Bz.RULES.every((r) => r.k && r.what.length > 120))
+}
+
 /* ---------- speed binning ---------- */
 group('Speed binning')
 {
@@ -1402,6 +1504,7 @@ group('Build output')
       ok('author meta tag shipped', html.includes('name="author"') && html.includes('Abhay Bhuva'))
       ok('the provenance note shipped', bundle.includes('Anthropic') && bundle.includes('publicly available'))
       ok('the no-confidential-data statement shipped', /confidential/i.test(bundle))
+      ok('the business tab shipped', bundle.includes('break-even') || bundle.includes('Total NRE'))
       ok('speed binning shipped in the yield lab',
         bundle.includes('Colour by speed bin') || bundle.includes('Blended selling price'))
       ok('the clock tab shipped', bundle.includes('f_max') || bundle.includes('Signal reach'))
