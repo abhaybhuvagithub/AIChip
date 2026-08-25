@@ -4,6 +4,12 @@ import {
   totalNre, breakEvenUnits, cashFlow, d0AtQuarter,
 } from '../lib/business.js'
 import { computeRun, fmt } from '../lib/fab.js'
+import Icon from './Icon.jsx'
+
+const NRE_ICON = {
+  'Mask set': 'wafer', Engineering: 'eda', 'EDA licences': 'eda',
+  'IP licensing': 'iplicense', Respins: 'die', 'Total NRE': 'foundry',
+}
 
 const usd = (v) => {
   if (!Number.isFinite(v)) return '—'
@@ -146,7 +152,10 @@ export default function Business({ cfg, goTab }) {
                   ...(nre.respin > 0 ? [['Respins', nre.respin, `${respins} × ${baseRespin ? 'base-layer' : 'metal-only'}`]] : []),
                 ].map(([k, v, note]) => (
                   <tr key={k}>
-                    <td><b>{k}</b><div className="small" style={{ marginTop: 2 }}>{note}</div></td>
+                    <td>
+                      <b className="iconrow"><Icon name={NRE_ICON[k]} size={22} />{k}</b>
+                      <div className="small" style={{ marginTop: 2 }}>{note}</div>
+                    </td>
                     <td className="num" style={{ color: 'var(--accent)' }}>{usd(v)}</td>
                     <td className="num">{fmt.pct(v / nre.total, 0)}</td>
                     <td><div className="bar"><i style={{ width: `${(v / nre.total) * 100}%` }} /></div></td>

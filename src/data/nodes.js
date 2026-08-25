@@ -31,42 +31,42 @@ export const ARCHITECTURES = [
 // quote anyone's contract.
 export const PRODUCTS = [
   {
-    id: 'mobile-soc', name: 'Flagship mobile SoC', icon: '▤',
+    id: 'mobile-soc', name: 'Flagship mobile SoC', icon: 'soc',
     blurb: 'Small die, huge volume, brutal power budget. Yield matters less than cost per die and how many you can ship in a quarter.',
     dieX: 10.5, dieY: 10.5, node: '3 nm', d0: 0.07, alpha: 2.5, waferCost: 20000, layers: 78, asp: 120, packageCost: 6, testYield: 0.97,
   },
   {
-    id: 'gpu', name: 'Discrete GPU', icon: '▦',
+    id: 'gpu', name: 'Discrete GPU', icon: 'gpu',
     blurb: 'Large monolithic die pressed against the reticle limit. Every extra mm² is punished twice — fewer dies and worse yield.',
     dieX: 24, dieY: 25, node: '5 nm', d0: 0.09, alpha: 2, waferCost: 17000, layers: 72, asp: 900, packageCost: 25, testYield: 0.95,
   },
   {
-    id: 'ai-accel', name: 'AI accelerator + HBM', icon: '◫',
+    id: 'ai-accel', name: 'AI accelerator + HBM', icon: 'interposer',
     blurb: 'Beyond one reticle, so it is built as chiplets on an interposer with stacked memory. Packaging cost rivals the silicon.',
     dieX: 26, dieY: 33, node: '3 nm', d0: 0.08, alpha: 2, waferCost: 20000, layers: 80, asp: 22000, packageCost: 1200, testYield: 0.9, packageYield: 0.96,
   },
   {
-    id: 'cpu-chiplet', name: 'CPU chiplet', icon: '▪',
+    id: 'cpu-chiplet', name: 'CPU chiplet', icon: 'chiplet',
     blurb: 'Deliberately small so yield stays high, then several are packaged together. This is the whole argument for disaggregation.',
     dieX: 8, dieY: 9.2, node: '5 nm', d0: 0.08, alpha: 2.5, waferCost: 17000, layers: 70, asp: 90, packageCost: 40, testYield: 0.96,
   },
   {
-    id: 'mcu', name: 'Automotive MCU', icon: '▫',
+    id: 'mcu', name: 'Automotive MCU', icon: 'mcu',
     blurb: 'Mature node, tiny die, decade-long supply commitments. Defect density is low because the process has run for years.',
     dieX: 3.2, dieY: 3.2, node: '40 nm', d0: 0.03, alpha: 3, waferCost: 3000, layers: 32, asp: 4, packageCost: 0.4, testYield: 0.99,
   },
   {
-    id: 'dram', name: 'DRAM', icon: '▥',
+    id: 'dram', name: 'DRAM', icon: 'dram',
     blurb: 'Redundant rows and columns mean a defective die is often repairable at sort — yield behaves differently from logic.',
     dieX: 6.5, dieY: 8, node: '1α nm', d0: 0.05, alpha: 3, waferCost: 5500, layers: 40, asp: 3.5, packageCost: 0.6, testYield: 0.98,
   },
   {
-    id: 'nand', name: '3D NAND', icon: '▩',
+    id: 'nand', name: '3D NAND', icon: 'nand',
     blurb: 'Scaling moved to the vertical axis: stack more layers rather than shrink. The hard part is a single etch through all of them.',
     dieX: 9, dieY: 11, node: '200+ layers', d0: 0.06, alpha: 3, waferCost: 6000, layers: 45, asp: 6, packageCost: 0.8, testYield: 0.97,
   },
   {
-    id: 'power', name: 'SiC power device', icon: '◪',
+    id: 'power', name: 'SiC power device', icon: 'power',
     blurb: 'Different substrate entirely, on 200 mm. Silicon carbide is hard to grow and hard to cut, so substrate cost dominates.',
     waferDia: 200, dieX: 5, dieY: 5, node: 'SiC', d0: 0.4, alpha: 2, waferCost: 1500, layers: 18, asp: 12, packageCost: 1.5, testYield: 0.94,
   },

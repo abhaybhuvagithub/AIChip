@@ -179,6 +179,24 @@ npm run build    # production build into dist/
 npm test         # the whole gate — see below
 ```
 
+## Icons
+
+A drawn icon set (`src/ui/Icon.jsx`) covers packages, chip function, IP blocks
+and the industry layers — around thirty line-art glyphs on a shared 24×24 grid.
+
+They stroke in `currentColor`, so an icon inherits whatever colour it sits in
+(an accent, a maker's hue, a speed-bin colour) and works across all five
+palettes and both modes without a second asset. That is the reason for drawing
+them rather than using emoji, which carry their own colours, or an icon font,
+which is a network request for glyphs never designed for silicon.
+
+The grammar is consistent so the set reads as one family: a chip is a rounded
+square with connections on its edges, what a chip *does* is shown by what
+fills it, and an IP block is drawn with a dashed outline — because it is a
+licensed drawing, not a part. Verify checks that every icon referenced in a
+data file exists, so a typo fails the build rather than rendering an invisible
+gap.
+
 ## The assistant
 
 The ✨ button opens an assistant that answers from the app's live state — the
@@ -207,7 +225,7 @@ that fails fastest:
 | --- | --- |
 | `npm run lint` | Dead imports, unused props, hook misuse. Found three real bugs the first time it ran. |
 | `npm run build` | Anything that does not compile. |
-| `npm run verify` | 530 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
+| `npm run verify` | 544 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
 | `npm run smoke` | Renders all sixteen tabs across five configurations, including an unmakeable die and a zero-yield process. Catches components that throw on first render, and output that leaks `NaN` or `undefined` — which reads as broken while passing every other check. |
 | `npm run budget` | Bundle size against a gzipped budget. This bundle grew 206 kB → 331 kB across six feature passes with nothing watching. |
 
@@ -227,7 +245,7 @@ publish means the push succeeded, not that the bytes are being served — a
 sister repo shipped the previous build for weeks with green checks the whole
 time, because nothing closed that loop.
 
-`npm run verify` runs 530 checks across wafer geometry, yield model
+`npm run verify` runs 544 checks across wafer geometry, yield model
 correctness (pinned against hand-computed values), economics invariants,
 defect scatter determinism, a named type scale with a 14px floor and a pinned
 prose tier, WCAG contrast across all ten themes, architecture and thermal-wall arithmetic, material

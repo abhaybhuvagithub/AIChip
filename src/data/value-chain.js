@@ -11,7 +11,7 @@
 
 export const LAYERS = [
   {
-    id: 'isa',
+    id: 'isa', icon: 'ipcore',
     name: 'Instruction set and IP',
     who: ['Arm', 'RISC-V (open standard)', 'SiFive', 'Imagination'],
     what: 'Sells the design of the processor, not the processor. A licensee gets verified RTL or an architecture licence and builds their own silicon around it.',
@@ -19,7 +19,7 @@ export const LAYERS = [
     concentration: 'Two viable options for a new design: licence Arm, or take RISC-V and build the ecosystem yourself.',
   },
   {
-    id: 'eda',
+    id: 'eda', icon: 'eda',
     name: 'Design automation',
     who: ['Synopsys', 'Cadence', 'Siemens EDA'],
     what: 'The software without which a modern chip cannot be designed at all — synthesis, place and route, timing closure, verification, and the foundry-certified process design kits.',
@@ -27,7 +27,7 @@ export const LAYERS = [
     concentration: 'Three companies, worldwide.',
   },
   {
-    id: 'fabless',
+    id: 'fabless', icon: 'fabless',
     name: 'Fabless design',
     who: ['Apple', 'NVIDIA', 'Qualcomm', 'AMD', 'Broadcom', 'MediaTek'],
     what: 'Designs the chip, owns the product and the customer relationship, and never touches a wafer. This is the model that has won the last thirty years.',
@@ -35,7 +35,7 @@ export const LAYERS = [
     concentration: 'Crowded at the bottom, extremely thin at the leading edge — a full N3 mask set and design programme runs into hundreds of millions.',
   },
   {
-    id: 'foundry',
+    id: 'foundry', icon: 'foundry',
     name: 'Foundry',
     who: ['TSMC', 'Samsung Foundry', 'Intel Foundry', 'GlobalFoundries', 'UMC', 'SMIC'],
     what: 'Owns the fab and sells wafer starts. Takes the capital risk that makes the fabless model possible in the first place.',
@@ -43,7 +43,7 @@ export const LAYERS = [
     concentration: 'Effectively one merchant supplier at the very top nodes, which is the single most consequential fact about the industry.',
   },
   {
-    id: 'equipment',
+    id: 'equipment', icon: 'equipment',
     name: 'Equipment',
     who: ['ASML', 'Applied Materials', 'Lam Research', 'Tokyo Electron', 'KLA'],
     what: 'Builds the scanners, etchers, deposition chambers and inspection tools. A fab is largely a building full of these.',
@@ -51,7 +51,7 @@ export const LAYERS = [
     concentration: 'One company on Earth makes EUV scanners. There is no second source, and that is why export controls on lithography bite the way they do.',
   },
   {
-    id: 'materials',
+    id: 'materials', icon: 'materials',
     name: 'Materials',
     who: ['Shin-Etsu', 'SUMCO (wafers)', 'JSR', 'Tokyo Ohka (resist)', 'Linde (gases)'],
     what: 'Blank wafers, photoresist, specialty gases, slurries, and the ultrapure chemistry the whole line runs on.',
@@ -59,7 +59,7 @@ export const LAYERS = [
     concentration: 'Heavily Japanese, and thin. Two companies supply most of the world\'s 300 mm blank wafers.',
   },
   {
-    id: 'osat',
+    id: 'osat', icon: 'osat',
     name: 'Assembly and test',
     who: ['ASE', 'Amkor', 'JCET', 'TSMC (advanced packaging)'],
     what: 'Dices, packages, bonds and tests. Historically the commodity end of the chain — and no longer, now that packaging is where performance is won.',
@@ -75,19 +75,19 @@ export const ARM = {
   what: 'Arm sells processor designs and the right to build them. It has never owned a fab, and until recently never sold a chip. Its cores are in essentially every phone on Earth, in Apple\'s M-series, in NVIDIA\'s Grace and Vera CPUs, and increasingly in datacentre silicon designed by the hyperscalers themselves.',
   licences: [
     {
-      k: 'Core licence',
+      k: 'Core licence', icon: 'ipcore',
       what: 'You take a verified Arm core — a Cortex-A for phones, a Neoverse for servers — drop it into your design and pay a royalty on every chip shipped. Fast, low-risk, and your CPU is the same as everyone else\'s.',
     },
     {
-      k: 'Architecture licence',
+      k: 'Architecture licence', icon: 'iplicense',
       what: 'You licence the instruction set and design your own core that implements it. Far more expensive, far more work, and the only way to differentiate on the CPU itself. Apple holds one, which is why Apple cores beat stock Arm cores.',
     },
     {
-      k: 'CSS — Compute Subsystem',
+      k: 'CSS — Compute Subsystem', icon: 'ipnoc',
       what: 'A pre-validated block: cores, mesh interconnect, memory and interrupt controllers, floorplanned and verified together. It moves Arm up the stack from selling a part to selling most of the chip.',
     },
     {
-      k: 'CSA — Chiplet System Architecture',
+      k: 'CSA — Chiplet System Architecture', icon: 'chiplet',
       what: 'A published specification for how chiplets from different vendors talk to each other, over AMBA CHI C2C and UCIe. An attempt to make a multi-vendor chiplet market exist at all, rather than each company building its own private one.',
     },
   ],
@@ -105,7 +105,7 @@ export const MODELS = [
     con: 'You carry the fab through every downturn. Intel\'s 10 nm difficulties held its product line hostage for years in a way a fabless company would simply have routed around.',
   },
   {
-    id: 'fabless',
+    id: 'fabless', icon: 'fabless',
     name: 'Fabless plus foundry',
     who: 'Apple, NVIDIA, Qualcomm, AMD, and effectively everyone new',
     how: 'Design the chip, buy wafer starts from TSMC or Samsung, buy packaging from an OSAT. Specialise, and let each layer be world-class at one thing.',

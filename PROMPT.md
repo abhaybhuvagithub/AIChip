@@ -64,6 +64,14 @@ plus the checks that stop the feature regressing.
 > expose, and that is the one thing everyone who has stood in a fab
 > remembers. Name the theme after the room.
 >
+> Iconography is drawn, not imported: line art on one grid, stroked in
+> `currentColor` so every icon works in every palette and both modes from a
+> single asset. Emoji carry their own colours and their own baggage; an icon
+> font is a network request for glyphs that were never designed for this
+> subject. Give the set a grammar so it reads as a family, and check that every
+> icon a data file references actually exists — a typo should fail the build,
+> not render an invisible gap.
+>
 > Pick **one** signature element and spend the boldness there — for this
 > build, the live wafer map with dies drawn to scale, ghosted partial dies at
 > the edge, and defect-killed dies in red. Everything around it stays quiet.
@@ -606,3 +614,29 @@ earned back.
   real mask bill. The ratios between nodes are more trustworthy than any single
   figure and the shape of the cash curve more trustworthy than either, and the
   closing note says exactly that instead of implying precision.
+
+---
+
+## Eighteenth pass: icons
+
+The site had been using unicode glyphs — ▤ ▦ ◫ ▪ — as stand-ins for chips.
+They were placeholders that had quietly become permanent.
+
+- **Drawn, not imported.** About thirty line-art icons on a shared 24×24 grid,
+  stroked in `currentColor`. That single decision means one asset works across
+  five palettes and two modes, and an icon can take a maker's hue or a speed-bin
+  colour without a variant. Emoji would have brought their own palette; an icon
+  font would have been a network request for glyphs never designed for silicon.
+- **Give the set a grammar.** A chip is a rounded square with connections on its
+  edges; what it *does* is shown by what fills it; an IP block gets a dashed
+  outline, because it is a licensed drawing rather than a part. Without a rule
+  like that, thirty icons are thirty unrelated drawings.
+- **Applied where they distinguish, not everywhere.** The Economics product
+  table, the Silicon catalogue, the value-chain layers, the Arm licence types
+  and the NRE lines all gained icons because in each the icon carries
+  information. The yield-lab preset dropdown lost its glyph entirely — a
+  `<select>` cannot render SVG, and a lone emoji there was worse than nothing.
+- **The check is on the reference, not the asset.** A misspelled icon name
+  renders an invisible gap that no visual review catches. Verify resolves every
+  `icon:` in every data file against the set; I typo'd one to confirm it named
+  the file and the bad key.

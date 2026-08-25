@@ -125,7 +125,7 @@ export default function YieldLab({ cfg, patch }) {
               if (p) patch({ ...p, preset: p.id })
             }}>
               <option value="">Custom</option>
-              {PRODUCTS.map((p) => <option key={p.id} value={p.id}>{p.icon} {p.name}</option>)}
+              {PRODUCTS.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
           </div>
 

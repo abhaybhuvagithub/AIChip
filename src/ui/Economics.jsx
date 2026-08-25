@@ -1,6 +1,7 @@
 import React from 'react'
 import { computeRun, fmt } from '../lib/fab.js'
 import { PRODUCTS, FOUNDRIES } from '../data/nodes.js'
+import Icon from './Icon.jsx'
 
 function Money({ label, value, set, min, max, step, prefix = '$' }) {
   return (
@@ -102,7 +103,7 @@ export default function Economics({ cfg, patch }) {
               return (
                 <tr key={p.id} style={{ cursor: 'pointer' }} onClick={() => patch({ ...p, preset: p.id })}
                   title="Load into the yield lab">
-                  <td><b>{p.icon} {p.name}</b></td>
+                  <td><b className="iconrow"><Icon name={p.icon} size={22} title={p.name} /> {p.name}</b></td>
                   <td className="num">{p.node}</td>
                   <td className="num">{p.dieX}×{p.dieY}</td>
                   <td className="num">{fmt.n(pr.geo.gross)}</td>

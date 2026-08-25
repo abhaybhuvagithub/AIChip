@@ -974,6 +974,70 @@ group('Physics')
     P.LITHO.every((l, i) => i === 0 || l.year > P.LITHO[i - 1].year))
 }
 
+/* ---------- icons ---------- */
+group('Icons')
+{
+  const iconSrc = readFileSync(join(root, 'src/ui/Icon.jsx'), 'utf8')
+  const names = [...iconSrc.matchAll(/^ {2}([a-z][a-zA-Z0-9]*): \(<>/gm)].map((m) => m[1])
+
+  ok('the icon set is populated', names.length >= 28, String(names.length))
+  ok('icon keys are unique', new Set(names).size === names.length)
+  ok('the set covers packages, function, IP and industry', (() => {
+    const need = ['die', 'qfp', 'bga', 'chiplet', 'stack', 'wafer', 'waferscale', 'interposer',
+      'cpu', 'gpu', 'npu', 'soc', 'mcu', 'dram', 'nand', 'power',
+      'ipcore', 'ipgpu', 'ipnpu', 'ipmem', 'ipphy', 'ipnoc', 'ipsec', 'iplicense',
+      'eda', 'foundry', 'equipment', 'materials', 'osat']
+    return need.every((n) => names.includes(n))
+  })())
+
+  // Themeable by construction: an icon that hardcodes a colour breaks in five
+  // palettes and two modes at once.
+  ok('icons stroke in currentColor and hardcode no colour',
+    /stroke: 'currentColor'/.test(iconSrc) &&
+    !/(stroke|fill)="#[0-9a-fA-F]{3,6}"/.test(iconSrc))
+  ok('every icon draws on the same 24x24 grid',
+    (iconSrc.match(/viewBox="0 0 24 24"/g) || []).length >= 1 &&
+    !/viewBox="0 0 (?!24 24)/.test(iconSrc))
+  ok('an unknown icon name renders nothing rather than throwing',
+    /if \(!glyph\) return null/.test(iconSrc))
+  ok('decorative icons are hidden from assistive technology',
+    /aria-hidden=\{title \? undefined : 'true'\}/.test(iconSrc))
+
+  // Every icon referenced in data must exist. A typo would render an invisible
+  // gap that nothing else would catch.
+  const refs = []
+  for (const f of ['data/nodes.js', 'data/silicon.js', 'data/value-chain.js']) {
+    const t = readFileSync(join(root, 'src', f), 'utf8')
+    for (const m of t.matchAll(/icon: '([a-zA-Z0-9]+)'/g)) refs.push([f, m[1]])
+  }
+  ok('data files reference icons by name', refs.length >= 35, String(refs.length))
+  ok('every referenced icon exists in the set',
+    refs.every(([, n]) => names.includes(n)),
+    refs.filter(([, n]) => !names.includes(n)).map(([f, n]) => `${f}:${n}`).join(', '))
+  ok('no unicode glyph is left standing in for an icon', (() => {
+    for (const f of ['data/nodes.js', 'data/silicon.js', 'data/value-chain.js']) {
+      const t = readFileSync(join(root, 'src', f), 'utf8')
+      if (/icon: '[^a-zA-Z]/.test(t)) return false
+    }
+    return true
+  })())
+  ok('every real part carries an icon', (() => {
+    const t = readFileSync(join(root, 'src/data/silicon.js'), 'utf8')
+    const entries = (t.match(/^ {4}id: '/gm) || []).length
+    const withIcon = (t.match(/id: '[a-z0-9-]+', icon: '/g) || []).length
+    return entries === withIcon
+  })())
+  ok('every value-chain layer carries an icon', (() => {
+    const t = readFileSync(join(root, 'src/data/value-chain.js'), 'utf8')
+    const layers = (t.match(/^ {4}id: '[a-z]+', icon: '/gm) || []).length
+    return layers >= 7
+  })())
+  ok('wafer-scale parts use the wafer-scale icon', (() => {
+    const t = readFileSync(join(root, 'src/data/silicon.js'), 'utf8')
+    return /id: 'wse3', icon: 'waferscale'/.test(t)
+  })())
+}
+
 /* ---------- business ---------- */
 group('Business case')
 {
@@ -1504,6 +1568,7 @@ group('Build output')
       ok('author meta tag shipped', html.includes('name="author"') && html.includes('Abhay Bhuva'))
       ok('the provenance note shipped', bundle.includes('Anthropic') && bundle.includes('publicly available'))
       ok('the no-confidential-data statement shipped', /confidential/i.test(bundle))
+      ok('the icon set shipped', bundle.includes('waferscale') && bundle.includes('iplicense'))
       ok('the business tab shipped', bundle.includes('break-even') || bundle.includes('Total NRE'))
       ok('speed binning shipped in the yield lab',
         bundle.includes('Colour by speed bin') || bundle.includes('Blended selling price'))

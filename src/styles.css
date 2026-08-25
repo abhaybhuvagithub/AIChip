@@ -464,3 +464,9 @@ p.lede { color: var(--muted); font-size: var(--fs-lede); line-height: 1.6; max-w
   .bizline { overflow-x: auto; }
   .bizphase { flex: 0 0 130px !important; }
 }
+
+/* Icon + label pairs. The gap and baseline alignment are set once here so
+   every icon on the site sits the same way against its text. */
+.iconrow { display: inline-flex; align-items: center; gap: 8px; }
+.btn.iconrow { display: inline-flex; }
+h3.iconrow { display: flex; gap: 10px; }

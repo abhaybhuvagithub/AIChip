@@ -35,42 +35,42 @@ export const CATEGORIES = {
 export const SILICON = [
   // ---------------- Apple ----------------
   {
-    id: 'a17pro', maker: 'apple', cat: 'mobile', name: 'A17 Pro', year: 2023,
+    id: 'a17pro', icon: 'soc', maker: 'apple', cat: 'mobile', name: 'A17 Pro', year: 2023,
     foundry: 'TSMC', node: 'N3B', transistors: 19e9, areaMm2: 103, est: true,
     power: 8, dies: 1,
     what: 'The first 3 nm processor in a phone. Apple bought most of TSMC\'s early N3B capacity, which is the arrangement that has defined both companies for a decade: Apple takes the risk on a new node first, and pays for the privilege.',
     notable: 'First 3 nm consumer SoC',
   },
   {
-    id: 'm1', maker: 'apple', cat: 'pc', name: 'M1', year: 2020,
+    id: 'm1', icon: 'soc', maker: 'apple', cat: 'pc', name: 'M1', year: 2020,
     foundry: 'TSMC', node: 'N5', transistors: 16e9, areaMm2: 119, est: true,
     power: 20, dies: 1,
     what: 'The chip that ended Apple\'s Intel era. Its argument was not raw throughput but unified memory — CPU, GPU and neural engine addressing one pool, so data stops being copied between them.',
     notable: 'Unified memory architecture',
   },
   {
-    id: 'm1ultra', maker: 'apple', cat: 'pc', name: 'M1 Ultra', year: 2022,
+    id: 'm1ultra', icon: 'chiplet', maker: 'apple', cat: 'pc', name: 'M1 Ultra', year: 2022,
     foundry: 'TSMC', node: 'N5', transistors: 114e9, areaMm2: 420, est: true, dies: 2,
     power: 60,
     what: 'Two M1 Max dies joined edge-to-edge by a silicon interposer Apple calls UltraFusion, presented to software as one chip. The cleanest consumer demonstration of why the reticle limit is not the end of the road.',
     notable: 'Two dies, one logical chip',
   },
   {
-    id: 'm4', maker: 'apple', cat: 'pc', name: 'M4', year: 2024,
+    id: 'm4', icon: 'soc', maker: 'apple', cat: 'pc', name: 'M4', year: 2024,
     foundry: 'TSMC', node: 'N3E', transistors: 28e9, areaMm2: 165, est: true, dies: 1,
     power: 22,
     what: 'A move from the first-generation N3B to N3E, which trades a little density for markedly better yield and cost. The interesting decision at this point in the roadmap is usually which flavour of a node to use, not which node.',
     notable: 'N3E for yield over density',
   },
   {
-    id: 'm5', maker: 'apple', cat: 'pc', name: 'M5', year: 2025,
+    id: 'm5', icon: 'soc', maker: 'apple', cat: 'pc', name: 'M5', year: 2025,
     foundry: 'TSMC', node: 'N3P', transistors: 28e9, areaMm2: 150, est: true, dies: 1,
     power: 22,
     what: 'Apple stayed on 3 nm rather than taking N2 first, reportedly on cost. Reports differ on whether the base part is N3E or N3P. The M5 Pro and Max that followed in March 2026 bond two dies together under a scheme Apple calls Fusion Architecture.',
     notable: 'Stayed on 3 nm; Pro/Max went dual-die',
   },
   {
-    id: 'm6', maker: 'apple', cat: 'pc', name: 'M6 / A20', year: 2026,
+    id: 'm6', icon: 'soc', maker: 'apple', cat: 'pc', name: 'M6 / A20', year: 2026,
     foundry: 'TSMC', node: 'N2', transistors: 0, areaMm2: 0, areaKnown: false, dies: 1,
     power: 0, upcoming: true,
     what: 'The move to N2 — TSMC\'s first gate-all-around nanosheet node, and the first change in transistor architecture since FinFET arrived in 2011. More than half of TSMC\'s initial N2 allocation is reported to go to Apple.',
@@ -79,35 +79,35 @@ export const SILICON = [
 
   // ---------------- Google ----------------
   {
-    id: 'tpuv1', maker: 'google', cat: 'ai', name: 'TPU v1', year: 2015,
+    id: 'tpuv1', icon: 'npu', maker: 'google', cat: 'ai', name: 'TPU v1', year: 2015,
     foundry: 'TSMC', node: '28 nm', transistors: 0, areaMm2: 331, dies: 1,
     power: 75, tops: 92e12, precision: 'INT8',
     what: 'A deliberately boring chip built around one idea: a 256×256 systolic array of multipliers with the weights held still and the data flowing through. No caches, no speculation, no out-of-order machinery. It went from silicon to datacentre deployment in about fifteen months.',
     notable: 'The systolic array bet',
   },
   {
-    id: 'tpuv4', maker: 'google', cat: 'ai', name: 'TPU v4', year: 2021,
+    id: 'tpuv4', icon: 'npu', maker: 'google', cat: 'ai', name: 'TPU v4', year: 2021,
     foundry: 'TSMC', node: '7 nm', transistors: 0, areaMm2: 0, areaKnown: false, dies: 1,
     power: 200, est: true, tops: 275e12, precision: 'BF16',
     what: 'Introduced optical circuit switching between pods, so the interconnect topology can be reconfigured for the shape of the job rather than fixed at build time. Google publishes pod throughput freely and die area almost never.',
     notable: 'Optically switched interconnect',
   },
   {
-    id: 'tpuv7', maker: 'google', cat: 'ai', name: 'TPU v7 (Ironwood)', year: 2025,
+    id: 'tpuv7', icon: 'chiplet', maker: 'google', cat: 'ai', name: 'TPU v7 (Ironwood)', year: 2025,
     foundry: 'TSMC', node: 'Undisclosed', transistors: 0, areaMm2: 0, areaKnown: false, dies: 2,
     power: 0, precision: 'FP8',
     what: 'A dual-chiplet part: two TensorCores and four SparseCores per chip, 192 GB of HBM at about 7.4 TB/s, in 9,216-chip liquid-cooled pods delivering 42.5 exaflops. The first TPU generation whose physical layout was optimised by a reinforcement learning tool.',
     notable: '9,216 chips per pod, 42.5 EFLOPS',
   },
   {
-    id: 'tpu8t', maker: 'google', cat: 'ai', name: 'TPU 8t', year: 2026,
+    id: 'tpu8t', icon: 'npu', maker: 'google', cat: 'ai', name: 'TPU 8t', year: 2026,
     foundry: 'TSMC', node: 'Undisclosed', transistors: 0, areaMm2: 0, areaKnown: false, dies: 1,
     power: 0, precision: 'FP4',
     what: 'The eighth generation split into two chips — the first time Google has fielded genuinely distinct training and inference silicon in one generation. The 8t is the training half, designed with Broadcom, in superpods of 9,600 chips sharing two petabytes of HBM and delivering 121 FP4 exaflops.',
     notable: '121 EFLOPS per superpod',
   },
   {
-    id: 'tpu8i', maker: 'google', cat: 'ai', name: 'TPU 8i', year: 2026,
+    id: 'tpu8i', icon: 'npu', maker: 'google', cat: 'ai', name: 'TPU 8i', year: 2026,
     foundry: 'TSMC', node: 'Undisclosed', transistors: 0, areaMm2: 0, areaKnown: false, dies: 1,
     power: 0, precision: 'FP4',
     what: 'The inference half, designed with MediaTek. Around 10.1 FP4 petaflops per chip, 384 MB of on-chip SRAM — triple the previous generation — and 288 GB of HBM at 8.6 TB/s. The SRAM number is the tell: serving is a memory problem before it is an arithmetic one.',
@@ -116,28 +116,28 @@ export const SILICON = [
 
   // ---------------- NVIDIA ----------------
   {
-    id: 'h100', maker: 'nvidia', cat: 'ai', name: 'H100', year: 2022,
+    id: 'h100', icon: 'gpu', maker: 'nvidia', cat: 'ai', name: 'H100', year: 2022,
     foundry: 'TSMC', node: '4N', transistors: 80e9, areaMm2: 814, dies: 1,
     power: 700, tops: 990e12, precision: 'FP16',
     what: 'A single die pressed right against the reticle field, and the part most of the current AI buildout was trained on. It is also the calibration point for the compute model on this site: 80 billion transistors, about 280,000 tensor MAC lanes, 1.755 GHz.',
     notable: 'Reticle-limit monolithic die',
   },
   {
-    id: 'b200', maker: 'nvidia', cat: 'ai', name: 'B200 (Blackwell)', year: 2024,
+    id: 'b200', icon: 'chiplet', maker: 'nvidia', cat: 'ai', name: 'B200 (Blackwell)', year: 2024,
     foundry: 'TSMC', node: '4NP', transistors: 208e9, areaMm2: 800, est: true, dies: 2,
     power: 1000,
     what: 'Two reticle-sized dies bonded into one package and presented as a single GPU. When you cannot make the die bigger, you make the package bigger — the same conclusion Apple reached at the other end of the market.',
     notable: 'Two reticle dies, one GPU',
   },
   {
-    id: 'rubin', maker: 'nvidia', cat: 'ai', name: 'Rubin (R100)', year: 2026,
+    id: 'rubin', icon: 'interposer', maker: 'nvidia', cat: 'ai', name: 'Rubin (R100)', year: 2026,
     foundry: 'TSMC', node: 'N3', transistors: 336e9, areaMm2: 800, est: true, dies: 2,
     power: 1800, est2: true, precision: 'FP4',
     what: 'Two reticle-sized compute dies on TSMC N3, 336 billion transistors, 288 GB of HBM4 at around 22 TB/s, and roughly 50 petaflops of FP4 inference per package. A full NVL72 rack is quoted at about 3.6 exaflops.',
     notable: '336B transistors, HBM4',
   },
   {
-    id: 'vera', maker: 'nvidia', cat: 'ai', name: 'Vera CPU', year: 2026,
+    id: 'vera', icon: 'cpu', maker: 'nvidia', cat: 'ai', name: 'Vera CPU', year: 2026,
     foundry: 'TSMC', node: 'N3', transistors: 227e9, areaMm2: 0, areaKnown: false, dies: 1,
     power: 0,
     what: '88 custom Arm cores, coherently attached to a Rubin GPU over NVLink-C2C. Notable mostly for the transistor count — a CPU carrying more transistors than an entire H100, because most of it is cache and interconnect rather than cores.',
@@ -146,14 +146,14 @@ export const SILICON = [
 
   // ---------------- AMD ----------------
   {
-    id: 'mi300x', maker: 'amd', cat: 'ai', name: 'Instinct MI300X', year: 2023,
+    id: 'mi300x', icon: 'interposer', maker: 'amd', cat: 'ai', name: 'Instinct MI300X', year: 2023,
     foundry: 'TSMC', node: 'N5 + N6', transistors: 153e9, areaMm2: 115, est: true, dies: 12,
     power: 750,
     what: 'Eight compute dies on 5 nm stacked on four I/O dies on 6 nm, with 192 GB of HBM3 around them — thirteen pieces of silicon in one package. The clearest production example of putting each function on whichever node suits it rather than paying leading-edge prices for everything.',
     notable: 'Mixed-node 3.5D chiplets',
   },
   {
-    id: 'ryzenccd', maker: 'amd', cat: 'pc', name: 'Ryzen CCD', year: 2022,
+    id: 'ryzenccd', icon: 'chiplet', maker: 'amd', cat: 'pc', name: 'Ryzen CCD', year: 2022,
     foundry: 'TSMC', node: 'N5', transistors: 6.5e9, areaMm2: 71, est: true, dies: 1,
     power: 65,
     what: 'A deliberately small eight-core compute die. The whole strategy is visible in the geometry: keep the expensive silicon tiny so it yields, put the I/O on a cheap older node, and assemble the product in the package.',
@@ -162,14 +162,14 @@ export const SILICON = [
 
   // ---------------- Cerebras ----------------
   {
-    id: 'wse3', maker: 'cerebras', cat: 'extreme', name: 'WSE-3', year: 2024,
+    id: 'wse3', icon: 'waferscale', maker: 'cerebras', cat: 'extreme', name: 'WSE-3', year: 2024,
     foundry: 'TSMC', node: '5 nm', transistors: 4e12, areaMm2: 46225, dies: 1,
     power: 23000, tops: 125e15, precision: 'FP16',
     what: 'One chip, 215 mm on a side, occupying almost an entire 300 mm wafer. It is not diced. Reticle fields are stitched together across their boundaries so signals cross what would normally be a scribe lane, and defective cores are routed around rather than discarded — which is the only way a die this size can yield at all.',
     notable: 'The wafer is the chip',
   },
   {
-    id: 'wse3t', maker: 'cerebras', cat: 'extreme', name: 'WSE-3 Turbo', year: 2026,
+    id: 'wse3t', icon: 'waferscale', maker: 'cerebras', cat: 'extreme', name: 'WSE-3 Turbo', year: 2026,
     foundry: 'TSMC', node: '5 nm', transistors: 4e12, areaMm2: 46225, dies: 1,
     power: 23000, est: true,
     what: 'Same silicon, same node, roughly twice the performance — a generation won without a shrink. It breaks the usual pattern of Cerebras generations tracking TSMC process generations, and is a reminder that a node is only one of the levers.',
@@ -178,14 +178,14 @@ export const SILICON = [
 
   // ---------------- Others ----------------
   {
-    id: 'd1', maker: 'other', cat: 'ai', name: 'Tesla D1 (Dojo)', year: 2021,
+    id: 'd1', icon: 'npu', maker: 'other', cat: 'ai', name: 'Tesla D1 (Dojo)', year: 2021,
     foundry: 'TSMC', node: '7 nm', transistors: 50e9, areaMm2: 645, dies: 1,
     power: 400, est: true,
     what: 'Built to be tiled: 25 dies bonded onto a single substrate as a "training tile" with no packaging between them, so the array behaves like one large fabric. An answer to the reticle limit that sits between chiplets and wafer scale.',
     notable: '25 dies per training tile',
   },
   {
-    id: 'sd8elite', maker: 'other', cat: 'mobile', name: 'Snapdragon 8 Elite', year: 2024,
+    id: 'sd8elite', icon: 'soc', maker: 'other', cat: 'mobile', name: 'Snapdragon 8 Elite', year: 2024,
     foundry: 'TSMC', node: 'N3E', transistors: 0, areaMm2: 125, est: true, dies: 1,
     power: 10,
     what: 'The other half of the flagship phone market. Same foundry, same node family as Apple, different design philosophy — custom Arm-compatible cores clocked aggressively, in a part sold to many handset makers rather than one.',

@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react'
 import { SILICON, MAKERS, CATEGORIES, COUNTED } from '../data/silicon.js'
 import { computeRun, fmt, RETICLE } from '../lib/fab.js'
 import { ops } from '../lib/compute.js'
+import Icon from './Icon.jsx'
 
 const density = (s) => (s.transistors > 0 && s.areaMm2 > 0 ? s.transistors / 1e6 / (s.areaMm2 * (s.dies || 1)) : 0)
 const totalArea = (s) => s.areaMm2 * (s.dies || 1)
@@ -106,7 +107,10 @@ export default function Silicon({ cfg, patch, goTab }) {
             </div>
             <span className="badge">{CATEGORIES[s.cat]}</span>
           </div>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 26, letterSpacing: '-.02em', marginTop: 4 }}>{s.name}</h3>
+          <h3 className="iconrow" style={{ fontFamily: 'var(--font-display)', fontSize: 26, letterSpacing: '-.02em', marginTop: 6 }}>
+            <Icon name={s.icon} size={30} style={{ color: MAKERS[s.maker].hue }} title={s.name} />
+            {s.name}
+          </h3>
           <div style={{ color: MAKERS[s.maker].hue, fontSize: 17, margin: '4px 0 12px' }}>{s.notable}</div>
           <p style={{ fontSize: 18, lineHeight: 1.6 }}>{s.what}</p>
 
@@ -177,7 +181,10 @@ export default function Silicon({ cfg, patch, goTab }) {
               return (
                 <tr key={p.id} style={{ cursor: 'pointer', background: p.id === sel ? 'var(--panel2)' : undefined }}
                   onClick={() => setSel(p.id)}>
-                  <td><b style={{ color: MAKERS[p.maker].hue }}>{p.name}</b>
+                  <td>
+                    <b className="iconrow" style={{ color: MAKERS[p.maker].hue }}>
+                      <Icon name={p.icon} size={22} title={p.name} />{p.name}
+                    </b>
                     {p.dies > 1 && <span className="badge" style={{ marginLeft: 7 }}>{p.dies} dies</span>}</td>
                   <td className="num">{p.year}</td>
                   <td className="small">{p.foundry} {p.node}</td>

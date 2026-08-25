@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { LAYERS, ARM, MODELS, FAB_TIERS, TERAFAB } from '../data/value-chain.js'
+import Icon from './Icon.jsx'
 import { computeRun, fmt } from '../lib/fab.js'
 import { computeThroughput, ops, watts, DEFAULT_COMPUTE } from '../lib/compute.js'
 import { waferMass, grams } from '../lib/chain.js'
@@ -37,12 +38,17 @@ export default function ValueChain({ cfg }) {
       <h2 className="sec">The layers</h2>
       <div className="row" style={{ marginBottom: 12 }}>
         {LAYERS.map((x) => (
-          <button key={x.id} className={`btn ${layer === x.id ? 'active' : ''}`} onClick={() => setLayer(x.id)}>{x.name}</button>
+          <button key={x.id} className={`btn iconrow ${layer === x.id ? 'active' : ''}`} onClick={() => setLayer(x.id)}>
+            <Icon name={x.icon} size={19} />{x.name}
+          </button>
         ))}
       </div>
       <div className="detail">
         <div className="card">
-          <div className="eyebrow">{l.name}</div>
+          <div className="iconrow" style={{ marginBottom: 6 }}>
+            <Icon name={l.icon} size={30} style={{ color: 'var(--accent)' }} />
+            <span className="eyebrow" style={{ margin: 0 }}>{l.name}</span>
+          </div>
           <p style={{ fontSize: 18, lineHeight: 1.62, marginTop: 8 }}>{l.what}</p>
           <p className="phys" style={{ fontSize: 18, lineHeight: 1.62 }}>{l.capture}</p>
         </div>
@@ -63,7 +69,10 @@ export default function ValueChain({ cfg }) {
       <div className="grid g2" style={{ marginTop: 12 }}>
         {ARM.licences.map((x) => (
           <div className="card" key={x.k}>
-            <div className="eyebrow">{x.k}</div>
+            <div className="iconrow" style={{ marginBottom: 4 }}>
+              <Icon name={x.icon} size={26} style={{ color: 'var(--accent)' }} />
+              <span className="eyebrow" style={{ margin: 0 }}>{x.k}</span>
+            </div>
             <p className="small" style={{ marginTop: 8 }}>{x.what}</p>
           </div>
         ))}
