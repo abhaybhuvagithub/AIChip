@@ -201,3 +201,37 @@ a sourcing problem rather than a modelling one.
   80 billion transistors on 814 mm² and WSE-3 at 4 trillion on 46,225 mm².
   Those exist so a careless edit to a number fails the build, which structural
   checks would never catch.
+
+---
+
+## Fifth pass: Arm and Terafab
+
+Two additions that turned out to belong together: both are about industrial
+structure, which the site had ignored entirely in favour of physics and
+per-die economics.
+
+- **"Terafab" was not a term I could place.** Rather than assuming it meant a
+  tera-scale fab in the abstract, I looked it up — it is a specific announced
+  Tesla/SpaceX project in Grimes County, Texas. Guessing would have produced
+  something confident and wrong. When a brief contains a term you cannot
+  source, that is the signal to check, not to infer from morphology.
+- **The live-project problem.** Terafab has a site, permits and incentive
+  agreements, and no wafers. Presenting announced figures alongside operating
+  ones would have been the ordinary mistake. The tab uses two explicitly
+  labelled tables — committed versus stated ambition — and verify checks
+  enforce the boundary: the terawatt output claim is asserted to be in the
+  ambitions column and asserted *not* to be in the confirmed one. The case
+  against gets a full paragraph rather than a hedging clause.
+- **An illustrative number must be labelled inside the data, not just in
+  prose.** The fab-scale calculator needed a wafer-start figure for the
+  terafab tier and none is published, so the tier carries `real: false`, the
+  UI renders "Proposed" and an asterisk, and a check asserts the flag. A
+  plausible number in a column of real ones is the same failure mode as a
+  guessed die area on the Silicon tab.
+- **Arm's own-silicon move creates a conflict worth naming.** It would have
+  been easy to write the CSS/CSA story as a straightforward product ladder.
+  Arm now competes with the licensees it sells to, including a sister company
+  under the same owner, while RISC-V presses from below. A check asserts the
+  tension text mentions both, and another asserts that RISC-V share figures
+  are hedged — published estimates differ enormously depending on whether you
+  count chips, cores or dollars.

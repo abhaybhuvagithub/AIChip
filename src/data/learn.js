@@ -16,11 +16,14 @@ export const TOUR = [
   { id: 't8', tab: 'nodes', title: 'See why the names stopped meaning anything', body: 'From 22 nm the number stops describing a measurable dimension. What kept improving is density and the transistor architecture — planar to fin to nanosheet, one more side of the channel each time.' },
   { id: 't8b', tab: 'silicon', title: 'See what all of this is actually about', body: 'Every part is drawn at true relative area on one 300 mm wafer. An A17 Pro is the small square near the middle; the Cerebras WSE-3 is the wafer. Both are called a chip.' },
   { id: 't8c', tab: 'silicon', title: 'Notice what is missing', body: 'Several cells are empty rather than estimated. Google publishes pod throughput freely and die geometry almost never, and Apple has never published a die size — every Apple area here is someone else measuring a die shot.' },
+  { id: 't8d', tab: 'chain', title: 'Count the suppliers', body: 'Click through the seven layers and read the concentration line on each. Three EDA companies worldwide. One company making EUV scanners. That last fact explains more about semiconductor geopolitics than any other single thing.' },
+  { id: 't8e', tab: 'chain', title: 'Find the layer that owns nothing', body: 'Arm has never owned a fab and until 2026 never sold a chip, yet its cores are in nearly every phone on Earth. Selling the design rather than the object is what made the fabless world possible.' },
+  { id: 't8f', tab: 'chain', title: 'Watch the argument reopen', body: 'The industry settled on specialisation decades ago. Terafab is a bet that specialisation became a liability once capacity itself turned scarce. Note the two tables: what is committed, and what is so far only stated.' },
   { id: 't9', tab: 'compute', title: 'Turn silicon into operations', body: 'The die you configured now becomes a throughput number. Watch the top-left figure as you change nothing but the precision dropdown — the silicon is identical and the number moves by 64x.' },
   { id: 't10', tab: 'compute', title: 'Climb to the trillions and past them', body: 'Move the scale selector from one die to a cluster. Note the power column keeping pace: past a rack, what you can build is set by the substation, not the fab.' },
   { id: 't11', tab: 'quantum', title: 'Meet the other exchange rate', body: 'Pick Shor on RSA-2048, then drag the physical error rate. Between 0.8% and 1.2% the qubit count goes vertical and then to infinity — that cliff is the surface code threshold.' },
   { id: 't12', tab: 'quantum', title: 'See what a fab cannot fix', body: 'Read the comparison table. A logic fab is a statistical discipline that expects failures and designs around them. A quantum chip has no binning and no redundancy, so the same tools do not buy the same safety.' },
-  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Twenty-three questions. Everything needed to answer them is on the other eight tabs.' },
+  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Twenty-six questions. Everything needed to answer them is on the other nine tabs.' },
 ]
 
 export const QUIZ = [
@@ -101,6 +104,24 @@ export const QUIZ = [
     opts: ['Random particle contamination', 'A process uniformity or edge-handling problem', 'A bad mask', 'Test program error'],
     a: 1,
     why: 'Spatial signature is diagnostic. Random speckle points at particles; rings point at uniformity across the wafer; repeating patterns point at the reticle.',
+  },
+  {
+    q: 'Arm has never owned a fab. What does it actually sell?',
+    opts: ['Finished processors to handset makers', 'Processor designs and the right to build them, against a royalty per chip shipped', 'Manufacturing capacity reserved at TSMC', 'Software toolchains'],
+    a: 1,
+    why: 'A core licence gets you a verified Arm core to drop in. An architecture licence lets you design your own core implementing the instruction set — which is what Apple holds, and why Apple cores outperform stock Arm ones.',
+  },
+  {
+    q: 'Export controls on lithography have outsized effect. Why that layer specifically?',
+    opts: ['Scanners are the most expensive tool in a fab', 'Exactly one company in the world makes EUV scanners — there is no second source', 'Lithography is the easiest step to monitor', 'Scanners contain the most regulated materials'],
+    a: 1,
+    why: 'Most layers of the supply chain have three to five viable suppliers. EUV has one. A chokepoint with no alternative is a policy instrument in a way a merely concentrated market is not.',
+  },
+  {
+    q: 'What is the actual argument behind vertically integrating a fab, as Terafab proposes?',
+    opts: ['Manufacturing is cheaper in-house', 'A shorter iteration loop — revise a mask and re-run without shipping wafers between continents', 'Vertical integration improves yield directly', 'It avoids paying Arm royalties'],
+    a: 1,
+    why: 'The claim is about cycle time, not unit cost. Against it: every stage being consolidated is one where a specialist has decades of process knowledge, which is the argument the industry already settled once.',
   },
   {
     q: 'Why do chiplets improve economics even though packaging gets harder?',

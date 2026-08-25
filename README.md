@@ -17,7 +17,8 @@ Five tabs:
 | **Compute** | Turns the die you configured into operations per second, and climbs from one die to a 100,000-die cluster. Shows why headline throughput outran Moore's law: precision and sparsity, not density. |
 | **Quantum** | A surface code resource calculator — drag the physical error rate and watch the qubit count go vertical at threshold — plus five hardware modalities and a side-by-side of classical against quantum fabrication. |
 | **Silicon** | Twenty real parts — Apple A-series and M-series, Google TPU v1 through the eighth generation, NVIDIA H100/Blackwell/Rubin, AMD MI300X, Cerebras WSE-3 — drawn at true relative area on one 300 mm wafer. Load any of them into the yield lab. |
-| **Quiz** | Twenty-three questions, self-explaining. |
+| **Value chain** | The seven layers that actually produce a chip, and how few suppliers each has. Arm's licensing model and its 2026 move into shipping its own silicon. Three business models — IDM, fabless plus foundry, and the vertical re-integration Terafab is betting on. A fab-scale calculator that turns wafer starts per month into chips, silicon and compute per year. |
+| **Quiz** | Twenty-six questions, self-explaining. |
 
 ## What is actually modelled
 
@@ -62,6 +63,14 @@ considerably by producer — wire-saw kerf alone destroys 30–40% of a finished
 crystal as dust. The compounded ratio, roughly eight grams of rock per gram of
 shipped silicon, is the figure worth carrying; the individual digits are not.
 
+Terafab is an announced project, not an operating factory. The tab separates
+what is committed (site, permits, phase-one capital, jobs) from what is stated
+ambition (2 nm target, the terawatt output framing, which does not originate
+in semiconductor practice and has been publicly disputed), and verify checks
+enforce that separation — the terawatt claim cannot move into the committed
+column. The "terafab" wafer-start figure in the scale calculator is
+illustrative; no such number has been published.
+
 Figures for real parts come from vendor announcements and public reporting
 through mid-2026. Transistor counts are vendor figures where vendors publish
 them; die areas are third-party die-shot measurements where they do not, and
@@ -96,10 +105,10 @@ npm run build    # production build into dist/
 npm test         # build, then run the verification suite
 ```
 
-`npm run verify` runs 183 checks across wafer geometry, yield model
+`npm run verify` runs 217 checks across wafer geometry, yield model
 correctness (pinned against hand-computed values), economics invariants,
 defect scatter determinism, material chain mass balance, published specs for
-real parts, compute-model
+real parts, value-chain sourcing separation, compute-model
 calibration, surface code arithmetic, content completeness, and the contents of the built bundle. A
 failure blocks deployment — see `.github/workflows/deploy.yml`.
 

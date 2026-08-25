@@ -19,6 +19,7 @@ const { NODES, PRODUCTS, ARCHITECTURES, FOUNDRIES } = await import(join(root, 's
 const { QUIZ, TOUR } = await import(join(root, 'src/data/learn.js'))
 const { computeThroughput, ops, watts, PRECISIONS, LADDER, SCALE_NAMES, DEFAULT_COMPUTE } =
   await import(join(root, 'src/lib/compute.js'))
+const { LAYERS, ARM, MODELS, FAB_TIERS, TERAFAB } = await import(join(root, 'src/data/value-chain.js'))
 const { SILICON, MAKERS, CATEGORIES, COUNTED } = await import(join(root, 'src/data/silicon.js'))
 const { CHAIN, AUTOMATION, WHY_NO_HUMANS } = await import(join(root, 'src/data/sand.js'))
 const { traceBack, waferMass, nines, impurityPpb, grams, SI_DENSITY } =
@@ -173,14 +174,77 @@ group('Content')
   ok('quiz answers all point at a real option', QUIZ.every((q) => q.opts[q.a] !== undefined))
   ok('every quiz question explains itself', QUIZ.every((q) => q.why && q.why.length > 40))
   ok('quiz options are distinct', QUIZ.every((q) => new Set(q.opts).size === q.opts.length))
-  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', 'silicon', 'compute', 'quantum', 'quiz'].includes(t.tab)))
-  ok('the tour visits every tab', ['sand', 'line', 'wafer', 'economics', 'nodes', 'silicon', 'compute', 'quantum', 'quiz']
+  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', 'silicon', 'chain', 'compute', 'quantum', 'quiz'].includes(t.tab)))
+  ok('the tour visits every tab', ['sand', 'line', 'wafer', 'economics', 'nodes', 'silicon', 'chain', 'compute', 'quantum', 'quiz']
     .every((t) => TOUR.some((s) => s.tab === t)))
   ok('quiz covers the material chain', QUIZ.some((q) => /purity|distill|polysilicon|particle/i.test(q.q)))
   ok('quiz covers real silicon', QUIZ.some((q) => /Cerebras|MI300X|wafer-scale/i.test(q.q)))
-  ok('quiz covers compute and quantum', QUIZ.length >= 23 &&
+  ok('quiz covers the value chain', QUIZ.some((q) => /Arm|EUV scanners|Terafab/i.test(q.q)))
+  ok('quiz covers compute and quantum', QUIZ.length >= 26 &&
     QUIZ.some((q) => /FP4|sparsity|precision/i.test(q.q)) &&
     QUIZ.some((q) => /qubit|surface code|threshold/i.test(q.q)))
+}
+
+/* ---------- value chain ---------- */
+group('Value chain')
+{
+  ok('all seven layers are populated', LAYERS.length >= 7 && LAYERS.every((l) =>
+    l.id && l.name && l.what && l.capture && l.concentration && Array.isArray(l.who) && l.who.length >= 3))
+  ok('layer ids are unique', new Set(LAYERS.map((l) => l.id)).size === LAYERS.length)
+  ok('the chain runs IP through assembly',
+    LAYERS[0].id === 'isa' && LAYERS[LAYERS.length - 1].id === 'osat')
+  ok('the foundry and equipment layers are both present',
+    LAYERS.some((l) => l.id === 'foundry') && LAYERS.some((l) => l.id === 'equipment'))
+  ok('Arm appears in the IP layer', LAYERS.find((l) => l.id === 'isa').who.some((w) => /Arm/.test(w)))
+  ok('RISC-V appears as the alternative', LAYERS.find((l) => l.id === 'isa').who.some((w) => /RISC-V/.test(w)))
+  ok('ASML appears in the equipment layer', LAYERS.find((l) => l.id === 'equipment').who.some((w) => /ASML/.test(w)))
+  ok('TSMC appears in the foundry layer', LAYERS.find((l) => l.id === 'foundry').who.some((w) => /TSMC/.test(w)))
+
+  ok('Arm section is complete', ARM.what && ARM.ownSilicon && ARM.tension && ARM.licences.length >= 4)
+  ok('both licence types are explained',
+    ARM.licences.some((x) => /Core licence/i.test(x.k)) &&
+    ARM.licences.some((x) => /Architecture licence/i.test(x.k)))
+  ok('CSS and CSA are both covered',
+    ARM.licences.some((x) => /CSS/.test(x.k)) && ARM.licences.some((x) => /CSA/.test(x.k)))
+  ok('the licensor-becomes-supplier tension is stated, not glossed',
+    /compete/i.test(ARM.tension) && /RISC-V/.test(ARM.tension))
+  ok('RISC-V share claims are hedged rather than asserted as fact',
+    /vary|estimate/i.test(ARM.tension))
+
+  ok('three business models, each argued both ways', MODELS.length === 3 &&
+    MODELS.every((m) => m.name && m.who && m.how && m.pro && m.con))
+  ok('IDM, fabless and vertical are all represented',
+    ['idm', 'fabless', 'vertical'].every((id) => MODELS.some((m) => m.id === id)))
+
+  ok('fab tiers are ordered by capacity',
+    FAB_TIERS.every((t, i) => i === 0 || t.wpm > FAB_TIERS[i - 1].wpm))
+  ok('every fab tier has a wafer-start figure and a note',
+    FAB_TIERS.every((t) => t.wpm > 0 && t.note && typeof t.real === 'boolean'))
+  ok('the megafab band matches the published shorthand',
+    FAB_TIERS.find((t) => t.id === 'megafab').wpm >= 30000 &&
+    FAB_TIERS.find((t) => t.id === 'megafab').wpm <= 100000)
+  ok('gigafab is above 100k wafer starts', FAB_TIERS.find((t) => t.id === 'gigafab').wpm > 100000)
+  // The honesty rule: a proposed tier must not masquerade as an operating one.
+  ok('terafab is flagged as not real', FAB_TIERS.find((t) => t.id === 'terafab').real === false)
+  ok('every tier except terafab is flagged as real',
+    FAB_TIERS.filter((t) => t.id !== 'terafab').every((t) => t.real === true))
+  ok('the illustrative wafer-start figure is labelled as such',
+    /illustrative|what-if|no such number/i.test(FAB_TIERS.find((t) => t.id === 'terafab').note))
+
+  ok('Terafab status says it is not operating', /not operating/i.test(TERAFAB.status))
+  ok('Terafab separates commitments from ambitions',
+    TERAFAB.confirmed.length >= 5 && TERAFAB.ambitions.length >= 3 &&
+    TERAFAB.confirmed.every((r) => r.length === 2) && TERAFAB.ambitions.every((r) => r.length === 2))
+  ok('the capital figure and site are in the confirmed column',
+    TERAFAB.confirmed.some(([, v]) => /16\.8/.test(v)) &&
+    TERAFAB.confirmed.some(([, v]) => /Grimes/.test(v)))
+  ok('the terawatt claim sits in ambitions, not commitments',
+    TERAFAB.ambitions.some(([, v]) => /terawatt/i.test(v)) &&
+    !TERAFAB.confirmed.some(([, v]) => /terawatt/i.test(v)))
+  ok('the terawatt metric is explicitly flagged as contested',
+    TERAFAB.ambitions.some(([, v]) => /does not come from the chip industry|critics/i.test(v)))
+  ok('the case against is stated at length, not as a token caveat',
+    TERAFAB.against.length > 200 && TERAFAB.why.length > 150)
 }
 
 /* ---------- real silicon ---------- */
@@ -475,6 +539,7 @@ group('Build output')
       // survive refactors.
       ok('the provenance note shipped', bundle.includes('Anthropic') && bundle.includes('publicly available'))
       ok('the no-confidential-data statement shipped', /confidential/i.test(bundle))
+      ok('the value chain shipped', bundle.includes('Terafab') && bundle.includes('Neoverse'))
       ok('the silicon catalogue shipped', bundle.includes('Cerebras') && bundle.includes('Ironwood'))
       ok('the sand-to-silicon chain shipped', bundle.includes('Czochralski') && bundle.includes('Siemens'))
       ok('the compute tab shipped', bundle.includes('TOPS') || bundle.includes('EOPS'))

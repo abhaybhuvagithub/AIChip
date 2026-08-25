@@ -4,6 +4,7 @@ import YieldLab from './ui/YieldLab.jsx'
 import Economics from './ui/Economics.jsx'
 import NodesView from './ui/Nodes.jsx'
 import Silicon from './ui/Silicon.jsx'
+import ValueChain from './ui/ValueChain.jsx'
 import SandToSilicon from './ui/SandToSilicon.jsx'
 import Compute from './ui/Compute.jsx'
 import Quantum from './ui/Quantum.jsx'
@@ -18,6 +19,7 @@ const TABS = [
   { id: 'economics', label: 'Economics' },
   { id: 'nodes', label: 'Nodes' },
   { id: 'silicon', label: 'Silicon' },
+  { id: 'chain', label: 'Value chain' },
   { id: 'compute', label: 'Compute' },
   { id: 'quantum', label: 'Quantum' },
   { id: 'quiz', label: 'Quiz' },
@@ -114,6 +116,7 @@ export default function App() {
         {tab === 'economics' && <Economics cfg={cfg} patch={patch} />}
         {tab === 'nodes' && <NodesView />}
         {tab === 'silicon' && <Silicon cfg={cfg} patch={patch} goTab={setTab} />}
+        {tab === 'chain' && <ValueChain cfg={cfg} patch={patch} />}
         {tab === 'compute' && <Compute cfg={cfg} patch={patch} />}
         {tab === 'quantum' && <Quantum />}
         {tab === 'quiz' && <Quiz />}
