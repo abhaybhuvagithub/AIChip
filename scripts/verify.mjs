@@ -470,6 +470,11 @@ group('Build output')
       const bundle = readFileSync(join(dist, 'assets', js[0]), 'utf8')
       ok('the fab line content shipped', bundle.includes('Czochralski'))
       ok('the yield models shipped', bundle.includes('Negative binomial') || bundle.includes('negbinom'))
+      // The provenance note is a claim the repo makes to its readers, so it
+      // is checked like any other shipped content rather than trusted to
+      // survive refactors.
+      ok('the provenance note shipped', bundle.includes('Anthropic') && bundle.includes('publicly available'))
+      ok('the no-confidential-data statement shipped', /confidential/i.test(bundle))
       ok('the silicon catalogue shipped', bundle.includes('Cerebras') && bundle.includes('Ironwood'))
       ok('the sand-to-silicon chain shipped', bundle.includes('Czochralski') && bundle.includes('Siemens'))
       ok('the compute tab shipped', bundle.includes('TOPS') || bundle.includes('EOPS'))
@@ -483,6 +488,9 @@ group('Build output')
         sheet.includes(`data-theme="${t}"`) || sheet.includes(`data-theme=${t}`)))
       ok('reduced motion is respected', sheet.includes('prefers-reduced-motion'))
     }
+    const readme = readFileSync(join(root, 'README.md'), 'utf8')
+    ok('README states how the project was built', /Claude/.test(readme) && /Anthropic/.test(readme))
+    ok('README states that no confidential data was used', /No confidential/i.test(readme))
     ok('robots.txt was copied', existsSync(join(dist, 'robots.txt')))
     ok('sitemap.xml was copied', existsSync(join(dist, 'sitemap.xml')))
     ok('.nojekyll was copied', existsSync(join(dist, '.nojekyll')))

@@ -140,6 +140,13 @@ export default function App() {
           <br /><br />
           Process figures, die sizes and wafer prices are public estimates and vary by source. Treat
           them as the right order of magnitude, not as anyone's specification.
+          <br /><br />
+          <b>How this was built.</b> Developed with Claude, Anthropic's AI assistant. Everything here
+          comes from publicly available information — vendor announcements, published papers, public
+          reporting and standard textbook process engineering. No confidential, proprietary or
+          internal data from any company was used, and none of the figures represent anyone's
+          non-public specifications. Where a number could not be sourced publicly, it is marked as an
+          estimate or left blank rather than guessed.
         </div>
       </footer>
     </div>

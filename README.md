@@ -122,6 +122,22 @@ Five themes ship: Litho bay, Wafer, Glow, Millikelvin, and Cleanroom (light).
 so the next change is held to the same bar. It is written to be re-run against
 a new feature.
 
+## How this was built
+
+Developed with [Claude](https://claude.ai), Anthropic's AI assistant.
+
+Everything in this repository is derived from publicly available information:
+vendor announcements and datasheets, published papers, public reporting, and
+standard textbook process engineering. **No confidential, proprietary or
+internal data from any company was used**, and no figure here represents
+anyone's non-public specification.
+
+Where a number could not be sourced publicly, it is marked as an estimate or
+left blank rather than guessed — see the asterisked cells and the "not
+disclosed" entries on the Silicon tab. Verify checks enforce that: undisclosed
+die areas cannot be filled in, and third-party die-shot measurements must
+carry an estimate flag.
+
 ## Licence
 
 MIT.

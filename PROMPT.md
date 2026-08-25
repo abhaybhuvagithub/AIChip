@@ -34,7 +34,14 @@ plus the checks that stop the feature regressing.
 >    any control that only exists to look interactive.
 > 4. **State is a URL.** The current configuration lives in the address bar so
 >    a reader can send someone the exact thing they are looking at.
-> 5. **Client-side only.** No backend, no network calls at runtime, no
+> 5. **Public sources only.** Every figure must be traceable to something
+>    publicly available — a vendor announcement, a published paper, public
+>    reporting, or standard process engineering. No confidential, proprietary
+>    or internal company data, ever. Where a figure cannot be sourced
+>    publicly, mark it an estimate or leave it blank; never fill a gap with a
+>    plausible-looking number, because in a table of real specifications a
+>    guess is indistinguishable from a source.
+> 6. **Client-side only.** No backend, no network calls at runtime, no
 >    analytics, no storage beyond a theme preference. It must work offline and
 >    deploy as static files.
 >
