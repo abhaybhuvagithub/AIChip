@@ -177,12 +177,13 @@ group('Content')
   ok('quiz answers all point at a real option', QUIZ.every((q) => q.opts[q.a] !== undefined))
   ok('every quiz question explains itself', QUIZ.every((q) => q.why && q.why.length > 40))
   ok('quiz options are distinct', QUIZ.every((q) => new Set(q.opts).size === q.opts.length))
-  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science', 'clock', 'business'].includes(t.tab)))
+  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science', 'clock', 'business', 'ethics'].includes(t.tab)))
   ok('the tour visits every tab', ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz']
     .every((t) => TOUR.some((s) => s.tab === t)))
   ok('quiz covers the material chain', QUIZ.some((q) => /purity|distill|polysilicon|particle/i.test(q.q)))
   ok('quiz covers real silicon', QUIZ.some((q) => /Cerebras|MI300X|wafer-scale/i.test(q.q)))
   ok('quiz covers the value chain', QUIZ.some((q) => /Arm|EUV scanners|Terafab/i.test(q.q)))
+  ok('quiz covers discipline', QUIZ.some((q) => /per-step|flawless|700 steps/i.test(q.q)))
   ok('quiz covers the business case', QUIZ.some((q) => /NRE|amortis|cash|node above which/i.test(q.q)))
   ok('quiz covers speed binning', QUIZ.some((q) => /bin|slow dies|blended/i.test(q.q)))
   ok('quiz covers clock frequency', QUIZ.some((q) => /GHz|THz|clock/i.test(q.q)))
@@ -192,7 +193,7 @@ group('Content')
     QUIZ.some((q) => /X-factor|cycle time|bottleneck|scanners/i.test(q.q)))
   ok('quiz covers 3D transistors and the thermal wall',
     QUIZ.some((q) => /CFET|backside power/i.test(q.q)) && QUIZ.some((q) => /3D memory|3D logic/i.test(q.q)))
-  ok('quiz covers compute and quantum', QUIZ.length >= 45 &&
+  ok('quiz covers compute and quantum', QUIZ.length >= 47 &&
     QUIZ.some((q) => /FP4|sparsity|precision/i.test(q.q)) &&
     QUIZ.some((q) => /qubit|surface code|threshold/i.test(q.q)))
 }
@@ -1086,6 +1087,92 @@ group('Icons')
   })())
 }
 
+/* ---------- rigour and ethics ---------- */
+group('Discipline and ethics')
+{
+  const R = await import(join(root, 'src/lib/rigor.js'))
+  const E = await import(join(root, 'src/data/ethics.js'))
+
+  // The centrepiece calculation.
+  ok('per-step yield compounds back to the line yield',
+    near(R.lineYieldFrom(700, R.perStepYield(700, 0.99)), 0.99, 1e-9))
+  ok('700 steps at 99% line yield needs 99.9986% per step',
+    near(R.perStepYield(700, 0.99) * 100, 99.99856, 0.0005),
+    (R.perStepYield(700, 0.99) * 100).toFixed(5))
+  ok('that is a budget of about 14 ppm per step',
+    near(R.ppmPerStep(700, 0.99), 14.4, 0.2), R.ppmPerStep(700, 0.99).toFixed(1))
+  ok('more steps demand a tighter per-step budget',
+    R.ppmPerStep(1500, 0.99) < R.ppmPerStep(700, 0.99))
+  ok('a laxer line target loosens the per-step budget',
+    R.ppmPerStep(700, 0.9) > R.ppmPerStep(700, 0.99))
+  ok('a single step needs exactly the line yield', near(R.perStepYield(1, 0.9), 0.9, 1e-12))
+  ok('nonsense inputs return NaN rather than a plausible number',
+    Number.isNaN(R.perStepYield(0, 0.99)) && Number.isNaN(R.perStepYield(700, 1.5)))
+
+  // Sigma conversion, against the published table everyone quotes.
+  ok('3.4 DPMO is six sigma', near(R.sigmaFromDpmo(3.4), 6, 0.01), R.sigmaFromDpmo(3.4).toFixed(3))
+  ok('233 DPMO is five sigma', near(R.sigmaFromDpmo(233), 5, 0.02))
+  ok('6,210 DPMO is four sigma', near(R.sigmaFromDpmo(6210), 4, 0.02))
+  ok('66,807 DPMO is three sigma', near(R.sigmaFromDpmo(66807), 3, 0.02))
+  ok('sigma falls as defects rise',
+    R.sigmaFromDpmo(10) > R.sigmaFromDpmo(1000) && R.sigmaFromDpmo(1000) > R.sigmaFromDpmo(100000))
+
+  ok('escapes are the defects test does not catch',
+    near(R.escapes({ defectiveFraction: 0.02, testCoverage: 0.985, unitsShipped: 1e6 }).dppm, 300, 0.01))
+  ok('perfect coverage means no escapes',
+    R.escapes({ defectiveFraction: 0.5, testCoverage: 1, unitsShipped: 1e6 }).badPartsShipped === 0)
+  ok('escapes scale with volume', (() => {
+    const a = R.escapes({ defectiveFraction: 0.02, testCoverage: 0.99, unitsShipped: 1e6 })
+    const b = R.escapes({ defectiveFraction: 0.02, testCoverage: 0.99, unitsShipped: 1e7 })
+    return near(b.badPartsShipped / a.badPartsShipped, 10, 1e-9)
+  })())
+
+  ok('escape cost rises steeply downstream', (() => {
+    const design = R.ESCAPE_STAGES.find((x) => x.id === 'design')
+    const recall = R.ESCAPE_STAGES.find((x) => x.id === 'recall')
+    return recall.cost / design.cost >= 1e6
+  })())
+  ok('every escape stage explains itself',
+    R.ESCAPE_STAGES.length >= 7 && R.ESCAPE_STAGES.every((x) => x.name && x.cost > 0 && x.what.length > 50))
+  ok('DPPM targets tighten with consequence',
+    R.DPPM_TARGETS.every((t, i) => i === 0 || t.dppm < R.DPPM_TARGETS[i - 1].dppm))
+  ok('automotive targets one DPPM or better',
+    R.DPPM_TARGETS.find((t) => /Automotive/.test(t.market)).dppm <= 1)
+
+  // Content. The disciplines must each say what breaks without them —
+  // otherwise the tab is a list of virtues rather than an argument.
+  ok('nine disciplines, each fully argued', E.DISCIPLINES.length >= 9 && E.DISCIPLINES.every((x) =>
+    x.name && x.icon && x.one && x.what.length > 100 && x.why.length > 80 && x.without.length > 40))
+  ok('the non-negotiable one is present and named as such',
+    E.DISCIPLINES.some((x) => x.id === 'dataint' && /not negotiable/i.test(x.one)))
+  ok('stop-the-line authority is covered',
+    E.DISCIPLINES.some((x) => x.id === 'stop' && /punish/i.test(x.what + x.one)))
+
+  ok('eight ethical domains, each with what good looks like',
+    E.ETHICS.length >= 8 && E.ETHICS.every((x) =>
+      x.name && x.icon && x.stake && x.what.length > 120 && x.good.length > 80))
+  ok('worker health, environment, counterfeits and dual use are all covered',
+    ['worker', 'environment', 'counterfeit', 'dualuse'].every((id) => E.ETHICS.some((x) => x.id === id)))
+  // The one named case must keep its qualification. Stripping the "did not
+  // concede causation" clause would turn a careful account into an accusation.
+  ok('the named case retains its causal qualification', (() => {
+    const w = E.ETHICS.find((x) => x.id === 'worker')
+    return w.case && /did not concede/i.test(w.case) && /contested/i.test(w.case)
+  })())
+  ok('the named case is dated and attributed',
+    /2018/.test(E.ETHICS.find((x) => x.id === 'worker').case))
+  ok('dual use admits that reasonable people disagree',
+    /reasonable people disagree/i.test(E.ETHICS.find((x) => x.id === 'dualuse').good))
+
+  // The framing this tab was built to correct.
+  ok('the tab argues flawless is the wrong target',
+    E.PRINCIPLES.some((p) => /wrong target/i.test(p.k)))
+  ok('discipline is framed as arithmetic rather than virtue',
+    E.PRINCIPLES.some((p) => /arithmetic/i.test(p.k)))
+  ok('all four principles are argued at length',
+    E.PRINCIPLES.length === 4 && E.PRINCIPLES.every((p) => p.k && p.what.length > 150))
+}
+
 /* ---------- business ---------- */
 group('Business case')
 {
@@ -1617,6 +1704,8 @@ group('Build output')
       ok('the provenance note shipped', bundle.includes('Anthropic') && bundle.includes('publicly available'))
       ok('the no-confidential-data statement shipped', /confidential/i.test(bundle))
       ok('the icon set shipped', bundle.includes('waferscale') && bundle.includes('iplicense'))
+      ok('the discipline tab shipped', bundle.includes('per-step yield') || bundle.includes('stop-the-line'))
+      ok('the discipline tab keeps the case qualification', /did not concede/i.test(bundle))
       ok('the business tab shipped', bundle.includes('break-even') || bundle.includes('Total NRE'))
       ok('speed binning shipped in the yield lab',
         bundle.includes('Colour by speed bin') || bundle.includes('Blended selling price'))

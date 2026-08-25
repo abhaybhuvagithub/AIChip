@@ -37,11 +37,13 @@ export const TOUR = [
   { id: 't8f', tab: 'chain', title: 'Watch the argument reopen', body: 'The industry settled on specialisation decades ago. Terafab is a bet that specialisation became a liability once capacity itself turned scarce. Note the two tables: what is committed, and what is so far only stated.' },
   { id: 't8z1', tab: 'business', title: 'See what it costs to start', body: 'Four years and hundreds of millions before a single part ships, and over 80% of it spent before anyone knows whether the silicon works. Click through the phases and watch where the money goes.' },
   { id: 't8z2', tab: 'business', title: 'Find the node that kills the product', body: 'Pick the IoT SoC market, then walk down the node table. There is a node above which the programme never pays back — not because the chip is worse, but because the NRE cannot be amortised over the units the market will absorb.' },
+  { id: 't8y1', tab: 'ethics', title: 'See why care is not enough', body: 'Seven hundred steps and yield multiplies: every step must succeed 99.9986% of the time to finish 99 wafers in 100. That is fourteen parts per million, per step. No amount of attention delivers that, which is the entire case for procedure over heroics.' },
+  { id: 't8y2', tab: 'ethics', title: 'Follow a missed defect downstream', body: 'The rule of ten: each stage a defect escapes to multiplies the cost of fixing it by roughly ten. Every gate someone is tempted to skip is orders of magnitude cheaper than the one after it.' },
   { id: 't9', tab: 'compute', title: 'Turn silicon into operations', body: 'The die you configured now becomes a throughput number. Watch the top-left figure as you change nothing but the precision dropdown — the silicon is identical and the number moves by 64x.' },
   { id: 't10', tab: 'compute', title: 'Climb to the trillions and past them', body: 'Move the scale selector from one die to a cluster. Note the power column keeping pace: past a rack, what you can build is set by the substation, not the fab.' },
   { id: 't11', tab: 'quantum', title: 'Meet the other exchange rate', body: 'Pick Shor on RSA-2048, then drag the physical error rate. Between 0.8% and 1.2% the qubit count goes vertical and then to infinity — that cliff is the surface code threshold.' },
   { id: 't12', tab: 'quantum', title: 'See what a fab cannot fix', body: 'Read the comparison table. A logic fab is a statistical discipline that expects failures and designs around them. A quantum chip has no binning and no redundancy, so the same tools do not buy the same safety.' },
-  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Forty-five questions. Everything needed to answer them is on the other thirteen tabs.' },
+  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Forty-seven questions. Everything needed to answer them is on the other thirteen tabs.' },
 ]
 
 export const QUIZ = [
@@ -218,6 +220,18 @@ export const QUIZ = [
     opts: ['Tax timing', 'Wafers are paid for months before the parts can be sold, and foundry capacity is take-or-pay', 'Royalties are paid up front', 'Depreciation on test equipment'],
     a: 1,
     why: 'Cycle time is three to four months and booked capacity must be paid for whether you use it or not. Working capital, not profitability, is what kills companies at the ramp stage.',
+  },
+  {
+    q: 'A leading-edge flow has ~700 steps. To finish 99 wafers in 100, how well must each step perform?',
+    opts: ['About 99%', 'About 99.9986% — roughly 14 defects per million, per step', 'About 99.9%', 'It depends only on the final test'],
+    a: 1,
+    why: 'Yield multiplies across steps, so the per-step requirement is the line target raised to the power of one over the step count. No amount of care delivers fourteen parts per million by attention alone — which is the whole argument for documented procedure, statistical control and automation.',
+  },
+  {
+    q: 'Why is "flawless" the wrong target for a fab culture?',
+    opts: ['Perfection is too expensive', 'A culture expecting perfection hides problems, because admitting one marks you out', 'It discourages automation', 'Customers do not require it'],
+    a: 1,
+    why: 'The disciplines exist because failure is certain. The goal is detection, containment and recovery — the best fabs are not the ones without excursions but the ones that find an excursion in hours rather than weeks. Bad news has to travel faster than good news, and it will not if reporting it is risky.',
   },
   {
     q: 'What is binning?',

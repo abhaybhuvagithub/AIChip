@@ -667,3 +667,36 @@ dots throws that away.
   passed before this pass and after it. So the suite now asserts an average of
   at least four drawn shapes per icon — a direct measure of the thing that was
   actually improved, and one that fails if someone later simplifies them back.
+
+---
+
+## Twentieth pass: discipline and ethics
+
+The brief asked for what is required to make this "a flawless success". The tab
+argues with the word, in its own headline, because the premise is the most
+important thing to correct.
+
+- **Flawless is the wrong target, and saying so is the contribution.** A
+  culture that expects perfection is a culture where problems get hidden,
+  because admitting one marks you out. The disciplines exist because failure is
+  certain; the goal is detection, containment and recovery. Agreeing with the
+  brief would have produced a worse tab.
+- **Then earn the claim with arithmetic.** Seven hundred steps, yield
+  multiplies, so 99% line yield demands 99.9986% per step — fourteen parts per
+  million, every step, every time. That single computed figure makes the case
+  for procedure over heroics better than any amount of exhortation, and it
+  reframes discipline as arithmetic rather than virtue.
+- **Name the hard case, and keep its qualification.** The tab cites a
+  documented occupational-health settlement with dates and the company's own
+  quoted words — and states that the company did not concede causation, because
+  it did not. A verify check asserts that clause and the word "contested"
+  cannot be edited out; I removed them to confirm it fired. Long-latency
+  disease is genuinely hard to attribute, and a site that flattened that into
+  an accusation would be doing the same thing it criticises elsewhere:
+  preferring a clean story to a measurement.
+- **Ethics sections fail when they are lists of virtues.** Each discipline
+  therefore states what breaks in its absence, and each ethical domain states
+  what good practice actually looks like rather than that the issue is
+  important. On dual use the tab says plainly that reasonable people disagree
+  about where the line sits — because they do, and claiming otherwise would be
+  the same false confidence.

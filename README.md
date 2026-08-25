@@ -22,9 +22,10 @@ Five tabs:
 | **Quantum** | A surface code resource calculator — drag the physical error rate and watch the qubit count go vertical at threshold — plus five hardware modalities and a side-by-side of classical against quantum fabrication. |
 | **3D & beyond** | The architecture ladder with drawn cross-sections — planar, FinFET, nanosheet, forksheet, CFET, 2D-material channel — plus backside power delivery, four levels of circuit stacking, and an interactive thermal-wall calculator. Every entry carries a status badge, because "demonstrated at IEDM" and "in a product" are five to ten years apart. |
 | **Silicon** | Twenty real parts — Apple A-series and M-series, Google TPU v1 through the eighth generation, NVIDIA H100/Blackwell/Rubin, AMD MI300X, Cerebras WSE-3 — drawn at true relative area on one 300 mm wafer. Load any of them into the yield lab. |
+| **Discipline** | Why "flawless" is the wrong target, and what the right one is. The arithmetic that makes discipline compulsory — 700 steps at 99.9986% each — plus nine engineering disciplines, the rule of ten on escape cost, test-coverage escapes against real DPPM targets, and eight domains where the ethical judgement is genuine. |
 | **0 → market** | The business case: seven phases from concept to ramp, an NRE build-up by node, and the one calculation that decides whether a chip exists — break-even units = NRE ÷ margin. Plus a lifetime cash-flow chart showing the four-year hole before the climb. Unit cost comes from the die you configured in the yield lab. |
 | **Value chain** | The seven layers that actually produce a chip, and how few suppliers each has. Arm's licensing model and its 2026 move into shipping its own silicon. Three business models — IDM, fabless plus foundry, and the vertical re-integration Terafab is betting on. A fab-scale calculator that turns wafer starts per month into chips, silicon and compute per year. |
-| **Quiz** | Forty-five questions, self-explaining. |
+| **Quiz** | Forty-seven questions, self-explaining. |
 
 ## What is actually modelled
 
@@ -45,6 +46,9 @@ Five tabs:
 - **Device physics** — thermal voltage, Varshni bandgap, intrinsic carriers,
   mass action, oxide capacitance and EOT, square-law drain current,
   subthreshold swing, WKB gate tunnelling, and dynamic power.
+- **Rigour** — per-step yield required for a target line yield over N steps,
+  the DPMO-to-sigma conversion on the standard 1.5σ-shift convention, and test
+  escapes against market DPPM targets.
 - **Business case** — NRE built up from mask set, engineer-years, EDA and IP
   by node; break-even volume; an S-curve ramp with annual price erosion and
   yield learning; and quarter-by-quarter cumulative cash flow to a payback
@@ -128,6 +132,16 @@ ratio between generations. Cooling capability bands are order-of-magnitude
 only; real limits depend on hot-spot distribution rather than average density.
 Verify checks assert that only the three shipping architectures are marked
 production and that no beyond-CMOS option is.
+
+The Discipline tab names one real occupational-health case. It is presented
+with dates, the company's own quoted statements and the causal question left
+where the parties left it — contested — because long-latency occupational
+disease is genuinely hard to attribute and stating otherwise would be
+unfair to everyone involved. A verify check asserts that qualification cannot
+be edited out. The engineering disciplines are described in general terms from
+published industry practice rather than attributed to any company's internal
+procedure, and the escape-cost ratios are the conventional illustrative
+figures.
 
 Business-tab costs are widely-cited industry estimates and vary by a factor of
 two or more between sources and between companies — nobody publishes their
@@ -236,7 +250,7 @@ that fails fastest:
 | --- | --- |
 | `npm run lint` | Dead imports, unused props, hook misuse. Found three real bugs the first time it ran. |
 | `npm run build` | Anything that does not compile. |
-| `npm run verify` | 549 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
+| `npm run verify` | 582 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
 | `npm run smoke` | Renders all sixteen tabs across five configurations, including an unmakeable die and a zero-yield process. Catches components that throw on first render, and output that leaks `NaN` or `undefined` — which reads as broken while passing every other check. |
 | `npm run budget` | Bundle size against a gzipped budget. This bundle grew 206 kB → 331 kB across six feature passes with nothing watching. |
 
@@ -256,7 +270,7 @@ publish means the push succeeded, not that the bytes are being served — a
 sister repo shipped the previous build for weeks with green checks the whole
 time, because nothing closed that loop.
 
-`npm run verify` runs 549 checks across wafer geometry, yield model
+`npm run verify` runs 582 checks across wafer geometry, yield model
 correctness (pinned against hand-computed values), economics invariants,
 defect scatter determinism, a named type scale with a 14px floor and a pinned
 prose tier, WCAG contrast across all ten themes, architecture and thermal-wall arithmetic, material

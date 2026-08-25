@@ -12,6 +12,7 @@ import Science from './ui/Science.jsx'
 import Clock from './ui/Clock.jsx'
 import ValueChain from './ui/ValueChain.jsx'
 import Business from './ui/Business.jsx'
+import Ethics from './ui/Ethics.jsx'
 import SandToSilicon from './ui/SandToSilicon.jsx'
 import Compute from './ui/Compute.jsx'
 import Quantum from './ui/Quantum.jsx'
@@ -34,6 +35,7 @@ const TABS = [
   { id: 'silicon', label: 'Silicon' },
   { id: 'chain', label: 'Value chain' },
   { id: 'business', label: '0 → market' },
+  { id: 'ethics', label: 'Discipline' },
   { id: 'compute', label: 'Compute' },
   { id: 'quantum', label: 'Quantum' },
   { id: 'quiz', label: 'Quiz' },
@@ -206,6 +208,7 @@ export default function App() {
         {tab === 'silicon' && <Silicon cfg={cfg} patch={patch} goTab={setTab} />}
         {tab === 'chain' && <ValueChain cfg={cfg} />}
         {tab === 'business' && <Business cfg={cfg} goTab={setTab} />}
+        {tab === 'ethics' && <Ethics />}
         {tab === 'compute' && <Compute cfg={cfg} patch={patch} />}
         {tab === 'quantum' && <Quantum />}
         {tab === 'quiz' && <Quiz />}
