@@ -16,7 +16,8 @@ Five tabs:
 | **Nodes** | 180 nm to 2 nm, with the transistor architecture that made each generation possible, and a drawn cross-section showing how many sides of the channel the gate controls. |
 | **Compute** | Turns the die you configured into operations per second, and climbs from one die to a 100,000-die cluster. Shows why headline throughput outran Moore's law: precision and sparsity, not density. |
 | **Quantum** | A surface code resource calculator — drag the physical error rate and watch the qubit count go vertical at threshold — plus five hardware modalities and a side-by-side of classical against quantum fabrication. |
-| **Quiz** | Twenty-one questions, self-explaining. |
+| **Silicon** | Twenty real parts — Apple A-series and M-series, Google TPU v1 through the eighth generation, NVIDIA H100/Blackwell/Rubin, AMD MI300X, Cerebras WSE-3 — drawn at true relative area on one 300 mm wafer. Load any of them into the yield lab. |
+| **Quiz** | Twenty-three questions, self-explaining. |
 
 ## What is actually modelled
 
@@ -61,6 +62,14 @@ considerably by producer — wire-saw kerf alone destroys 30–40% of a finished
 crystal as dust. The compounded ratio, roughly eight grams of rock per gram of
 shipped silicon, is the figure worth carrying; the individual digits are not.
 
+Figures for real parts come from vendor announcements and public reporting
+through mid-2026. Transistor counts are vendor figures where vendors publish
+them; die areas are third-party die-shot measurements where they do not, and
+those are marked with an asterisk. Apple has never published a die size.
+Google publishes pod-level throughput freely and silicon geometry almost
+never — where nobody outside the company knows, the field is empty rather
+than estimated, and a verify check enforces that.
+
 The quantum estimator collapses magic-state distillation into a single
 overhead factor. Real resource estimates size it explicitly and it often
 dominates the footprint — which is most of why published estimates for the
@@ -87,9 +96,10 @@ npm run build    # production build into dist/
 npm test         # build, then run the verification suite
 ```
 
-`npm run verify` runs 155 checks across wafer geometry, yield model
+`npm run verify` runs 183 checks across wafer geometry, yield model
 correctness (pinned against hand-computed values), economics invariants,
-defect scatter determinism, material chain mass balance, compute-model
+defect scatter determinism, material chain mass balance, published specs for
+real parts, compute-model
 calibration, surface code arithmetic, content completeness, and the contents of the built bundle. A
 failure blocks deployment — see `.github/workflows/deploy.yml`.
 

@@ -3,6 +3,7 @@ import FabLine from './ui/FabLine.jsx'
 import YieldLab from './ui/YieldLab.jsx'
 import Economics from './ui/Economics.jsx'
 import NodesView from './ui/Nodes.jsx'
+import Silicon from './ui/Silicon.jsx'
 import SandToSilicon from './ui/SandToSilicon.jsx'
 import Compute from './ui/Compute.jsx'
 import Quantum from './ui/Quantum.jsx'
@@ -16,6 +17,7 @@ const TABS = [
   { id: 'wafer', label: 'Yield lab' },
   { id: 'economics', label: 'Economics' },
   { id: 'nodes', label: 'Nodes' },
+  { id: 'silicon', label: 'Silicon' },
   { id: 'compute', label: 'Compute' },
   { id: 'quantum', label: 'Quantum' },
   { id: 'quiz', label: 'Quiz' },
@@ -111,6 +113,7 @@ export default function App() {
         {tab === 'wafer' && <YieldLab cfg={cfg} patch={patch} />}
         {tab === 'economics' && <Economics cfg={cfg} patch={patch} />}
         {tab === 'nodes' && <NodesView />}
+        {tab === 'silicon' && <Silicon cfg={cfg} patch={patch} goTab={setTab} />}
         {tab === 'compute' && <Compute cfg={cfg} patch={patch} />}
         {tab === 'quantum' && <Quantum />}
         {tab === 'quiz' && <Quiz />}

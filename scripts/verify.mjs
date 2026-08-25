@@ -19,6 +19,7 @@ const { NODES, PRODUCTS, ARCHITECTURES, FOUNDRIES } = await import(join(root, 's
 const { QUIZ, TOUR } = await import(join(root, 'src/data/learn.js'))
 const { computeThroughput, ops, watts, PRECISIONS, LADDER, SCALE_NAMES, DEFAULT_COMPUTE } =
   await import(join(root, 'src/lib/compute.js'))
+const { SILICON, MAKERS, CATEGORIES, COUNTED } = await import(join(root, 'src/data/silicon.js'))
 const { CHAIN, AUTOMATION, WHY_NO_HUMANS } = await import(join(root, 'src/data/sand.js'))
 const { traceBack, waferMass, nines, impurityPpb, grams, SI_DENSITY } =
   await import(join(root, 'src/lib/chain.js'))
@@ -172,13 +173,84 @@ group('Content')
   ok('quiz answers all point at a real option', QUIZ.every((q) => q.opts[q.a] !== undefined))
   ok('every quiz question explains itself', QUIZ.every((q) => q.why && q.why.length > 40))
   ok('quiz options are distinct', QUIZ.every((q) => new Set(q.opts).size === q.opts.length))
-  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', 'compute', 'quantum', 'quiz'].includes(t.tab)))
-  ok('the tour visits every tab', ['sand', 'line', 'wafer', 'economics', 'nodes', 'compute', 'quantum', 'quiz']
+  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', 'silicon', 'compute', 'quantum', 'quiz'].includes(t.tab)))
+  ok('the tour visits every tab', ['sand', 'line', 'wafer', 'economics', 'nodes', 'silicon', 'compute', 'quantum', 'quiz']
     .every((t) => TOUR.some((s) => s.tab === t)))
   ok('quiz covers the material chain', QUIZ.some((q) => /purity|distill|polysilicon|particle/i.test(q.q)))
-  ok('quiz covers compute and quantum', QUIZ.length >= 21 &&
+  ok('quiz covers real silicon', QUIZ.some((q) => /Cerebras|MI300X|wafer-scale/i.test(q.q)))
+  ok('quiz covers compute and quantum', QUIZ.length >= 23 &&
     QUIZ.some((q) => /FP4|sparsity|precision/i.test(q.q)) &&
     QUIZ.some((q) => /qubit|surface code|threshold/i.test(q.q)))
+}
+
+/* ---------- real silicon ---------- */
+group('Real silicon')
+{
+  ok('the catalogue is populated and unique',
+    SILICON.length >= 18 && new Set(SILICON.map((s) => s.id)).size === SILICON.length)
+  ok('every part is fully described', SILICON.every((s) =>
+    s.name && s.year && s.foundry && s.node && s.what && s.notable &&
+    MAKERS[s.maker] && CATEGORIES[s.cat] && (s.dies || 1) >= 1))
+  ok('every maker in the legend has at least one part',
+    Object.keys(MAKERS).every((m) => SILICON.some((s) => s.maker === m)))
+  ok('every category is used',
+    Object.keys(CATEGORIES).every((c) => SILICON.some((s) => s.cat === c)))
+  ok('years are plausible', SILICON.every((s) => s.year >= 2015 && s.year <= 2027))
+  ok('Apple, Google, NVIDIA, AMD and Cerebras are all represented',
+    ['apple', 'google', 'nvidia', 'amd', 'cerebras'].every((m) => SILICON.some((s) => s.maker === m)))
+
+  // The honesty rules this file exists to enforce.
+  ok('undisclosed areas are flagged, not guessed',
+    SILICON.every((s) => s.areaKnown === false ? s.areaMm2 === 0 : s.areaMm2 >= 0))
+  ok('every part with a nonzero area has areaKnown unset or true',
+    SILICON.every((s) => !(s.areaMm2 > 0 && s.areaKnown === false)))
+  ok('at least one part declines to state its die area',
+    SILICON.some((s) => s.areaKnown === false))
+  ok('Apple areas are all marked as estimates',
+    SILICON.filter((s) => s.maker === 'apple' && s.areaMm2 > 0).every((s) => s.est === true))
+  ok('COUNTED holds exactly the parts with a transistor count',
+    COUNTED.length === SILICON.filter((s) => s.transistors > 0).length &&
+    COUNTED.every((c) => c.transistors > 0))
+  ok('COUNTED is non-empty and spans several orders of magnitude', (() => {
+    const lo = Math.min(...COUNTED.map((c) => c.transistors))
+    const hi = Math.max(...COUNTED.map((c) => c.transistors))
+    return COUNTED.length >= 10 && hi / lo > 100
+  })())
+
+  // Spot-checks against published figures. If a refactor or a careless edit
+  // moves one of these, it is a factual error, not a style change.
+  const by = (id) => SILICON.find((s) => s.id === id)
+  ok('H100: 80B transistors on 814 mm²', by('h100').transistors === 80e9 && by('h100').areaMm2 === 814)
+  ok('WSE-3: 4 trillion transistors on 46,225 mm²',
+    by('wse3').transistors === 4e12 && by('wse3').areaMm2 === 46225)
+  ok('WSE-3 is 215 mm square', near(Math.sqrt(by('wse3').areaMm2), 215, 0.1))
+  ok('Rubin: 336B transistors across two dies',
+    by('rubin').transistors === 336e9 && by('rubin').dies === 2)
+  ok('Blackwell: 208B transistors across two dies',
+    by('b200').transistors === 208e9 && by('b200').dies === 2)
+  ok('TPU v1: 331 mm² at 28 nm', by('tpuv1').areaMm2 === 331 && by('tpuv1').node === '28 nm')
+  ok('M1 Ultra is two dies', by('m1ultra').dies === 2)
+  ok('MI300X is a multi-die part', by('mi300x').dies > 2)
+  ok('every Apple and Google part is fabbed at TSMC',
+    SILICON.filter((s) => s.maker === 'apple' || s.maker === 'google').every((s) => s.foundry === 'TSMC'))
+
+  // Derived figures the UI shows.
+  const dens = (s) => s.transistors / 1e6 / (s.areaMm2 * (s.dies || 1))
+  ok('computed densities are physically plausible',
+    SILICON.filter((s) => s.transistors > 0 && s.areaMm2 > 0)
+      .every((s) => dens(s) > 5 && dens(s) < 400))
+  ok('H100 density lands near the value the compute model is calibrated on',
+    near(dens(by('h100')), 98, 4), dens(by('h100')).toFixed(1))
+  ok('newer nodes are denser than older ones', dens(by('rubin')) > dens(by('tpuv1')) || by('tpuv1').transistors === 0)
+  ok('parts above the reticle field are all multi-die or stitched',
+    SILICON.filter((s) => s.areaMm2 > RETICLE.area).every((s) => s.dies > 1 || s.maker === 'cerebras'))
+  ok('every loadable part yields at least one die on a 300 mm wafer',
+    SILICON.filter((s) => s.areaKnown !== false && s.areaMm2 > 0 && s.areaMm2 < 60000)
+      .every((s) => {
+        const side = Math.sqrt(s.areaMm2)
+        const g = layoutDies({ waferDia: 300, dieX: side, dieY: side, scribe: 0.08, edgeExclusion: 3 })
+        return s.areaMm2 > 40000 ? g.gross === 0 : g.gross >= 1
+      }))
 }
 
 /* ---------- sand to silicon ---------- */
@@ -398,6 +470,7 @@ group('Build output')
       const bundle = readFileSync(join(dist, 'assets', js[0]), 'utf8')
       ok('the fab line content shipped', bundle.includes('Czochralski'))
       ok('the yield models shipped', bundle.includes('Negative binomial') || bundle.includes('negbinom'))
+      ok('the silicon catalogue shipped', bundle.includes('Cerebras') && bundle.includes('Ironwood'))
       ok('the sand-to-silicon chain shipped', bundle.includes('Czochralski') && bundle.includes('Siemens'))
       ok('the compute tab shipped', bundle.includes('TOPS') || bundle.includes('EOPS'))
       ok('the quantum tab shipped', bundle.includes('transmon') || bundle.includes('surface code') || bundle.includes('Millikelvin'))

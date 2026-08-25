@@ -168,3 +168,29 @@ What the bar caught:
 - The autoplay loop initially listed `progress` as an effect dependency, which
   restarted the animation every frame and left it frozen at zero. Left in with
   a comment, because it is the exact mistake the next person will make.
+
+---
+
+## Fourth pass: real parts
+
+Named silicon, so the models have something to bite on. This pass was mostly
+a sourcing problem rather than a modelling one.
+
+- **Training data was stale and would have shipped wrong figures.** Checked
+  current sources before writing anything: Google is on its eighth TPU
+  generation and has split training and inference into separate chips, NVIDIA
+  shipped Rubin, Apple went to M5 on 3 nm rather than N2. Writing any of that
+  from memory would have put confidently wrong numbers into a repository.
+- **The temptation was to fill every cell.** Google does not publish TPU die
+  areas and Apple has never published a die size in its history. The file
+  marks those `areaKnown: false` and the UI says "not disclosed" and refuses
+  to offer a load, rather than inventing a plausible number. A verify check
+  enforces it, because a guessed figure in a table of real specifications is
+  worse than a gap — it looks identical to a sourced one.
+- **Third-party die-shot measurements are not vendor specifications**, so they
+  carry an `est` flag and an asterisk in the table. Another check asserts
+  every Apple area is flagged.
+- **Spot-check assertions, not just structural ones.** The suite pins H100 at
+  80 billion transistors on 814 mm² and WSE-3 at 4 trillion on 46,225 mm².
+  Those exist so a careless edit to a number fails the build, which structural
+  checks would never catch.

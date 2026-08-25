@@ -14,11 +14,13 @@ export const TOUR = [
   { id: 't6', tab: 'wafer', title: 'Read the edge', body: 'Raise edge exclusion. Those outer dies were never countable, and the ring you lose grows with wafer diameter — one of several reasons 450 mm never paid for itself.' },
   { id: 't7', tab: 'economics', title: 'Follow the money to the good die', body: 'Cost per good die, not yield, is what a fab is run to. A 40% yield on a cheap wafer can beat 80% on an expensive one. Try the automotive MCU against the AI accelerator.' },
   { id: 't8', tab: 'nodes', title: 'See why the names stopped meaning anything', body: 'From 22 nm the number stops describing a measurable dimension. What kept improving is density and the transistor architecture — planar to fin to nanosheet, one more side of the channel each time.' },
+  { id: 't8b', tab: 'silicon', title: 'See what all of this is actually about', body: 'Every part is drawn at true relative area on one 300 mm wafer. An A17 Pro is the small square near the middle; the Cerebras WSE-3 is the wafer. Both are called a chip.' },
+  { id: 't8c', tab: 'silicon', title: 'Notice what is missing', body: 'Several cells are empty rather than estimated. Google publishes pod throughput freely and die geometry almost never, and Apple has never published a die size — every Apple area here is someone else measuring a die shot.' },
   { id: 't9', tab: 'compute', title: 'Turn silicon into operations', body: 'The die you configured now becomes a throughput number. Watch the top-left figure as you change nothing but the precision dropdown — the silicon is identical and the number moves by 64x.' },
   { id: 't10', tab: 'compute', title: 'Climb to the trillions and past them', body: 'Move the scale selector from one die to a cluster. Note the power column keeping pace: past a rack, what you can build is set by the substation, not the fab.' },
   { id: 't11', tab: 'quantum', title: 'Meet the other exchange rate', body: 'Pick Shor on RSA-2048, then drag the physical error rate. Between 0.8% and 1.2% the qubit count goes vertical and then to infinity — that cliff is the surface code threshold.' },
   { id: 't12', tab: 'quantum', title: 'See what a fab cannot fix', body: 'Read the comparison table. A logic fab is a statistical discipline that expects failures and designs around them. A quantum chip has no binning and no redundancy, so the same tools do not buy the same safety.' },
-  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Twenty-one questions. Everything needed to answer them is on the other seven tabs.' },
+  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Twenty-three questions. Everything needed to answer them is on the other eight tabs.' },
 ]
 
 export const QUIZ = [
@@ -63,6 +65,18 @@ export const QUIZ = [
     opts: ['It assumes fewer defects overall', 'It accounts for clustering, so defects overlap on the same dies', 'It ignores edge dies', 'It includes the line yield term'],
     a: 1,
     why: 'Clustered defects land repeatedly on already-dead dies instead of killing fresh ones. Poisson assumes independence and therefore over-counts the damage.',
+  },
+  {
+    q: 'The Cerebras WSE-3 is a single 46,225 mm² chip — over fifty times the reticle field. How is that possible?',
+    opts: ['A larger scanner was built for it', 'Reticle fields are stitched across their boundaries, and defective cores are routed around', 'It uses a 450 mm wafer', 'It is several dies bonded in a package'],
+    a: 1,
+    why: 'The wafer is never diced. Overlapping exposures let signals cross what would normally be a scribe lane, and the architecture routes around dead cores — no conventional yield model survives a die that size, so the redundancy is the enabler.',
+  },
+  {
+    q: 'AMD builds MI300X from eight 5 nm compute dies on four 6 nm I/O dies. Why two different nodes?',
+    opts: ['5 nm capacity was unavailable', 'I/O and analog scale poorly, so paying leading-edge prices for them wastes money', 'The nodes are electrically incompatible otherwise', '6 nm runs cooler'],
+    a: 1,
+    why: 'Logic density improves with each node; I/O, analog and SRAM do so much less. Putting each function on whichever node suits it is one of the main economic arguments for disaggregation, alongside yield.',
   },
   {
     q: 'What sets the maximum size of a single monolithic die?',
