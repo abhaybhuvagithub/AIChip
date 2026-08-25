@@ -76,6 +76,25 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      # High and critical only. Failing a static site's build on a moderate
-      # advisory in a build-time dependency teaches people to ignore the job.
-      - run: npm audit --audit-level=high --omit=dev
+      # Production dependencies block the build. These ship to users.
+      - name: Audit production dependencies
+        run: npm audit --audit-level=high --omit=dev
+
+      # Dev dependencies are reported but do not block. A dev-server advisory
+      # in a build tool does not reach a visitor to a static site, and failing
+      # the build on one teaches people to ignore the job. It is surfaced in
+      # the run summary so it still gets seen.
+      - name: Audit dev dependencies (report only)
+        if: always()
+        run: |
+          if npm audit --audit-level=high > /tmp/audit.txt 2>&1; then
+            echo "No high or critical advisories, including dev." >> "$GITHUB_STEP_SUMMARY"
+          else
+            {
+              echo "### Dev dependency advisories (non-blocking)"
+              echo ''
+              echo '```'
+              tail -30 /tmp/audit.txt
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi

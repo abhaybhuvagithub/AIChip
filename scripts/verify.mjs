@@ -653,6 +653,8 @@ group('Pipeline')
   ok('deploy does not cancel itself mid-push', /cancel-in-progress: false/.test(dep))
   ok('deploy re-verifies the artifact it ships', /npm run verify/.test(dep))
   ok('deploy confirms the live site afterwards', /postdeploy\.mjs/.test(dep))
+  ok('production dependencies are audited as a blocking step',
+    /npm audit --audit-level=high --omit=dev/.test(ci))
   ok('dependabot is configured', existsSync(join(root, '.github/dependabot.yml')))
   ok('a PR template exists', existsSync(join(root, '.github/pull_request_template.md')))
 }
