@@ -11,7 +11,11 @@ export const TOUR = [
   { id: 't6', tab: 'wafer', title: 'Read the edge', body: 'Raise edge exclusion. Those outer dies were never countable, and the ring you lose grows with wafer diameter — one of several reasons 450 mm never paid for itself.' },
   { id: 't7', tab: 'economics', title: 'Follow the money to the good die', body: 'Cost per good die, not yield, is what a fab is run to. A 40% yield on a cheap wafer can beat 80% on an expensive one. Try the automotive MCU against the AI accelerator.' },
   { id: 't8', tab: 'nodes', title: 'See why the names stopped meaning anything', body: 'From 22 nm the number stops describing a measurable dimension. What kept improving is density and the transistor architecture — planar to fin to nanosheet, one more side of the channel each time.' },
-  { id: 't9', tab: 'quiz', title: 'Check it landed', body: 'Twelve questions. Everything needed to answer them is on the other four tabs.' },
+  { id: 't9', tab: 'compute', title: 'Turn silicon into operations', body: 'The die you configured now becomes a throughput number. Watch the top-left figure as you change nothing but the precision dropdown — the silicon is identical and the number moves by 64x.' },
+  { id: 't10', tab: 'compute', title: 'Climb to the trillions and past them', body: 'Move the scale selector from one die to a cluster. Note the power column keeping pace: past a rack, what you can build is set by the substation, not the fab.' },
+  { id: 't11', tab: 'quantum', title: 'Meet the other exchange rate', body: 'Pick Shor on RSA-2048, then drag the physical error rate. Between 0.8% and 1.2% the qubit count goes vertical and then to infinity — that cliff is the surface code threshold.' },
+  { id: 't12', tab: 'quantum', title: 'See what a fab cannot fix', body: 'Read the comparison table. A logic fab is a statistical discipline that expects failures and designs around them. A quantum chip has no binning and no redundancy, so the same tools do not buy the same safety.' },
+  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Eighteen questions. Everything needed to answer them is on the other six tabs.' },
 ]
 
 export const QUIZ = [
@@ -80,6 +84,42 @@ export const QUIZ = [
     opts: ['One', 'Three', 'Four', 'Two'],
     a: 2,
     why: 'Planar controls one side, FinFET three, GAA nanosheet all four. Each step buys back electrostatic control lost to short-channel effects.',
+  },
+  {
+    q: 'Dropping arithmetic from FP16 to FP4 multiplies an accelerator\'s headline throughput by about four. What changed on the die?',
+    opts: ['The clock speed quadrupled', 'Nothing — narrower arithmetic means more multipliers fit in the same silicon', 'The transistor count quadrupled', 'Memory bandwidth quadrupled'],
+    a: 1,
+    why: 'A narrower number needs a physically smaller multiplier, so more of them fit. This is why headline throughput has grown faster than transistor density — the arithmetic got cheaper, not just denser.',
+  },
+  {
+    q: 'Why is "with sparsity" attached to most published accelerator figures?',
+    opts: ['It measures memory efficiency', 'Structured sparsity skips half the multiplies and the skipped ones are counted', 'It indicates the chip supports sparse matrix formats', 'It is a thermal derating factor'],
+    a: 1,
+    why: 'A 2:4 structured pattern lets the hardware skip half the multiplications, and vendors count them anyway. It doubles the datasheet number without adding a transistor.',
+  },
+  {
+    q: 'Real training runs achieve perhaps 30–60% of an accelerator\'s peak. What is usually the limit?',
+    opts: ['Thermal throttling', 'Memory bandwidth — the arithmetic units sit idle waiting for data', 'Instruction decode', 'Clock jitter'],
+    a: 1,
+    why: 'Peak assumes every lane is fed every cycle. Getting data to the multipliers is the harder engineering problem, which is why HBM sits next to the compute die rather than across a board.',
+  },
+  {
+    q: 'A quantum chip has roughly a thousand devices where a logic die has a hundred billion. Why is it still harder to build?',
+    opts: ['The lithography is finer', 'Every qubit must meet frequency, coherence and fidelity spec — there is no binning or redundancy', 'It requires more mask layers', 'The wafers are larger'],
+    a: 1,
+    why: 'A logic fab is a statistical discipline: expect failures, design around them, sell the partial parts as lower SKUs. The surface code assumes a working lattice, so one bad qubit in the wrong place can waste the chip.',
+  },
+  {
+    q: 'The surface code threshold is about 1% per operation. What happens above it?',
+    opts: ['Correction gets slower but still works', 'Adding qubits makes things worse — the correction introduces more errors than it removes', 'You need a longer code distance', 'Runtime increases linearly'],
+    a: 1,
+    why: 'Below threshold, more physical qubits buy exponentially better logical qubits. Above it, the machinery is itself the dominant error source and no qubit count rescues it. Getting under threshold is a physics problem, not a manufacturing one.',
+  },
+  {
+    q: 'Increasing surface code distance from 11 to 13 does what to the logical error rate?',
+    opts: ['Improves it by roughly 18%', 'Improves it by roughly an order of magnitude', 'Doubles it', 'Leaves it unchanged'],
+    a: 1,
+    why: 'Logical error goes as (p/p_threshold) raised to about (d+1)/2. The distance sits in the exponent, so two more steps of distance buys a power, not a percentage — at the cost of physical qubits growing as d².',
   },
   {
     q: 'Roughly how long does a wafer take from start to finished part?',

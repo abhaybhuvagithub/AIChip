@@ -17,6 +17,10 @@ const { layoutDies, computeRun, YIELD_MODELS, scatterDefects, killDies, RETICLE,
 const { PROCESS, STAGES } = await import(join(root, 'src/data/process.js'))
 const { NODES, PRODUCTS, ARCHITECTURES, FOUNDRIES } = await import(join(root, 'src/data/nodes.js'))
 const { QUIZ, TOUR } = await import(join(root, 'src/data/learn.js'))
+const { computeThroughput, ops, watts, PRECISIONS, LADDER, SCALE_NAMES, DEFAULT_COMPUTE } =
+  await import(join(root, 'src/lib/compute.js'))
+const { physicalPerLogical, logicalErrorRate, requiredDistance, estimateResources, THRESHOLD, ALGORITHMS, MODALITIES, FAB_DIFFERENCES, SHARED } =
+  await import(join(root, 'src/lib/quantum.js'))
 
 let pass = 0, fail = 0
 const ok = (name, cond, detail = '') => {
@@ -165,7 +169,139 @@ group('Content')
   ok('quiz answers all point at a real option', QUIZ.every((q) => q.opts[q.a] !== undefined))
   ok('every quiz question explains itself', QUIZ.every((q) => q.why && q.why.length > 40))
   ok('quiz options are distinct', QUIZ.every((q) => new Set(q.opts).size === q.opts.length))
-  ok('tour steps point at real tabs', TOUR.every((t) => ['line', 'wafer', 'economics', 'nodes', 'quiz'].includes(t.tab)))
+  ok('tour steps point at real tabs', TOUR.every((t) => ['line', 'wafer', 'economics', 'nodes', 'compute', 'quantum', 'quiz'].includes(t.tab)))
+  ok('the tour visits every tab', ['line', 'wafer', 'economics', 'nodes', 'compute', 'quantum', 'quiz']
+    .every((t) => TOUR.some((s) => s.tab === t)))
+  ok('quiz covers compute and quantum', QUIZ.length >= 18 &&
+    QUIZ.some((q) => /FP4|sparsity|precision/i.test(q.q)) &&
+    QUIZ.some((q) => /qubit|surface code|threshold/i.test(q.q)))
+}
+
+/* ---------- compute throughput ---------- */
+group('Compute throughput')
+{
+  const die = { dieX: 26, dieY: 31.3, waferDia: 300, scribe: 0.08, edgeExclusion: 3, d0: 0.08, model: 'negbinom', alpha: 2, waferCost: 20000, packageCost: 20, lineYield: 0.98, testYield: 0.95, packageYield: 0.98, asp: 0 }
+  const c = { ...DEFAULT_COMPUTE, density: 98, trPerMac: 250000, clockGHz: 1.755, precision: 'fp16', sparsity: 1 }
+  const y = computeRun(die)
+  const r = computeThroughput(die, c, y)
+
+  // The model is calibrated, so this is the check that matters: a ~814 mm²
+  // die at ~98 MTr/mm² and 1.755 GHz should land near 1,000 TFLOPS at FP16.
+  // If a refactor moves this, the calibration has silently broken.
+  ok('calibration: reference accelerator lands near 1 POPS at FP16',
+    r.opsPerDie > 0.8e15 && r.opsPerDie < 1.5e15, ops(r.opsPerDie))
+  ok('MAC count is total transistors over transistors-per-MAC',
+    near(r.macs, (die.dieX * die.dieY * c.density * 1e6) / c.trPerMac, 1))
+  ok('achieved throughput never exceeds peak', r.achieved <= r.opsPerDie)
+  ok('sparsity doubles the headline figure',
+    near(computeThroughput(die, { ...c, sparsity: 2 }, y).opsPerDie, r.opsPerDie * 2, 1e6))
+
+  ok('FP4 is 64x FP64 on identical silicon', (() => {
+    const lo = computeThroughput(die, { ...c, precision: 'fp64' }, y).opsPerDie
+    const hi = computeThroughput(die, { ...c, precision: 'fp4' }, y).opsPerDie
+    return near(hi / lo, 64, 0.001)
+  })())
+  ok('precision multipliers are ordered from FP64 up to FP4',
+    PRECISIONS.every((p, i) => i === 0 || p.mult >= PRECISIONS[i - 1].mult))
+  ok('every precision has a stated use', PRECISIONS.every((p) => p.label && p.use && p.mult > 0))
+
+  ok('the scale ladder is monotonic', LADDER.every((l, i) => i === 0 || l.mult > LADDER[i - 1].mult))
+  ok('scale multiplies throughput and power together', (() => {
+    const rack = computeThroughput(die, { ...c, scale: 'rack' }, y)
+    return near(rack.peakAtScale, r.opsPerDie * 144, 1e6) && near(rack.powerAtScale, c.wattsPerDie * 144, 0.01)
+  })())
+  ok('a cluster of this die clears an exaop at FP8',
+    computeThroughput(die, { ...c, precision: 'fp8', scale: 'cluster' }, y).peakAtScale > 1e18)
+
+  ok('per-wafer throughput tracks good dies', near(r.opsPerWafer, r.opsPerDie * y.goodDies, 1e6))
+  ok('ops per dollar is finite for a shippable die', Number.isFinite(r.opsPerDollar) && r.opsPerDollar > 0)
+  ok('zero-transistor die produces no ops', computeThroughput({ dieX: 0, dieY: 0 }, c, y).opsPerDie === 0)
+  ok('zero transistors-per-MAC does not divide by zero',
+    computeThroughput(die, { ...c, trPerMac: 0 }, y).opsPerDie === 0)
+  ok('zero power does not divide by zero',
+    computeThroughput(die, { ...c, wattsPerDie: 0 }, y).opsPerWatt === 0)
+
+  ok('ops() picks the right SI prefix', ops(1.5e12).endsWith('TOPS') && ops(1.5e15).endsWith('POPS') &&
+    ops(1.5e18).endsWith('EOPS') && ops(1.5e21).endsWith('ZOPS'))
+  ok('ops() handles zero and nonsense', ops(0) === '—' && ops(NaN) === '—' && ops(-5) === '—')
+  ok('watts() scales through kW and MW', watts(500) === '500 W' && watts(1500).endsWith('kW') && watts(2e6).endsWith('MW'))
+  ok('scale names are the standard powers of ten', SCALE_NAMES.map((s) => s.exp).join() === '12,15,18,21')
+}
+
+/* ---------- quantum ---------- */
+group('Quantum error correction')
+{
+  // Rotated surface code: d^2 data + (d^2-1) measure.
+  ok('physical qubits per logical is 2d²−1',
+    physicalPerLogical(3) === 17 && physicalPerLogical(5) === 49 && physicalPerLogical(11) === 241)
+
+  ok('logical error falls as distance grows', (() => {
+    let last = Infinity
+    for (const d of [3, 5, 7, 9, 11, 13]) { const e = logicalErrorRate(0.001, d); if (e >= last) return false; last = e }
+    return true
+  })())
+  ok('two more distance steps buy roughly an order of magnitude',
+    (() => { const r = logicalErrorRate(0.001, 11) / logicalErrorRate(0.001, 13); return r > 5 && r < 20 })())
+  ok('logical error rises as physical error rises',
+    logicalErrorRate(0.005, 11) > logicalErrorRate(0.0005, 11))
+  ok('at threshold the code stops helping', logicalErrorRate(THRESHOLD, 21) === 1)
+  ok('above threshold the code stops helping', logicalErrorRate(0.02, 51) === 1)
+  ok('hand-check: p=0.001, d=11 gives A·(0.1)^6', near(logicalErrorRate(0.001, 11), 0.1 * Math.pow(0.1, 6), 1e-18))
+
+  ok('required distance is always odd', [0.0001, 0.0005, 0.001, 0.005].every((p) => {
+    const d = requiredDistance(p, 1e-12); return d !== null && d % 2 === 1
+  }))
+  ok('a worse physical error rate never needs a shorter code', (() => {
+    let last = 0
+    for (const p of [0.0001, 0.0005, 0.001, 0.003, 0.006]) {
+      const d = requiredDistance(p, 1e-12); if (d === null || d < last) return false; last = d
+    }
+    return true
+  })())
+  ok('above threshold there is no workable distance', requiredDistance(0.015, 1e-12) === null)
+
+  const shor = ALGORITHMS.find((a) => a.id === 'shor')
+  const est = estimateResources({ p: 0.001, logicalQubits: shor.logical, tGates: shor.t, factoryOverhead: 1.5, cycleUs: 1 })
+  ok('Shor at 0.1% error is estimated in the millions of qubits',
+    est.ok && est.totalQubits > 1e6 && est.totalQubits < 1e8, est.ok ? String(est.totalQubits) : 'failed')
+  ok('the estimate meets the error target it set', est.ok && est.achievedPL <= est.targetPL)
+  ok('total qubits equal logical × per-logical × factory overhead',
+    est.ok && near(est.totalQubits, Math.ceil(shor.logical * est.perLogical * 1.5), 1))
+  ok('factory overhead scales the footprint linearly', (() => {
+    const a = estimateResources({ p: 0.001, logicalQubits: 100, tGates: 1e9, factoryOverhead: 1 })
+    const b = estimateResources({ p: 0.001, logicalQubits: 100, tGates: 1e9, factoryOverhead: 4 })
+    return a.ok && b.ok && near(b.totalQubits / a.totalQubits, 4, 0.02)
+  })())
+  ok('a slower correction cycle lengthens runtime proportionally', (() => {
+    const a = estimateResources({ p: 0.001, logicalQubits: 100, tGates: 1e6, cycleUs: 1 })
+    const b = estimateResources({ p: 0.001, logicalQubits: 100, tGates: 1e6, cycleUs: 100 })
+    return a.ok && b.ok && near(b.seconds / a.seconds, 100, 0.01)
+  })())
+  ok('a bigger algorithm never needs fewer qubits', (() => {
+    const a = estimateResources({ p: 0.001, logicalQubits: 100, tGates: 1e6 })
+    const b = estimateResources({ p: 0.001, logicalQubits: 100, tGates: 1e15 })
+    return a.ok && b.ok && b.totalQubits >= a.totalQubits
+  })())
+  ok('above threshold the estimate refuses rather than returning a number', (() => {
+    const e = estimateResources({ p: 0.02, logicalQubits: 100, tGates: 1e6 })
+    return e.ok === false && e.reason === 'above-threshold'
+  })())
+  ok('every algorithm preset resolves at a realistic error rate',
+    ALGORITHMS.every((a) => estimateResources({ p: 0.0005, logicalQubits: a.logical, tGates: a.t }).ok))
+  ok('algorithm presets are complete and unique',
+    new Set(ALGORITHMS.map((a) => a.id)).size === ALGORITHMS.length &&
+    ALGORITHMS.every((a) => a.name && a.logical > 0 && a.t > 0 && a.note))
+}
+
+group('Quantum content')
+{
+  ok('five modalities, each fully described', MODALITIES.length === 5 && MODALITIES.every((m) =>
+    m.name && m.temp && m.gate && m.coherence && m.fab && m.hard && m.pro && m.con))
+  ok('modality ids are unique', new Set(MODALITIES.map((m) => m.id)).size === MODALITIES.length)
+  ok('the fab comparison covers both sides on every row',
+    FAB_DIFFERENCES.length >= 6 && FAB_DIFFERENCES.every((f) => f.k && f.classical && f.quantum && f.why))
+  ok('shared-process list is populated', SHARED.length >= 5 && SHARED.every((s) => typeof s === 'string' && s.length > 10))
+  ok('threshold is the conventional 1%', THRESHOLD === 0.01)
 }
 
 /* ---------- build output ---------- */
@@ -189,12 +325,14 @@ group('Build output')
       const bundle = readFileSync(join(dist, 'assets', js[0]), 'utf8')
       ok('the fab line content shipped', bundle.includes('Czochralski'))
       ok('the yield models shipped', bundle.includes('Negative binomial') || bundle.includes('negbinom'))
+      ok('the compute tab shipped', bundle.includes('TOPS') || bundle.includes('EOPS'))
+      ok('the quantum tab shipped', bundle.includes('transmon') || bundle.includes('surface code') || bundle.includes('Millikelvin'))
       ok('no stray console.log in the bundle', !/console\.log\(/.test(bundle))
     }
     if (css.length) {
       const sheet = readFileSync(join(dist, 'assets', css[0]), 'utf8')
       // The minifier drops the quotes in attribute selectors, so accept both.
-      ok('all four themes shipped', ['litho', 'wafer', 'glow', 'cleanroom'].every((t) =>
+      ok('all five themes shipped', ['litho', 'wafer', 'glow', 'mk', 'cleanroom'].every((t) =>
         sheet.includes(`data-theme="${t}"`) || sheet.includes(`data-theme=${t}`)))
       ok('reduced motion is respected', sheet.includes('prefers-reduced-motion'))
     }

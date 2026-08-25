@@ -3,6 +3,8 @@ import FabLine from './ui/FabLine.jsx'
 import YieldLab from './ui/YieldLab.jsx'
 import Economics from './ui/Economics.jsx'
 import NodesView from './ui/Nodes.jsx'
+import Compute from './ui/Compute.jsx'
+import Quantum from './ui/Quantum.jsx'
 import Quiz from './ui/Quiz.jsx'
 import { TOUR } from './data/learn.js'
 import { PRODUCTS } from './data/nodes.js'
@@ -12,6 +14,8 @@ const TABS = [
   { id: 'wafer', label: 'Yield lab' },
   { id: 'economics', label: 'Economics' },
   { id: 'nodes', label: 'Nodes' },
+  { id: 'compute', label: 'Compute' },
+  { id: 'quantum', label: 'Quantum' },
   { id: 'quiz', label: 'Quiz' },
 ]
 
@@ -19,6 +23,7 @@ const THEMES = [
   { id: 'litho', label: 'Litho bay' },
   { id: 'wafer', label: 'Wafer' },
   { id: 'glow', label: 'Glow' },
+  { id: 'mk', label: 'Millikelvin' },
   { id: 'cleanroom', label: 'Cleanroom' },
 ]
 
@@ -103,6 +108,8 @@ export default function App() {
         {tab === 'wafer' && <YieldLab cfg={cfg} patch={patch} />}
         {tab === 'economics' && <Economics cfg={cfg} patch={patch} />}
         {tab === 'nodes' && <NodesView />}
+        {tab === 'compute' && <Compute cfg={cfg} patch={patch} />}
+        {tab === 'quantum' && <Quantum />}
         {tab === 'quiz' && <Quiz />}
       </main>
 
@@ -120,9 +127,10 @@ export default function App() {
 
       <footer className="footer">
         <div className="page" style={{ padding: 0 }}>
-          <b>FabSim</b> — an interactive walk through how a semiconductor chip is made, and the arithmetic
-          that decides whether it can be sold. Every number on the yield and economics tabs is computed
-          in the browser from the model you choose; nothing is fetched and nothing is stored.
+          <b>FabSim</b> — an interactive walk through how a semiconductor chip is made, what it delivers
+          once it runs, and the arithmetic that decides whether either is worth doing. Every number on
+          the yield, economics, compute and quantum tabs is computed in the browser from the model you
+          choose; nothing is fetched and nothing is stored.
           <br /><br />
           Process figures, die sizes and wafer prices are public estimates and vary by source. Treat
           them as the right order of magnitude, not as anyone's specification.

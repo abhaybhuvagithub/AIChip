@@ -115,3 +115,26 @@ Worth keeping, because these are the mistakes the prompt exists to prevent:
 - CSS minification strips quotes from attribute selectors, so a bundle check
   for `data-theme="litho"` failed against a correct build. The check now
   accepts both forms — a reminder to test what ships, not what you wrote.
+
+---
+
+## Second pass: compute and quantum
+
+Re-run with the change clause appended. What the bar caught this time:
+
+- The compute model's first version counted MAC lanes from a "fraction of die
+  used for compute" and a per-lane transistor count. It produced roughly nine
+  times the throughput a real accelerator delivers, because it ignored that
+  most of an accelerator die is SRAM, scheduling and memory PHY that the lanes
+  cannot run without. Rewritten to divide *total* transistors by an amortised
+  transistors-per-delivered-MAC figure, calibrated against a published part —
+  and a verify check now pins that calibration so a refactor cannot move it
+  without failing the build.
+- The quantum estimator initially returned a qubit count for physical error
+  rates above the surface code threshold. That is not a large number, it is a
+  category error: above threshold, correction adds more errors than it removes
+  and no qubit count works. It now refuses and the UI explains why, because a
+  plausible-looking number would have been worse than none.
+- Magic-state distillation was going to be omitted for simplicity. It is
+  usually the largest single term in a real estimate, so hiding it would have
+  made the tool quietly wrong. It is a slider with the caveat attached.

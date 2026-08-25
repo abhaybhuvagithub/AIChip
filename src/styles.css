@@ -36,6 +36,16 @@
   --sel: #e8edf4; --shadow: rgba(0,0,0,.55); --chip-bg: rgba(17,22,31,.92);
 }
 
+/* Millikelvin — for the quantum tab. A dilution refrigerator runs colder than
+   deep space, and the palette should say so before the copy does. */
+[data-theme="mk"] {
+  --bg: #05090e; --panel: #0b1119; --panel2: #101823; --border: #1f2d3d;
+  --text: #dfeaf5; --muted: #6f8296; --accent: #4dd6e8; --ok: #31c48d;
+  --warn: #f4b740; --bad: #ff6b8a;
+  --wafer: radial-gradient(circle at 32% 24%, #0e1826 0%, #05090e 74%);
+  --sel: #dfeaf5; --shadow: rgba(0,0,0,.65); --chip-bg: rgba(11,17,25,.93);
+}
+
 [data-theme="cleanroom"] {
   --bg: #f4f5f7; --panel: #ffffff; --panel2: #eef0f4; --border: #d5d9e0;
   --text: #14171d; --muted: #5a6272; --accent: #b8710a; --ok: #178055;

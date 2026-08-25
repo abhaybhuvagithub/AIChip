@@ -9,9 +9,9 @@ export default function Quiz() {
   return (
     <div>
       <div className="eyebrow">Check</div>
-      <h1 className="title">Twelve questions.</h1>
+      <h1 className="title">Eighteen questions.</h1>
       <p className="lede">
-        Everything you need is on the other four tabs. Answers explain themselves as soon as you pick one —
+        Everything you need is on the other six tabs. Answers explain themselves as soon as you pick one —
         there is nothing to submit.
       </p>
 
@@ -51,9 +51,9 @@ export default function Quiz() {
             {score} / {QUIZ.length}
           </div>
           <p className="small" style={{ marginTop: 8 }}>
-            {score >= 10
+            {score >= 15
               ? 'You could hold your own in a yield review. The remaining gap is which lever to pull first, and that comes from the economics tab.'
-              : score >= 6
+              : score >= 9
                 ? 'The mechanism is there. Go back through the fab line with the run button — the loop structure is what most of the misses have in common.'
                 : 'Worth a second pass. Start with the fab line, then the yield lab, then come back here.'}
           </p>
