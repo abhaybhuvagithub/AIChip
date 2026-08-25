@@ -108,7 +108,7 @@ export default function Business({ cfg, goTab }) {
         {PHASES.map((x) => (
           <button key={x.id} className={`bizphase ${phase === x.id ? 'on' : ''}`}
             style={{ flex: x.months }} onClick={() => setPhase(x.id)} aria-pressed={phase === x.id}>
-            <span className="bizphase-n">{x.name}</span>
+            <span className="bizphase-n iconrow"><Icon name={x.icon} size={17} />{x.name}</span>
             <span className="bizphase-m">{x.months} mo · {fmt.pct(x.cashShare, 0)}</span>
           </button>
         ))}
@@ -124,7 +124,9 @@ export default function Business({ cfg, goTab }) {
       <div className="detail" style={{ marginTop: 14 }}>
         <div className="card">
           <div className="eyebrow">{p.months} months · {fmt.pct(p.cashShare, 0)} of the budget</div>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 24, letterSpacing: '-.02em', marginTop: 4 }}>{p.name}</h3>
+          <h3 className="iconrow" style={{ fontFamily: 'var(--font-display)', fontSize: 24, letterSpacing: '-.02em', marginTop: 6 }}>
+            <Icon name={p.icon} size={30} style={{ color: 'var(--accent)' }} title={p.name} />{p.name}
+          </h3>
           <p style={{ marginTop: 10 }}>{p.what}</p>
         </div>
         <div className="card">

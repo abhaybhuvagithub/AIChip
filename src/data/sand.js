@@ -12,7 +12,7 @@
 
 export const CHAIN = [
   {
-    id: 'quartzite',
+    id: 'quartzite', icon: 'quartzite',
     name: 'Quartzite',
     formula: 'SiO₂',
     one: 'A rock that is already a quarter silicon by weight.',
@@ -26,7 +26,7 @@ export const CHAIN = [
     stat: '~28% of the Earth\'s crust by mass',
   },
   {
-    id: 'mgsi',
+    id: 'mgsi', icon: 'furnace',
     name: 'Carbothermic reduction',
     formula: 'SiO₂ + 2C → Si + 2CO',
     one: 'Burn the oxygen off with carbon, at nineteen hundred degrees.',
@@ -40,7 +40,7 @@ export const CHAIN = [
     stat: '~12 kWh per kg — the single most energy-hungry step by mass',
   },
   {
-    id: 'tcs',
+    id: 'tcs', icon: 'distill',
     name: 'Trichlorosilane',
     formula: 'Si + 3HCl → SiHCl₃ + H₂',
     one: 'Turn the silicon into a liquid you can distil.',
@@ -55,7 +55,7 @@ export const CHAIN = [
     stat: 'Boiling point 31.8 °C — the reason this step exists',
   },
   {
-    id: 'poly',
+    id: 'poly', icon: 'siemens',
     name: 'Siemens deposition',
     formula: 'SiHCl₃ + H₂ → Si + 3HCl',
     one: 'Grow it back as a solid, one atom at a time, on a hot rod.',
@@ -69,7 +69,7 @@ export const CHAIN = [
     stat: '9N purity — 1 impurity atom per 1,000,000,000',
   },
   {
-    id: 'cz',
+    id: 'cz', icon: 'puller',
     name: 'Czochralski pull',
     formula: 'Si (poly) → Si (single crystal)',
     one: 'Melt it, dip a seed, and pull one perfect lattice out.',
@@ -83,7 +83,7 @@ export const CHAIN = [
     stat: '~2 m long, ~265 kg, one crystal',
   },
   {
-    id: 'slice',
+    id: 'slice', icon: 'saw',
     name: 'Slice and polish',
     formula: 'Boule → wafers',
     one: 'Cut it into mirrors flat to a few tens of nanometres.',
@@ -97,7 +97,7 @@ export const CHAIN = [
     stat: '300 mm wafer: 127 g, 775 µm thick',
   },
   {
-    id: 'fab',
+    id: 'fab', icon: 'foundry',
     name: 'The fab',
     formula: 'Wafer → patterned wafer',
     one: 'Seven hundred steps, three months, no hands.',
@@ -111,7 +111,7 @@ export const CHAIN = [
     stat: '~730 kWh per wafer at the leading edge',
   },
   {
-    id: 'die',
+    id: 'die', icon: 'die',
     name: 'Die',
     formula: 'Wafer → chips',
     one: 'A gram of rock, three months ago.',

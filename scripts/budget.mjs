@@ -31,12 +31,14 @@ const dist = join(root, 'dist')
 //           histogram, and speed colouring on the wafer map, ~9 kB)
 //   156 kB  the business tab (NRE build-up, break-even, ramp and cash-flow
 //           model with a lifetime chart, ~7 kB)
+//   166 kB  the detailed icon set (60 technical drawings replacing 30 outline
+//           glyphs, rolled out across every tab, ~5 kB)
 // Each rise is a feature that bought the bytes, named in the commit.
 const BUDGET = {
-  'js.gzip': 156 * 1024,
+  'js.gzip': 166 * 1024,
   'css.gzip': 7 * 1024,
   'html.raw': 6 * 1024,
-  'total.gzip': 164 * 1024,
+  'total.gzip': 174 * 1024,
 }
 
 let fail = 0

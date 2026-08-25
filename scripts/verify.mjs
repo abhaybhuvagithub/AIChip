@@ -980,13 +980,28 @@ group('Icons')
   const iconSrc = readFileSync(join(root, 'src/ui/Icon.jsx'), 'utf8')
   const names = [...iconSrc.matchAll(/^ {2}([a-z][a-zA-Z0-9]*): \(<>/gm)].map((m) => m[1])
 
-  ok('the icon set is populated', names.length >= 28, String(names.length))
+  ok('the icon set is populated', names.length >= 55, String(names.length))
   ok('icon keys are unique', new Set(names).size === names.length)
   ok('the set covers packages, function, IP and industry', (() => {
-    const need = ['die', 'qfp', 'bga', 'chiplet', 'stack', 'wafer', 'waferscale', 'interposer',
+    const need = [
+      // packages
+      'die', 'qfp', 'bga', 'chiplet', 'stack', 'wafer', 'waferscale', 'interposer', 'hybrid',
+      // function
       'cpu', 'gpu', 'npu', 'soc', 'mcu', 'dram', 'nand', 'power',
-      'ipcore', 'ipgpu', 'ipnpu', 'ipmem', 'ipphy', 'ipnoc', 'ipsec', 'iplicense',
-      'eda', 'foundry', 'equipment', 'materials', 'osat']
+      // IP
+      'ipcore', 'ipgpu', 'ipnpu', 'ipdsp', 'ipmem', 'ipphy', 'ipnoc', 'ipsec', 'ippll', 'ipisp', 'iplicense',
+      // fab tools
+      'puller', 'saw', 'furnace', 'wetbench', 'coater', 'scanner', 'etcher', 'implanter',
+      'depo', 'cmp', 'metal', 'metrology', 'prober', 'dicer', 'bonder', 'tester',
+      // material chain
+      'quartzite', 'distill', 'siemens',
+      // transistor architectures
+      'planar', 'finfet', 'nanosheet', 'forksheet', 'cfet', 'twod',
+      // quantum
+      'transmon', 'iontrap', 'atomarray', 'spinqubit', 'photonic',
+      // industry
+      'eda', 'fabless', 'foundry', 'equipment', 'materials', 'osat',
+    ]
     return need.every((n) => names.includes(n))
   })())
 
@@ -1006,20 +1021,53 @@ group('Icons')
   // Every icon referenced in data must exist. A typo would render an invisible
   // gap that nothing else would catch.
   const refs = []
-  for (const f of ['data/nodes.js', 'data/silicon.js', 'data/value-chain.js']) {
+  const DATA = ['data/nodes.js', 'data/silicon.js', 'data/value-chain.js', 'data/process.js',
+    'data/sand.js', 'data/arch3d.js', 'lib/quantum.js', 'lib/business.js']
+  for (const f of DATA) {
     const t = readFileSync(join(root, 'src', f), 'utf8')
     for (const m of t.matchAll(/icon: '([a-zA-Z0-9]+)'/g)) refs.push([f, m[1]])
   }
-  ok('data files reference icons by name', refs.length >= 35, String(refs.length))
+  ok('data files reference icons by name', refs.length >= 80, String(refs.length))
   ok('every referenced icon exists in the set',
     refs.every(([, n]) => names.includes(n)),
     refs.filter(([, n]) => !names.includes(n)).map(([f, n]) => `${f}:${n}`).join(', '))
   ok('no unicode glyph is left standing in for an icon', (() => {
-    for (const f of ['data/nodes.js', 'data/silicon.js', 'data/value-chain.js']) {
+    for (const f of DATA) {
       const t = readFileSync(join(root, 'src', f), 'utf8')
       if (/icon: '[^a-zA-Z]/.test(t)) return false
     }
+    // The fab line used a `glyph:` field of unicode characters before this.
+    if (/glyph: '/.test(readFileSync(join(root, 'src/data/process.js'), 'utf8'))) return false
     return true
+  })())
+  ok('every fab-line module has a tool icon', (() => {
+    const t = readFileSync(join(root, 'src/data/process.js'), 'utf8')
+    return (t.match(/^ {4}id: '/gm) || []).length === (t.match(/icon: '/g) || []).length
+  })())
+  ok('every transistor architecture has a cross-section icon', (() => {
+    const t = readFileSync(join(root, 'src/data/arch3d.js'), 'utf8')
+    return ['planar', 'finfet', 'nanosheet', 'forksheet', 'cfet', 'twod']
+      .every((n) => t.includes(`icon: '${n}'`))
+  })())
+  ok('every quantum modality has an icon', (() => {
+    const t = readFileSync(join(root, 'src/lib/quantum.js'), 'utf8')
+    return (t.match(/id: '[a-z]+', icon: '/g) || []).length >= 5
+  })())
+  ok('every business phase has an icon', (() => {
+    const t = readFileSync(join(root, 'src/lib/business.js'), 'utf8')
+    return (t.match(/id: '[a-z]+', icon: '/g) || []).length >= 8
+  })())
+  // Detail is the point of this pass: a pictogram is one or two shapes, a
+  // technical drawing is several. Assert the set did not regress to outlines.
+  ok('icons are drawn at technical detail, not as pictograms', (() => {
+    const bodies = iconSrc.split(/^ {2}[a-z][a-zA-Z0-9]*: \(<>/gm).slice(1)
+    const shapes = bodies.map((b) => (b.match(/<(rect|circle|path|line|ellipse)/g) || []).length)
+    const avg = shapes.reduce((n, v) => n + v, 0) / shapes.length
+    return avg >= 4
+  })(), (() => {
+    const bodies = iconSrc.split(/^ {2}[a-z][a-zA-Z0-9]*: \(<>/gm).slice(1)
+    const shapes = bodies.map((b) => (b.match(/<(rect|circle|path|line|ellipse)/g) || []).length)
+    return (shapes.reduce((n, v) => n + v, 0) / shapes.length).toFixed(1) + ' shapes/icon'
   })())
   ok('every real part carries an icon', (() => {
     const t = readFileSync(join(root, 'src/data/silicon.js'), 'utf8')

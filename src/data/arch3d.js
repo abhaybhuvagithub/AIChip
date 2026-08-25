@@ -23,7 +23,7 @@ export const STATUS = {
 
 export const ARCH = [
   {
-    id: 'planar',
+    id: 'planar', icon: 'planar',
     name: 'Planar MOSFET',
     era: '1960s–2011',
     gated: 1,
@@ -36,7 +36,7 @@ export const ARCH = [
     cost: 'None — this is the baseline everything else is measured against.',
   },
   {
-    id: 'finfet',
+    id: 'finfet', icon: 'finfet',
     name: 'FinFET',
     era: '2011–2024',
     gated: 3,
@@ -49,7 +49,7 @@ export const ARCH = [
     cost: 'Fin patterning needs multiple exposures below about 40 nm pitch, and fin height uniformity becomes a first-order yield concern.',
   },
   {
-    id: 'nanosheet',
+    id: 'nanosheet', icon: 'nanosheet',
     name: 'Gate-all-around nanosheet',
     era: '2022–',
     gated: 4,
@@ -62,7 +62,7 @@ export const ARCH = [
     cost: 'The inner spacer and channel release steps are among the hardest in any production flow. You are etching a sacrificial layer out from between suspended sheets a few nanometres apart, without touching the sheets.',
   },
   {
-    id: 'forksheet',
+    id: 'forksheet', icon: 'forksheet',
     name: 'Forksheet',
     era: 'Roadmap',
     gated: 4,
@@ -75,7 +75,7 @@ export const ARCH = [
     cost: 'You give up part of the gate wrap in exchange for the spacing. Imec has proposed an outer-wall variant to extend nanosheet-based scaling to around the A10 node before CFET becomes necessary.',
   },
   {
-    id: 'cfet',
+    id: 'cfet', icon: 'cfet',
     name: 'CFET',
     era: 'Roadmap',
     gated: 4,
@@ -88,7 +88,7 @@ export const ARCH = [
     cost: 'Enormous. TSMC reported the first fully functional monolithic CFET inverter at 48 nm gate pitch at IEDM 2024, with backside contacts. Getting power and signal to a device buried under another device is the central problem, and it is why CFET and backside power arrive together.',
   },
   {
-    id: '2d',
+    id: '2d', icon: 'twod',
     name: '2D-material channel',
     era: 'Research',
     gated: 4,
@@ -119,7 +119,7 @@ export const BACKSIDE = {
 // The third axis: stack whole circuits, not just devices.
 export const STACKING = [
   {
-    id: 'package',
+    id: 'package', icon: 'interposer',
     name: 'Package-level (2.5D)',
     what: 'Separate dies placed side by side on a silicon interposer. Not stacking at all, strictly, but it is where the industry started going three-dimensional.',
     pitch: '~40–100 µm bumps',
@@ -127,7 +127,7 @@ export const STACKING = [
     note: 'Every large AI accelerator does this today.',
   },
   {
-    id: 'microbump',
+    id: 'microbump', icon: 'stack',
     name: '3D microbump',
     what: 'Dies stacked vertically and joined by solder microbumps, with through-silicon vias carrying signals through the upper die.',
     pitch: '~25–40 µm',
@@ -135,7 +135,7 @@ export const STACKING = [
     note: 'How HBM stacks eight to twelve DRAM dies.',
   },
   {
-    id: 'hybrid',
+    id: 'hybrid', icon: 'hybrid',
     name: 'Hybrid bonding',
     what: 'Copper pads on two dies are pressed into direct contact and annealed until the copper fuses. No solder, no bump, no gap.',
     pitch: '~1–10 µm, heading below 1 µm',
@@ -143,7 +143,7 @@ export const STACKING = [
     note: 'A thousand times the connection density of microbumps. Stacked cache and the densest 3D parts use it.',
   },
   {
-    id: 'sequential',
+    id: 'sequential', icon: 'cfet',
     name: 'Sequential (monolithic) 3D',
     what: 'The upper tier of transistors is built directly on top of the lower tier, on the same wafer, rather than bonded from a second wafer.',
     pitch: 'Contact pitch — effectively unlimited density',

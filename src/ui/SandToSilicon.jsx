@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { CHAIN, AUTOMATION, WHY_NO_HUMANS } from '../data/sand.js'
 import { traceBack, nines, impurityPpb, grams } from '../lib/chain.js'
 import { computeRun, fmt } from '../lib/fab.js'
+import Icon from './Icon.jsx'
 
 const STEP_MS = 3600
 
@@ -82,7 +83,7 @@ export default function SandToSilicon({ cfg }) {
             onClick={() => go(n)} aria-current={n === i} aria-label={c.name}>
             <div className="link-fill" style={{ width: n < i ? '100%' : n === i ? `${progress * 100}%` : '0%' }} />
             <span className="link-n">{String(n + 1).padStart(2, '0')}</span>
-            <span className="link-nm">{c.name}</span>
+            <span className="link-nm iconrow"><Icon name={c.icon} size={18} />{c.name}</span>
             <span className="link-p">{nines(c.purity)}</span>
           </button>
         ))}
@@ -119,7 +120,7 @@ export default function SandToSilicon({ cfg }) {
       <div className="detail" style={{ marginTop: 14 }}>
         <div className="card">
           <div className="eyebrow">Stage {String(i + 1).padStart(2, '0')} · {s.temp}</div>
-          <h3>{s.name}</h3>
+          <h3 className="iconrow"><Icon name={s.icon} size={34} style={{ color: 'var(--accent)' }} title={s.name} />{s.name}</h3>
           <div className="one" style={{ fontFamily: 'var(--font-mono)' }}>{s.formula}</div>
           <p style={{ color: 'var(--accent)', fontSize: 18.5, marginBottom: 12 }}>{s.one}</p>
           <p>{s.what}</p>

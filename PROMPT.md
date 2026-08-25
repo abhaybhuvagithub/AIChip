@@ -640,3 +640,30 @@ They were placeholders that had quietly become permanent.
   renders an invisible gap that no visual review catches. Verify resolves every
   `icon:` in every data file against the set; I typo'd one to confirm it named
   the file and the bad key.
+
+---
+
+## Nineteenth pass: icons, in detail
+
+The previous set was thirty simple outlines. Adequate, and not what the subject
+deserves — a chip package has real structure and drawing it as a square with
+dots throws that away.
+
+- **Draw the thing, do not symbolise it.** A BGA is now a cross-section:
+  substrate, die, bond wires arcing to the die edge, mould cap, solder balls
+  underneath. A 2.5D interposer shows three distinct bump pitches, because that
+  is the entire point of a 2.5D package. Hybrid bonding is two dies with a
+  single seam and no solder at all. Someone who knows packages should recognise
+  each instantly; someone who does not should still read the shape.
+- **The transistor icons carry an argument.** Planar shows the gate on one face,
+  FinFET wrapping three, nanosheet wrapping four, forksheet with its dielectric
+  wall, CFET with n stacked over p. The whole roadmap is legible from six icons
+  in a row, which no amount of prose achieves as quickly.
+- **Coverage, not decoration.** 64 icons now, and every unicode glyph on the
+  site is gone: sixteen fab tool types on the fab-line modules and the travel
+  path, the material chain, the quantum modalities, the business phases. A
+  `glyph:` field of unicode characters had survived twelve passes.
+- **Check the property that matters.** A check that icons *exist* would have
+  passed before this pass and after it. So the suite now asserts an average of
+  at least four drawn shapes per icon — a direct measure of the thing that was
+  actually improved, and one that fails if someone later simplifies them back.

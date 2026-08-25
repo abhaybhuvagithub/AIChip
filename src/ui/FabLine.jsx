@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { PROCESS, STAGES, CYCLE } from '../data/process.js'
+import Icon from './Icon.jsx'
 
 export default function FabLine() {
   const [sel, setSel] = useState(PROCESS[0].id)
@@ -61,7 +62,9 @@ export default function FabLine() {
             aria-pressed={sel === s.id}
           >
             <div className="idx">{String(i + 1).padStart(2, '0')}</div>
-            <div className="glyph" style={{ color: STAGES[s.stage].hue }}>{s.glyph}</div>
+            <div className="glyph" style={{ color: STAGES[s.stage].hue }}>
+              <Icon name={s.icon} size={30} />
+            </div>
             <div className="nm">{s.name}</div>
             <div className="stg" style={{ color: STAGES[s.stage].hue }}>{STAGES[s.stage].label}</div>
           </button>
@@ -73,7 +76,10 @@ export default function FabLine() {
           <div className="eyebrow" style={{ color: STAGES[step.stage].hue }}>
             Step {String(idx + 1).padStart(2, '0')} · {STAGES[step.stage].label}
           </div>
-          <h3>{step.name}</h3>
+          <h3 className="iconrow">
+            <Icon name={step.icon} size={34} style={{ color: STAGES[step.stage].hue }} title={step.name} />
+            {step.name}
+          </h3>
           <div className="one">{step.one}</div>
           <p>{step.what}</p>
           <p className="phys">{step.physics}</p>

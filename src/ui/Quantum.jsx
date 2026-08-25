@@ -4,6 +4,7 @@ import {
   THRESHOLD, ALGORITHMS, MODALITIES, FAB_DIFFERENCES, SHARED,
 } from '../lib/quantum.js'
 import { fmt } from '../lib/fab.js'
+import Icon from './Icon.jsx'
 
 function dur(s) {
   if (!Number.isFinite(s)) return '—'
@@ -200,13 +201,15 @@ export default function Quantum() {
       <h2 className="sec">Five ways to build one</h2>
       <div className="row" style={{ marginBottom: 12 }}>
         {MODALITIES.map((x) => (
-          <button key={x.id} className={`btn ${modality === x.id ? 'active' : ''}`} onClick={() => setModality(x.id)}>{x.name}</button>
+          <button key={x.id} className={`btn iconrow ${modality === x.id ? 'active' : ''}`} onClick={() => setModality(x.id)}>
+            <Icon name={x.icon} size={20} />{x.name}
+          </button>
         ))}
       </div>
       <div className="detail">
         <div className="card">
           <div className="eyebrow">How it is made</div>
-          <h3>{m.name}</h3>
+          <h3 className="iconrow"><Icon name={m.icon} size={32} style={{ color: 'var(--accent)' }} title={m.name} />{m.name}</h3>
           <p style={{ marginTop: 10 }}>{m.fab}</p>
           <p className="phys">{m.hard}</p>
         </div>

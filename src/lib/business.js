@@ -41,49 +41,49 @@ export const NODE_COSTS = [
  */
 export const PHASES = [
   {
-    id: 'concept', name: 'Concept and funding', months: 3, cashShare: 0.02,
+    id: 'concept', icon: 'iplicense', name: 'Concept and funding', months: 3, cashShare: 0.02,
     what: 'Someone decides a chip should exist. Market sizing, a rough architecture, and enough of a story to raise money or win internal approval.',
     risk: 'The market you sized takes three to four years to reach. You are forecasting demand for a product that does not exist against competitors who have not announced yet.',
     kills: 'Most ideas die here, and cheaply, which is the one mercy in the whole process.',
   },
   {
-    id: 'spec', name: 'Specification and architecture', months: 6, cashShare: 0.06,
+    id: 'spec', icon: 'eda', name: 'Specification and architecture', months: 6, cashShare: 0.06,
     what: 'Performance modelling, power budgets, the memory hierarchy, the interfaces. Which IP to license and which to build — Arm cores, memory PHYs, SerDes, controllers.',
     risk: 'Architecture decisions here are effectively irreversible by month eighteen. Getting the memory bandwidth ratio wrong is not fixable in software.',
     kills: 'Rare, but a competitor announcing something better can end a program at this stage.',
   },
   {
-    id: 'rtl', name: 'RTL design and verification', months: 14, cashShare: 0.42,
+    id: 'rtl', icon: 'eda', name: 'RTL design and verification', months: 14, cashShare: 0.42,
     what: 'Writing the logic, and then proving it. Verification is the majority of the effort and the majority of the headcount — simulation, formal methods, emulation on dedicated hardware.',
     risk: 'A functional bug that escapes to silicon costs a respin. Verification is never finished, only stopped.',
     kills: 'Schedule slips here compound: the foundry slot, the customer design-in window and the product launch are all downstream.',
   },
   {
-    id: 'physical', name: 'Physical design and signoff', months: 8, cashShare: 0.22,
+    id: 'physical', icon: 'fabless', name: 'Physical design and signoff', months: 8, cashShare: 0.22,
     what: 'Floorplanning, place and route, clock tree synthesis, timing closure across process corners, then design rule and layout-versus-schematic signoff against the foundry deck.',
     risk: 'Timing closure at the leading edge is an iterative grind with no guaranteed end date, and every corner you must close for multiplies the runs.',
     kills: 'Programs have been cancelled for failing to close timing at the frequency the product was sold on.',
   },
   {
-    id: 'tapeout', name: 'Tapeout and mask set', months: 1, cashShare: 0.14,
+    id: 'tapeout', icon: 'wafer', name: 'Tapeout and mask set', months: 1, cashShare: 0.14,
     what: 'The database goes to the foundry and the mask set is written — sixty to eighty reticles, each a precision object in its own right. This is a single, enormous, non-refundable payment.',
     risk: 'The mask bill is the most irreversible cheque in the process. Once written, a design change means writing it again.',
     kills: 'Nothing dies here. This is where dying becomes expensive.',
   },
   {
-    id: 'silicon', name: 'First silicon and bring-up', months: 4, cashShare: 0.06,
+    id: 'silicon', icon: 'prober', name: 'First silicon and bring-up', months: 4, cashShare: 0.06,
     what: 'Three months after tapeout, wafers come back. The lab powers up the first part, and finds out what verification missed. Debug, characterisation, and the decision on whether a respin is needed.',
     risk: 'A metal-only respin touches a few layers and is comparatively cheap. A base-layer respin is the full mask cost and three more months.',
     kills: 'This is where a program discovers whether it is a product or an expensive lesson.',
   },
   {
-    id: 'qual', name: 'Qualification', months: 6, cashShare: 0.05,
+    id: 'qual', icon: 'tester', name: 'Qualification', months: 6, cashShare: 0.05,
     what: 'Reliability testing to standard: high-temperature operating life, temperature cycling, humidity stress, ESD and latch-up. Automotive adds AEC-Q100 and roughly another year.',
     risk: 'A failure at qual can mean a design change after you have already committed to volume.',
     kills: 'Rarely fatal, frequently late.',
   },
   {
-    id: 'ramp', name: 'Production ramp', months: 6, cashShare: 0.03,
+    id: 'ramp', icon: 'foundry', name: 'Production ramp', months: 6, cashShare: 0.03,
     what: 'Yield learning, capacity booking, and the point where working capital hurts most: wafers are paid for three to four months before the parts they become can be sold.',
     risk: 'Booked capacity is take-or-pay. Forecast high and you own inventory; forecast low and you cannot supply a design win you fought for.',
     kills: 'Cash. Companies with a working product have failed at exactly this step.',

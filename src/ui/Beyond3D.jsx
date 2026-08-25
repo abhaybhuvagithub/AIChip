@@ -3,6 +3,7 @@ import { ARCH, STATUS, BACKSIDE, STACKING, BEYOND_CMOS, THERMAL_LIMITS } from '.
 import { areaReduction, stackThermal } from '../lib/thermal.js'
 import { fmt } from '../lib/fab.js'
 import { DEFAULT_COMPUTE, watts } from '../lib/compute.js'
+import Icon from './Icon.jsx'
 
 /**
  * Cross-sections, drawn rather than photographed.
@@ -117,7 +118,9 @@ export default function Beyond3D({ cfg }) {
       <h2 className="sec">The ladder</h2>
       <div className="row" style={{ marginBottom: 12 }}>
         {ARCH.map((x) => (
-          <button key={x.id} className={`btn ${sel === x.id ? 'active' : ''}`} onClick={() => setSel(x.id)}>{x.name}</button>
+          <button key={x.id} className={`btn iconrow ${sel === x.id ? 'active' : ''}`} onClick={() => setSel(x.id)}>
+            <Icon name={x.icon} size={20} />{x.name}
+          </button>
         ))}
       </div>
 
@@ -206,7 +209,7 @@ export default function Beyond3D({ cfg }) {
           <tbody>
             {STACKING.map((s) => (
               <tr key={s.id}>
-                <td><b>{s.name}</b></td>
+                <td><b className="iconrow"><Icon name={s.icon} size={22} />{s.name}</b></td>
                 <td className="num" style={{ color: 'var(--accent)' }}>{s.pitch}</td>
                 <td><span className="badge" style={{ color: STATUS[s.status].hue, borderColor: STATUS[s.status].hue }}>{STATUS[s.status].label}</span></td>
                 <td className="small">{s.what}</td>

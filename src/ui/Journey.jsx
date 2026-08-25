@@ -2,8 +2,21 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { buildJourney, journeyTotals, PHASES } from '../lib/journey.js'
 import { fmt } from '../lib/fab.js'
 import { speak, stopSpeaking, canSpeak } from '../lib/speech.js'
+import Icon from './Icon.jsx'
 
 const STEP_MS = 1400
+
+// The journey's step keys are finer-grained than the fab line's modules, so
+// they get their own mapping rather than reusing one that half-fits.
+const JOURNEY_ICON = {
+  quartzite: 'quartzite', mgsi: 'furnace', tcs: 'distill', poly: 'siemens',
+  cz: 'puller', slice: 'saw',
+  clean: 'wetbench', coat: 'coater', litho: 'scanner', develop: 'coater',
+  etch: 'etcher', implant: 'implanter', anneal: 'furnace', depo: 'depo',
+  cmp: 'cmp', strip: 'etcher', metro: 'metrology', inspect: 'metrology',
+  sort: 'prober', grind: 'saw', dice: 'dicer', attach: 'bonder',
+  bond: 'bonder', mold: 'bga', final: 'tester', mark: 'qfp',
+}
 
 export default function Journey({ narrate, setNarrate }) {
   const steps = useMemo(() => buildJourney(70), [])
@@ -112,7 +125,10 @@ export default function Journey({ narrate, setNarrate }) {
             </div>
             <span className="badge">{s.temp} °C</span>
           </div>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 26, letterSpacing: '-.02em', marginTop: 4 }}>{s.name}</h3>
+          <h3 className="iconrow" style={{ fontFamily: 'var(--font-display)', fontSize: 26, letterSpacing: '-.02em', marginTop: 6 }}>
+            <Icon name={JOURNEY_ICON[s.key] || 'die'} size={32} style={{ color: PHASES[s.phase].hue }} title={s.name} />
+            {s.name}
+          </h3>
           <div className="one" style={{ fontFamily: 'var(--font-mono)', fontSize: 16.5 }}>{s.tool}</div>
           <p style={{ marginTop: 10 }}>{s.what}</p>
           {s.levelLabel && <span className="badge on">{s.levelLabel}</span>}
