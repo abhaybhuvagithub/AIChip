@@ -183,6 +183,7 @@ group('Content')
   ok('quiz covers the material chain', QUIZ.some((q) => /purity|distill|polysilicon|particle/i.test(q.q)))
   ok('quiz covers real silicon', QUIZ.some((q) => /Cerebras|MI300X|wafer-scale/i.test(q.q)))
   ok('quiz covers the value chain', QUIZ.some((q) => /Arm|EUV scanners|Terafab/i.test(q.q)))
+  ok('quiz covers speed binning', QUIZ.some((q) => /bin|slow dies|blended/i.test(q.q)))
   ok('quiz covers clock frequency', QUIZ.some((q) => /GHz|THz|clock/i.test(q.q)))
   ok('quiz covers the underlying physics',
     QUIZ.some((q) => /subthreshold|60 mV|stochastic|tunnel/i.test(q.q)))
@@ -190,7 +191,7 @@ group('Content')
     QUIZ.some((q) => /X-factor|cycle time|bottleneck|scanners/i.test(q.q)))
   ok('quiz covers 3D transistors and the thermal wall',
     QUIZ.some((q) => /CFET|backside power/i.test(q.q)) && QUIZ.some((q) => /3D memory|3D logic/i.test(q.q)))
-  ok('quiz covers compute and quantum', QUIZ.length >= 39 &&
+  ok('quiz covers compute and quantum', QUIZ.length >= 42 &&
     QUIZ.some((q) => /FP4|sparsity|precision/i.test(q.q)) &&
     QUIZ.some((q) => /qubit|surface code|threshold/i.test(q.q)))
 }
@@ -972,6 +973,129 @@ group('Physics')
     P.LITHO.every((l, i) => i === 0 || l.year > P.LITHO[i - 1].year))
 }
 
+/* ---------- speed binning ---------- */
+group('Speed binning')
+{
+  const B = await import(join(root, 'src/lib/binning.js'))
+  const cfgB = { waferDia: 300, dieX: 10.5, dieY: 10.5, scribe: 0.08, edgeExclusion: 3 }
+  const geo = layoutDies(cfgB)
+  const dead = killDies(geo.dies, scatterDefects({ waferDia: 300, d0: 0.07, alpha: 2.5, seed: 7 }))
+  const F = (o = {}) => B.dieFrequencies(geo.dies, 300, { fBase: 5, seed: 7, ...o })
+  const freqs = F()
+
+  ok('a frequency is produced for every die', freqs.length === geo.dies.length)
+  ok('every frequency is finite and positive', freqs.every((f) => Number.isFinite(f) && f > 0))
+  ok('the same seed gives the same wafer', JSON.stringify(F()) === JSON.stringify(F()))
+  ok('a different seed gives a different wafer', JSON.stringify(F({ seed: 9 })) !== JSON.stringify(freqs))
+
+  // The three variation sources must each do what they claim, separately.
+  ok('zero variation gives one identical frequency everywhere', (() => {
+    const f = F({ dieSigma: 0, radialAmp: 0 })
+    return Math.max(...f) - Math.min(...f) < 1e-9
+  })())
+  ok('die-to-die spread widens the distribution', (() => {
+    const tight = F({ dieSigma: 0.005, radialAmp: 0 })
+    const loose = F({ dieSigma: 0.08, radialAmp: 0 })
+    const span = (a) => Math.max(...a) - Math.min(...a)
+    return span(loose) > span(tight) * 5
+  })())
+  ok('the radial term actually depends on radius', (() => {
+    const f = F({ dieSigma: 0, radialAmp: 0.2, radialSign: -1 })
+    const R = 150
+    let inner = [], outer = []
+    geo.dies.forEach((d, i) => {
+      const r = Math.hypot(d.x + d.w / 2, d.y + d.h / 2) / R
+      if (r < 0.3) inner.push(f[i]); else if (r > 0.85) outer.push(f[i])
+    })
+    const avg = (a) => a.reduce((n, v) => n + v, 0) / a.length
+    return inner.length && outer.length && avg(inner) > avg(outer)
+  })())
+  ok('flipping the radial sign flips which ring is slow', (() => {
+    const R = 150
+    const pick = (sign) => {
+      const f = F({ dieSigma: 0, radialAmp: 0.2, radialSign: sign })
+      let inner = [], outer = []
+      geo.dies.forEach((d, i) => {
+        const r = Math.hypot(d.x + d.w / 2, d.y + d.h / 2) / R
+        if (r < 0.3) inner.push(f[i]); else if (r > 0.85) outer.push(f[i])
+      })
+      const avg = (a) => a.reduce((n, v) => n + v, 0) / a.length
+      return avg(inner) - avg(outer)
+    }
+    return pick(-1) > 0 && pick(1) < 0
+  })())
+  ok('nominal clock scales the whole distribution', (() => {
+    const a = F({ fBase: 5, dieSigma: 0, radialAmp: 0 })[0]
+    const b = F({ fBase: 10, dieSigma: 0, radialAmp: 0 })[0]
+    return near(b / a, 2, 1e-9)
+  })())
+
+  // The within-die path term. Its whole point is that it is gentle, which is
+  // the contrast with yield — assert that rather than just that it exists.
+  ok('the worst-path penalty grows with area',
+    B.worstPathPenalty(600) > B.worstPathPenalty(100))
+  ok('the penalty grows only slowly — six times the area costs under 2%', (() => {
+    const rel = B.worstPathPenalty(600) / B.worstPathPenalty(100)
+    return rel > 1 && rel < 1.02
+  })(), (B.worstPathPenalty(600) / B.worstPathPenalty(100)).toFixed(4))
+  ok('the reference area normalises to unity',
+    near(B.worstPathPenalty(B.REF_AREA_MM2) / B.worstPathPenalty(B.REF_AREA_MM2), 1, 1e-12))
+  // The bug this caught first time round: an unnormalised penalty pushed every
+  // die below every bin, which looked plausible and was nonsense.
+  ok('a nominal die lands near the nominal clock, not 10% under', (() => {
+    const f = B.dieFrequencies(geo.dies, 300, { fBase: 5, dieSigma: 0, radialAmp: 0, seed: 7 })
+    return near(f[0], 5, 0.06)
+  })(), B.dieFrequencies(geo.dies, 300, { fBase: 5, dieSigma: 0, radialAmp: 0, seed: 7 })[0].toFixed(3))
+
+  ok('bins are ordered and priced consistently',
+    B.BINS.every((b, i) => i === 0 || b.min < B.BINS[i - 1].min) &&
+    B.BINS.every((b, i) => i === 0 || b.priceMult < B.BINS[i - 1].priceMult))
+  ok('binFor picks the right bin', (() => {
+    const top = B.binFor(5.4, 5), std = B.binFor(5.0, 5), low = B.binFor(4.4, 5), none = B.binFor(3.0, 5)
+    return top.id === 'x' && std.id === 'a' && low.id === 'c' && none === null
+  })())
+
+  const w = B.binWafer({ freqs, dead, fBase: 5, asp: 120 })
+  ok('binned dies plus too-slow equals the good dies',
+    B.BINS.reduce((n, b) => n + w.counts[b.id], 0) + w.tooSlow === w.good)
+  ok('good dies plus dead equals the gross die count', w.good + dead.size === geo.dies.length)
+  ok('a realistic spread populates more than one bin',
+    B.BINS.filter((b) => w.counts[b.id] > 0).length >= 3,
+    B.BINS.map((b) => `${b.id}:${w.counts[b.id]}`).join(' '))
+  ok('no die is binned as both dead and sellable',
+    w.perDie.every((b, i) => !(dead.has(i) && b)))
+  ok('blended price sits between the cheapest and dearest bin',
+    w.blendedAsp > 120 * B.BINS[B.BINS.length - 1].priceMult &&
+    w.blendedAsp < 120 * B.BINS[0].priceMult, w.blendedAsp.toFixed(1))
+  ok('revenue equals the sum over bins',
+    near(w.revenue, B.BINS.reduce((n, b) => n + w.counts[b.id] * 120 * b.priceMult, 0), 1e-6))
+  ok('percentiles are ordered', w.minF <= w.p10 && w.p10 <= w.p50 && w.p50 <= w.p90 && w.p90 <= w.maxF)
+  ok('no price means no revenue', B.binWafer({ freqs, dead, fBase: 5, asp: 0 }).revenue === 0)
+
+  ok('a lower nominal clock promotes dies into higher bins', (() => {
+    const easy = B.binWafer({ freqs, dead, fBase: 4.0, asp: 120 })
+    const hard = B.binWafer({ freqs, dead, fBase: 6.5, asp: 120 })
+    return easy.counts.x > hard.counts.x && hard.tooSlow > easy.tooSlow
+  })())
+
+  const h = B.histogram(freqs, dead)
+  ok('the histogram covers every living die',
+    h.bins.reduce((n, v) => n + v, 0) === geo.dies.length - dead.size)
+  ok('the histogram spans the observed range', h.lo <= w.minF + 1e-9 && h.hi >= w.maxF - 1e-9)
+  // Regression guard. Math.min(...arr) crashed on a 450 mm wafer of 1 mm dies
+  // — about 150,000 elements — which is reachable from the sliders.
+  ok('a wafer with 100k+ dies does not blow the stack', (() => {
+    const big = layoutDies({ waferDia: 450, dieX: 1, dieY: 1, scribe: 0.04, edgeExclusion: 0 })
+    if (big.gross < 100000) return false
+    const f = B.dieFrequencies(big.dies, 450, { fBase: 5, seed: 7 })
+    const h = B.histogram(f, new Set())
+    const bw = B.binWafer({ freqs: f, dead: new Set(), fBase: 5, asp: 100 })
+    return h.bins.length > 0 && Number.isFinite(bw.blendedAsp) && Number.isFinite(bw.minF)
+  })())
+  ok('an all-dead wafer gives an empty histogram',
+    B.histogram(freqs, new Set(freqs.map((_, i) => i))).bins.length === 0)
+}
+
 /* ---------- clock ---------- */
 group('Clock')
 {
@@ -1278,6 +1402,8 @@ group('Build output')
       ok('author meta tag shipped', html.includes('name="author"') && html.includes('Abhay Bhuva'))
       ok('the provenance note shipped', bundle.includes('Anthropic') && bundle.includes('publicly available'))
       ok('the no-confidential-data statement shipped', /confidential/i.test(bundle))
+      ok('speed binning shipped in the yield lab',
+        bundle.includes('Colour by speed bin') || bundle.includes('Blended selling price'))
       ok('the clock tab shipped', bundle.includes('f_max') || bundle.includes('Signal reach'))
       ok('the science tab shipped', bundle.includes('Subthreshold') || bundle.includes('subthreshold'))
       ok('the God view shipped', bundle.includes('God view') || bundle.includes('godflow'))

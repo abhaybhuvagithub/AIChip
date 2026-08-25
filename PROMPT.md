@@ -540,3 +540,38 @@ be would have been the easy version.
   the 48 GHz SFQ multiplier, the ~700 GHz RSFQ ceiling and the sub-THz 6G bands
   are all sourced, and each carries a status so research is never mistaken for
   shipping.
+
+---
+
+## Sixteenth pass: speed binning in the yield lab
+
+Clock frequency had its own tab and no connection to the wafer, which left the
+site making a claim it never demonstrated: that yield and speed are the same
+process variation seen twice.
+
+- **The missing model was per-die Fmax.** Three sources, and they behave
+  differently: systematic radial variation (anneal, CMP and focus all vary with
+  radius, so the slow ring repeats on every wafer from that tool), random
+  die-to-die noise, and within-die worst-path statistics. The wafer map now
+  colours by bin, and the ring is immediately visible in the same place the
+  defects and partial dies are.
+- **The within-die term is the interesting one, and it is gentle.** A die runs
+  at its slowest critical path, and the worst of N samples sits about
+  √(2·ln N) deviations out. Six times the area costs under 2% of clock, while
+  the same change destroys yield. Asserting that contrast is more useful than
+  asserting the term exists.
+- **A normalisation bug that looked plausible.** The path penalty was applied
+  absolutely, shifting every die 10% below every bin — a wafer where nothing
+  sells, which reads as a believable result rather than a bug. Fixed by
+  normalising against a reference die area, with a check that a nominal die
+  lands on the nominal clock.
+- **The model produced a counterintuitive result worth keeping, not smoothing.**
+  Tightening die-to-die variation often *lowers* blended price, because
+  tightening around a median below a bin edge removes the lucky fast dies
+  without promoting anything. That is true of real fabs and it is now a
+  callout and a quiz question.
+- **Smoke caught a genuine crash.** `Math.min(...array)` blows the call stack
+  past about 100,000 elements, and a 450 mm wafer of 1 mm dies has 150,000 —
+  reachable from the sliders. It surfaced only because the smoke test renders a
+  deliberate extremes configuration. Replaced with iteration, and there is now
+  a verify check that runs the whole binning path on a 100k-die wafer.

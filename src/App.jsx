@@ -62,6 +62,8 @@ const DEFAULT = {
   ...PRODUCTS[0], preset: PRODUCTS[0].id,
   waferDia: 300, scribe: 0.08, edgeExclusion: 3, model: 'negbinom', alpha: 2.5,
   lineYield: 0.98, testYield: 0.97, packageYield: 0.995, clustered: true, seed: 7,
+  // Speed binning: where the process is centred, and how much it varies.
+  fBase: 5, dieSigma: 0.035, radialAmp: 0.06, radialSign: -1,
 }
 
 // State lives in the URL hash so a configuration is a link. Someone arguing
@@ -131,7 +133,7 @@ export default function App() {
   useEffect(() => {
     const p = new URLSearchParams()
     p.set('tab', tab)
-    for (const k of ['dieX', 'dieY', 'waferDia', 'd0', 'model', 'alpha', 'edgeExclusion', 'waferCost', 'asp', 'packageCost', 'preset']) {
+    for (const k of ['dieX', 'dieY', 'waferDia', 'd0', 'model', 'alpha', 'edgeExclusion', 'waferCost', 'asp', 'packageCost', 'preset', 'fBase', 'dieSigma', 'radialAmp', 'radialSign']) {
       if (cfg[k] !== undefined && cfg[k] !== '') p.set(k, String(cfg[k]))
     }
     window.history.replaceState(null, '', '#' + p.toString())

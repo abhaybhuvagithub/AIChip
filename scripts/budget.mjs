@@ -27,12 +27,14 @@ const dist = join(root, 'dist')
 //   115 kB  original
 //   125 kB  discrete-event fab simulation (engine + live dashboard, ~9 kB)
 //   138 kB  the science tab (physics library, two SVG plotters, ~6 kB)
+//   148 kB  the clock tab and speed binning (frequency model, per-die Fmax,
+//           histogram, and speed colouring on the wafer map, ~9 kB)
 // Each rise is a feature that bought the bytes, named in the commit.
 const BUDGET = {
-  'js.gzip': 138 * 1024,
+  'js.gzip': 148 * 1024,
   'css.gzip': 7 * 1024,
   'html.raw': 6 * 1024,
-  'total.gzip': 146 * 1024,
+  'total.gzip': 156 * 1024,
 }
 
 let fail = 0

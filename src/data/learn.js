@@ -16,6 +16,8 @@ export const TOUR = [
   { id: 't3c', tab: 'run', title: 'Buy the wrong tool', body: 'Add etch or CMP tools and watch output barely move. Add scanners and it climbs. A constraint is the only place capital does anything, which is the least intuitive fact in factory economics.' },
   { id: 't3d', tab: 'run', title: 'Let something go wrong', body: 'Drop metrology sampling to one lot in twenty. A drifting chamber now damages nineteen lots before anyone notices, and the defect density at the bottom gets worse — which is the real cost of not measuring.' },
   { id: 't4', tab: 'wafer', title: 'Watch area punish you twice', body: 'On the wafer map, drag die size up. Gross dies fall, and yield falls at the same time. That double penalty is the entire economic case for chiplets.' },
+  { id: 't4b', tab: 'wafer', title: 'Sort the same wafer by speed', body: 'Switch the map to speed bins. A working die is not one product — every die clocks differently, and the pattern has a radius. The slow ring sits exactly where the defects and the partial dies are.' },
+  { id: 't4c', tab: 'wafer', title: 'Tighten the process and lose money', body: 'Drag die-to-die spread down and watch blended price. It often gets worse: tightening around a median below a bin edge removes your lucky fast dies without promoting anything. Centring matters more than tightening.' },
   { id: 't5', tab: 'wafer', title: 'Change the model, change the story', body: 'Switch between Poisson and negative binomial at a large die size. Same defect density, very different yield — because real defects cluster, and the model you pick decides whether the product looks viable.' },
   { id: 't6', tab: 'wafer', title: 'Read the edge', body: 'Raise edge exclusion. Those outer dies were never countable, and the ring you lose grows with wafer diameter — one of several reasons 450 mm never paid for itself.' },
   { id: 't7', tab: 'economics', title: 'Follow the money to the good die', body: 'Cost per good die, not yield, is what a fab is run to. A 40% yield on a cheap wafer can beat 80% on an expensive one. Try the automotive MCU against the AI accelerator.' },
@@ -37,7 +39,7 @@ export const TOUR = [
   { id: 't10', tab: 'compute', title: 'Climb to the trillions and past them', body: 'Move the scale selector from one die to a cluster. Note the power column keeping pace: past a rack, what you can build is set by the substation, not the fab.' },
   { id: 't11', tab: 'quantum', title: 'Meet the other exchange rate', body: 'Pick Shor on RSA-2048, then drag the physical error rate. Between 0.8% and 1.2% the qubit count goes vertical and then to infinity — that cliff is the surface code threshold.' },
   { id: 't12', tab: 'quantum', title: 'See what a fab cannot fix', body: 'Read the comparison table. A logic fab is a statistical discipline that expects failures and designs around them. A quantum chip has no binning and no redundancy, so the same tools do not buy the same safety.' },
-  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Thirty-nine questions. Everything needed to answer them is on the other thirteen tabs.' },
+  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Forty-two questions. Everything needed to answer them is on the other thirteen tabs.' },
 ]
 
 export const QUIZ = [
@@ -202,6 +204,24 @@ export const QUIZ = [
     opts: ['Sorting wafers by lot', 'Selling the same die as different products by grade or fused-off blocks', 'Discarding failed dies at sort', 'Grouping masks by layer'],
     a: 1,
     why: 'A die with one failed core is not scrap, it is a cheaper SKU. Harvesting turns a yield distribution into a product ladder, which is why yield alone does not decide profit.',
+  },
+  {
+    q: 'Slow dies on a wafer cluster in a ring rather than scattering randomly. What causes that?',
+    opts: ['Defect particles settle at the edge', 'Systematic radial variation — anneal profile, CMP removal rate and litho focus all vary with radius', 'Probe cards contact edge dies worse', 'Edge dies are thinner'],
+    a: 1,
+    why: 'Random die-to-die noise scatters. A ring is systematic and repeats on every wafer from that tool, which is what makes it correctable. The same edge that clocks worst also loses partial dies and collects defects.',
+  },
+  {
+    q: 'A fab tightens die-to-die variation and its blended selling price falls. How?',
+    opts: ['Tighter variation always lowers yield', 'The median sat below a bin edge, so tightening removed the lucky fast dies without promoting anything', 'Test time increased', 'Tighter processes cost more per wafer'],
+    a: 1,
+    why: 'Tightening only pays once the median is above the edge you are trying to clear. A fab has to centre the process and tighten it, and centring usually matters more — which is why "reduce variation" is never the whole instruction.',
+  },
+  {
+    q: 'Doubling die area is catastrophic for yield but costs well under 1% of maximum clock. Why so little?',
+    opts: ['Clock is set by the average path, which does not change', 'Clock is set by the worst of N paths, and the worst case grows as √(ln N)', 'Larger dies have better power delivery', 'Clock is limited by packaging, not silicon'],
+    a: 1,
+    why: 'A die runs at the speed of its slowest critical path. The maximum of N Gaussian samples sits about √(2·ln N) deviations out, and √(ln N) grows very slowly — so six times the paths costs under two percent, while six times the area destroys yield.',
   },
   {
     q: 'CFET stacks the n device on top of the p device. What makes it different from every scaling step before it?',
