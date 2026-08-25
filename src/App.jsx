@@ -8,6 +8,7 @@ import Economics from './ui/Economics.jsx'
 import NodesView from './ui/Nodes.jsx'
 import Silicon from './ui/Silicon.jsx'
 import Beyond3D from './ui/Beyond3D.jsx'
+import Science from './ui/Science.jsx'
 import ValueChain from './ui/ValueChain.jsx'
 import SandToSilicon from './ui/SandToSilicon.jsx'
 import Compute from './ui/Compute.jsx'
@@ -24,6 +25,7 @@ const TABS = [
   { id: 'run', label: 'Fab run' },
   { id: 'wafer', label: 'Yield lab' },
   { id: 'economics', label: 'Economics' },
+  { id: 'science', label: 'The science' },
   { id: 'nodes', label: 'Nodes' },
   { id: '3d', label: '3D & beyond' },
   { id: 'silicon', label: 'Silicon' },
@@ -127,6 +129,7 @@ export default function App() {
         {tab === 'run' && <FabRun cfg={cfg} onSnapshot={setSnap} />}
         {tab === 'wafer' && <YieldLab cfg={cfg} patch={patch} />}
         {tab === 'economics' && <Economics cfg={cfg} patch={patch} />}
+        {tab === 'science' && <Science />}
         {tab === 'nodes' && <NodesView />}
         {tab === '3d' && <Beyond3D cfg={cfg} />}
         {tab === 'silicon' && <Silicon cfg={cfg} patch={patch} goTab={setTab} />}

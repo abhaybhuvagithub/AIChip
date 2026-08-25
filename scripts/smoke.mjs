@@ -49,6 +49,7 @@ const { default: ValueChain } = await import('../src/ui/ValueChain.jsx')
 const { default: Compute } = await import('../src/ui/Compute.jsx')
 const { default: Quantum } = await import('../src/ui/Quantum.jsx')
 const { default: Quiz } = await import('../src/ui/Quiz.jsx')
+const { default: Science } = await import('../src/ui/Science.jsx')
 const { default: GodView } = await import('../src/ui/GodView.jsx')
 const { default: Journey } = await import('../src/ui/Journey.jsx')
 const { default: Assistant } = await import('../src/ui/Assistant.jsx')
@@ -80,7 +81,7 @@ const TABS = [
   ['SandToSilicon', SandToSilicon], ['FabLine', FabLine], ['FabRun', FabRun], ['YieldLab', YieldLab],
   ['Economics', Economics], ['Nodes', Nodes], ['Beyond3D', Beyond3D],
   ['Silicon', Silicon], ['ValueChain', ValueChain], ['Compute', Compute],
-  ['Quantum', Quantum], ['Quiz', Quiz], ['GodView', GodView], ['Journey', Journey],
+  ['Quantum', Quantum], ['Quiz', Quiz], ['GodView', GodView], ['Journey', Journey], ['Science', Science],
 ]
 
 let pass = 0, fail = 0

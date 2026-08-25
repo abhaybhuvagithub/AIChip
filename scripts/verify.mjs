@@ -177,17 +177,19 @@ group('Content')
   ok('quiz answers all point at a real option', QUIZ.every((q) => q.opts[q.a] !== undefined))
   ok('every quiz question explains itself', QUIZ.every((q) => q.why && q.why.length > 40))
   ok('quiz options are distinct', QUIZ.every((q) => new Set(q.opts).size === q.opts.length))
-  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god'].includes(t.tab)))
+  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science'].includes(t.tab)))
   ok('the tour visits every tab', ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz']
     .every((t) => TOUR.some((s) => s.tab === t)))
   ok('quiz covers the material chain', QUIZ.some((q) => /purity|distill|polysilicon|particle/i.test(q.q)))
   ok('quiz covers real silicon', QUIZ.some((q) => /Cerebras|MI300X|wafer-scale/i.test(q.q)))
   ok('quiz covers the value chain', QUIZ.some((q) => /Arm|EUV scanners|Terafab/i.test(q.q)))
+  ok('quiz covers the underlying physics',
+    QUIZ.some((q) => /subthreshold|60 mV|stochastic|tunnel/i.test(q.q)))
   ok('quiz covers the fab simulation',
     QUIZ.some((q) => /X-factor|cycle time|bottleneck|scanners/i.test(q.q)))
   ok('quiz covers 3D transistors and the thermal wall',
     QUIZ.some((q) => /CFET|backside power/i.test(q.q)) && QUIZ.some((q) => /3D memory|3D logic/i.test(q.q)))
-  ok('quiz covers compute and quantum', QUIZ.length >= 33 &&
+  ok('quiz covers compute and quantum', QUIZ.length >= 36 &&
     QUIZ.some((q) => /FP4|sparsity|precision/i.test(q.q)) &&
     QUIZ.some((q) => /qubit|surface code|threshold/i.test(q.q)))
 }
@@ -827,6 +829,148 @@ group('Fab simulation')
   ok('a lot is 25 wafers', LOT_SIZE === 25)
 }
 
+/* ---------- physics ---------- */
+group('Physics')
+{
+  const P = await import(join(root, 'src/lib/physics.js'))
+
+  // Constants, against their defined or measured values. If any of these drift
+  // the whole tab is quietly wrong and nothing else would catch it.
+  ok('elementary charge is the exact SI value', P.K.q === 1.602176634e-19)
+  ok('Boltzmann constant is the exact SI value', P.K.kB_J === 1.380649e-23)
+  ok('vacuum permittivity is in F/cm, not F/m', near(P.K.eps0, 8.854e-14, 1e-16))
+  ok('kT/q at 300 K is 25.85 mV', near(P.thermalVoltage(300) * 1000, 25.85, 0.02))
+  ok('silicon bandgap at 300 K is 1.12 eV', near(P.bandgap(300), 1.12, 0.005), P.bandgap(300).toFixed(4))
+  ok('bandgap narrows as temperature rises', P.bandgap(400) < P.bandgap(300) && P.bandgap(200) > P.bandgap(300))
+  ok('intrinsic carriers at 300 K are ~1e10 cm^-3',
+    P.intrinsicCarriers(300) > 8e9 && P.intrinsicCarriers(300) < 1.3e10)
+  ok('intrinsic carriers rise steeply with temperature',
+    P.intrinsicCarriers(400) > 100 * P.intrinsicCarriers(300))
+
+  // The single most important number on the tab.
+  ok('subthreshold floor at 300 K is 59.6 mV/decade',
+    near(P.ssFloor(300) * 1000, 59.6, 0.2), (P.ssFloor(300) * 1000).toFixed(2))
+  ok('the floor scales linearly with temperature',
+    near(P.ssFloor(600) / P.ssFloor(300), 2, 1e-9))
+  ok('cryogenic operation genuinely lowers the floor', P.ssFloor(77) * 1000 < 20)
+  ok('body factor never improves on the floor', P.subthresholdSwing(1.4, 300) > P.ssFloor(300))
+  ok('n = 1 reproduces the floor exactly', near(P.subthresholdSwing(1, 300), P.ssFloor(300), 1e-12))
+
+  // Mass action must hold at every doping and temperature.
+  ok('n·p = ni² for a doped sample', (() => {
+    for (const T of [250, 300, 400]) for (const N of [1e15, 1e17, 1e19]) {
+      const c = P.carriers(N, 'n', T)
+      if (!near(c.n * c.p, c.ni * c.ni, c.ni * c.ni * 0.01)) return false
+    }
+    return true
+  })())
+  ok('majority carriers track the doping', near(P.carriers(1e17, 'n').n, 1e17, 1e15))
+  ok('p-type and n-type are mirror images', (() => {
+    const n = P.carriers(1e17, 'n'), p = P.carriers(1e17, 'p')
+    return near(n.n, p.p, 1e12) && near(n.p, p.n, 1e3)
+  })())
+
+  ok('oxide capacitance for 2 nm SiO2 is ~1.7 µF/cm²',
+    near(P.oxideCap(2) * 1e6, 1.727, 0.01), (P.oxideCap(2) * 1e6).toFixed(3))
+  ok('capacitance is inversely proportional to thickness',
+    near(P.oxideCap(1) / P.oxideCap(2), 2, 1e-9))
+  ok('EOT and physical thickness are inverses',
+    near(P.eot(P.physicalForEot(1, 25), 25), 1, 1e-9))
+  ok('1 nm EOT in hafnia is ~6.4 nm of physical film',
+    near(P.physicalForEot(1, 25), 6.41, 0.02))
+
+  // MOSFET behaviour, as invariants rather than magic numbers.
+  const dev = { vth: 0.35, wOverL: 10, mu: 300, cox: P.oxideCap(2) }
+  ok('no current below threshold in the square-law model',
+    P.drainCurrent({ ...dev, vgs: 0.3, vds: 1 }) === 0)
+  ok('current rises with gate voltage',
+    P.drainCurrent({ ...dev, vgs: 1.0, vds: 1 }) > P.drainCurrent({ ...dev, vgs: 0.7, vds: 1 }))
+  ok('current saturates beyond Vds = Vov', (() => {
+    const a = P.drainCurrent({ ...dev, vgs: 1.0, vds: 0.65 })
+    const b = P.drainCurrent({ ...dev, vgs: 1.0, vds: 1.2 })
+    return near(a, b, a * 0.001)
+  })())
+  ok('drive current goes as the square of overdrive', (() => {
+    const a = P.drainCurrent({ ...dev, vgs: 0.35 + 0.2, vds: 1.2 })
+    const b = P.drainCurrent({ ...dev, vgs: 0.35 + 0.4, vds: 1.2 })
+    return near(b / a, 4, 0.02)
+  })())
+  ok('drive current is linear in W/L', (() => {
+    const a = P.drainCurrent({ ...dev, wOverL: 5, vgs: 1, vds: 1.2 })
+    const b = P.drainCurrent({ ...dev, wOverL: 20, vgs: 1, vds: 1.2 })
+    return near(b / a, 4, 1e-9)
+  })())
+  ok('subthreshold current is exponential in gate voltage', (() => {
+    const a = P.subthresholdCurrent({ vgs: 0.1, vth: 0.35 })
+    const b = P.subthresholdCurrent({ vgs: 0.1 + P.subthresholdSwing(1.3, 300), vth: 0.35 })
+    return near(b / a, 10, 0.05)
+  })())
+
+  // Tunnelling. The 0.18 nm figure is the one people quote as "a decade per
+  // two angstroms", and it falls out of the constants rather than being typed.
+  ok('SiO2 leakage rises a decade per ~0.18 nm',
+    near(P.nmPerDecade(), 0.181, 0.005), P.nmPerDecade().toFixed(4))
+  ok('tunnelling falls exponentially with thickness',
+    P.relativeTunnelCurrent(2) < P.relativeTunnelCurrent(1) / 1e5)
+  ok('the 1 nm SiO2 reference is unity', near(P.relativeTunnelCurrent(1), 1, 1e-9))
+  ok('a lower barrier tunnels more', P.relativeTunnelCurrent(2, 1.5) > P.relativeTunnelCurrent(2, 3.1))
+
+  // Optics.
+  ok('Rayleigh resolution improves with NA and shortens with wavelength',
+    P.resolution(193, 1.35, 0.31) > P.resolution(13.5, 0.33, 0.31) &&
+    P.resolution(13.5, 0.55, 0.31) < P.resolution(13.5, 0.33, 0.31))
+  ok('immersion ArF at k1 = 0.25 lands at the known ~38 nm limit',
+    near(P.resolution(193, 1.35, 0.25), 35.7, 1.5), P.resolution(193, 1.35, 0.25).toFixed(1))
+  ok('depth of focus goes as 1/NA²',
+    near(P.depthOfFocus(193, 1) / P.depthOfFocus(193, 2), 4, 1e-9))
+  ok('depth of focus is tens of nanometres at the leading edge',
+    P.depthOfFocus(13.5, 0.33) < 100 && P.depthOfFocus(193, 1.35) < 100)
+  ok('High-NA halves the depth of focus again',
+    P.depthOfFocus(13.5, 0.55) < P.depthOfFocus(13.5, 0.33))
+  ok('EUV photon energy is 91.8 eV', near(P.photonEnergy(13.5), 91.84, 0.05))
+  ok('ArF photon energy is 6.42 eV', near(P.photonEnergy(193), 6.42, 0.01))
+  ok('an EUV photon carries ~14x an ArF photon',
+    near(P.photonEnergy(13.5) / P.photonEnergy(193), 14.3, 0.2))
+
+  // Shot noise — the mechanism behind stochastic defects.
+  const euv = P.photonStatistics({ lambdaNm: 13.5, doseMjCm2: 30, featureNm: 16 })
+  const arf = P.photonStatistics({ lambdaNm: 193, doseMjCm2: 30, featureNm: 16 })
+  ok('the same dose delivers ~14x fewer EUV photons',
+    near(arf.n / euv.n, 14.3, 0.3), (arf.n / euv.n).toFixed(1))
+  ok('EUV shot noise is correspondingly worse', euv.sigmaRel > arf.sigmaRel)
+  ok('shot noise falls as 1/sqrt(N)', (() => {
+    const a = P.photonStatistics({ lambdaNm: 13.5, doseMjCm2: 30, featureNm: 16 })
+    const b = P.photonStatistics({ lambdaNm: 13.5, doseMjCm2: 120, featureNm: 16 })
+    return near(a.sigmaRel / b.sigmaRel, 2, 0.02)
+  })())
+  ok('smaller features collect fewer photons',
+    P.photonStatistics({ lambdaNm: 13.5, doseMjCm2: 30, featureNm: 8 }).n <
+    P.photonStatistics({ lambdaNm: 13.5, doseMjCm2: 30, featureNm: 32 }).n)
+
+  // Statistics and kinetics.
+  const rdf = P.dopantFluctuation({ wNm: 20, lNm: 20 })
+  ok('a 20 nm channel holds single-digit dopant atoms',
+    rdf.count > 3 && rdf.count < 20, rdf.count.toFixed(1))
+  ok('dopant variation is tens of percent at that size', rdf.sigmaRel > 0.2)
+  ok('a larger channel averages the fluctuation away',
+    P.dopantFluctuation({ wNm: 200, lNm: 200 }).sigmaRel < rdf.sigmaRel / 5)
+  ok('Arrhenius rises with temperature', P.arrhenius(1, 3.5, 1200) > P.arrhenius(1, 3.5, 900))
+  ok('diffusion length goes as sqrt(t)',
+    near(P.diffusionLength(1e-14, 400) / P.diffusionLength(1e-14, 100), 2, 1e-9))
+  ok('Deal-Grove growth is sublinear in time',
+    P.dealGrove({ hours: 4 }) < 4 * P.dealGrove({ hours: 1 }))
+  ok('dynamic power goes as the square of voltage',
+    near(P.dynamicPower({ capF: 1e-9, volts: 2, freqHz: 1e9 }) /
+         P.dynamicPower({ capF: 1e-9, volts: 1, freqHz: 1e9 }), 4, 1e-9))
+  ok('dielectrics are ordered and complete',
+    P.DIELECTRICS.length >= 4 && P.DIELECTRICS.every((d) => d.name && d.k > 0 && d.barrier > 0 && d.note))
+  ok('higher-k dielectrics have lower barriers — the real trade',
+    P.DIELECTRICS.find((d) => d.id === 'hfo2').barrier <
+    P.DIELECTRICS.find((d) => d.id === 'sio2').barrier)
+  ok('the litho generations are chronological and improving',
+    P.LITHO.every((l, i) => i === 0 || l.year > P.LITHO[i - 1].year))
+}
+
 /* ---------- legibility ---------- */
 group('Legibility')
 {
@@ -941,6 +1085,7 @@ group('Build output')
       ok('author meta tag shipped', html.includes('name="author"') && html.includes('Abhay Bhuva'))
       ok('the provenance note shipped', bundle.includes('Anthropic') && bundle.includes('publicly available'))
       ok('the no-confidential-data statement shipped', /confidential/i.test(bundle))
+      ok('the science tab shipped', bundle.includes('Subthreshold') || bundle.includes('subthreshold'))
       ok('the God view shipped', bundle.includes('God view') || bundle.includes('godflow'))
       ok('the travel path shipped', bundle.includes('Travel path') || bundle.includes('Follow one wafer'))
       ok('the assistant states it is not a language model', /not a language model/i.test(bundle))

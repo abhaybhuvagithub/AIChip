@@ -15,13 +15,14 @@ Five tabs:
 | **Fab line** | The 17 modules a wafer passes through, from crystal growth to final test. Each opens up into physics, tools, failure modes and duration. A "run a lot" button walks the line. |
 | **Yield lab** | A live 300 mm wafer map drawn to scale. Drag die size, defect density, edge exclusion or scribe width and watch gross dies, yield and good dies move together. Four real yield models, side by side on the same wafer. |
 | **Economics** | Cost per good die, silicon utilisation and gross margin, with eight real product shapes — mobile SoC through SiC power device — computed through the same model. |
+| **The science** | The physics underneath everything else, computed live: an interactive MOSFET I–V family, the subthreshold floor with a temperature slider, gate tunnelling and why hafnium replaced silicon dioxide, Rayleigh optics, EUV photon shot noise, random dopant fluctuation, and why Dennard scaling ended. |
 | **Nodes** | 180 nm to 2 nm, with the transistor architecture that made each generation possible, and a drawn cross-section showing how many sides of the channel the gate controls. |
 | **Compute** | Turns the die you configured into operations per second, and climbs from one die to a 100,000-die cluster. Shows why headline throughput outran Moore's law: precision and sparsity, not density. |
 | **Quantum** | A surface code resource calculator — drag the physical error rate and watch the qubit count go vertical at threshold — plus five hardware modalities and a side-by-side of classical against quantum fabrication. |
 | **3D & beyond** | The architecture ladder with drawn cross-sections — planar, FinFET, nanosheet, forksheet, CFET, 2D-material channel — plus backside power delivery, four levels of circuit stacking, and an interactive thermal-wall calculator. Every entry carries a status badge, because "demonstrated at IEDM" and "in a product" are five to ten years apart. |
 | **Silicon** | Twenty real parts — Apple A-series and M-series, Google TPU v1 through the eighth generation, NVIDIA H100/Blackwell/Rubin, AMD MI300X, Cerebras WSE-3 — drawn at true relative area on one 300 mm wafer. Load any of them into the yield lab. |
 | **Value chain** | The seven layers that actually produce a chip, and how few suppliers each has. Arm's licensing model and its 2026 move into shipping its own silicon. Three business models — IDM, fabless plus foundry, and the vertical re-integration Terafab is betting on. A fab-scale calculator that turns wafer starts per month into chips, silicon and compute per year. |
-| **Quiz** | Thirty-three questions, self-explaining. |
+| **Quiz** | Thirty-six questions, self-explaining. |
 
 ## What is actually modelled
 
@@ -39,6 +40,11 @@ Five tabs:
   layers, tool failures on an MTBF basis, defect accumulation per step,
   excursions that run undetected until a sampled lot reaches metrology, and
   run-to-run control damping drift. Seeded, so a run is reproducible.
+- **Device physics** — thermal voltage, Varshni bandgap, intrinsic carriers,
+  mass action, oxide capacitance and EOT, square-law drain current,
+  subthreshold swing, WKB gate tunnelling, and dynamic power.
+- **Optics** — Rayleigh resolution and depth of focus, photon energy, and
+  Poisson photon statistics per feature.
 - **Cell footprint** — relative standard-cell area per architecture at
   iso-node, planar as baseline, from vendor and imec publications.
 - **Thermal wall** — power density as tiers stack, against approximate cooling
@@ -75,6 +81,14 @@ Loss factors in the material chain are published rough figures and vary
 considerably by producer — wire-saw kerf alone destroys 30–40% of a finished
 crystal as dust. The compounded ratio, roughly eight grams of rock per gram of
 shipped silicon, is the figure worth carrying; the individual digits are not.
+
+Every equation on the science tab is the textbook one with real units, and
+verify pins the outputs against known values: kT/q = 25.85 mV, the 59.6
+mV/decade subthreshold floor, a 1.12 eV bandgap, n_i ≈ 10¹⁰ cm⁻³, 1.727 µF/cm²
+for 2 nm of SiO₂, one decade of gate leakage per 0.18 nm, and 91.8 eV per EUV
+photon. The MOSFET model is deliberately first-order and the tab says where it
+stops being true — it ignores velocity saturation, channel-length modulation
+and every short-channel effect, all of which matter below 100 nm.
 
 The fab simulation is calibrated, not fitted. The tool set was sized so that
 lithography is the constraint — which is what it is in a real leading-edge fab,
@@ -163,8 +177,8 @@ that fails fastest:
 | --- | --- |
 | `npm run lint` | Dead imports, unused props, hook misuse. Found three real bugs the first time it ran. |
 | `npm run build` | Anything that does not compile. |
-| `npm run verify` | 356 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
-| `npm run smoke` | Renders all thirteen tabs across five configurations, including an unmakeable die and a zero-yield process. Catches components that throw on first render, and output that leaks `NaN` or `undefined` — which reads as broken while passing every other check. |
+| `npm run verify` | 410 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
+| `npm run smoke` | Renders all fourteen tabs across five configurations, including an unmakeable die and a zero-yield process. Catches components that throw on first render, and output that leaks `NaN` or `undefined` — which reads as broken while passing every other check. |
 | `npm run budget` | Bundle size against a gzipped budget. This bundle grew 206 kB → 331 kB across six feature passes with nothing watching. |
 
 CI (`.github/workflows/ci.yml`) runs all five on every push and pull request,
@@ -183,7 +197,7 @@ publish means the push succeeded, not that the bytes are being served — a
 sister repo shipped the previous build for weeks with green checks the whole
 time, because nothing closed that loop.
 
-`npm run verify` runs 356 checks across wafer geometry, yield model
+`npm run verify` runs 410 checks across wafer geometry, yield model
 correctness (pinned against hand-computed values), economics invariants,
 defect scatter determinism, a 13px legibility floor across the stylesheet and
 every inline style, architecture and thermal-wall arithmetic, material

@@ -23,6 +23,9 @@ export const TOUR = [
   { id: 't8a1', tab: '3d', title: 'Count the gated faces', body: 'Step along the ladder and watch the cross-section. Planar gates one face of the channel, FinFET three, nanosheet four. Each step buys back electrostatic control that short channels took away.' },
   { id: 't8a2', tab: '3d', title: 'Find the step that shrinks nothing', body: 'CFET is the only rung that reduces cell area without reducing any dimension — the pitch stays the same and one device moves underneath the other. That is why it needs backside power to arrive with it.' },
   { id: 't8a3', tab: '3d', title: 'Hit the wall', body: 'Drag the tier slider up on the thermal section. Density scales with tiers; the surface you can remove heat through does not. Then drag activity down and watch the problem vanish — that is exactly the trick stacked memory plays and stacked logic cannot.' },
+  { id: 't8s1', tab: 'science', title: 'Find the floor', body: 'Drag the temperature slider on the subthreshold section. The 60 mV/decade limit is not engineering — it is the Boltzmann tail of the carrier distribution, and it is why supply voltage stopped scaling and you got multiple cores instead of faster ones.' },
+  { id: 't8s2', tab: 'science', title: 'Count the photons', body: 'An EUV photon carries fourteen times the energy of an ArF one, so the same dose delivers fourteen times fewer of them. Drop the dose and watch the shot noise climb — that is where stochastic defects come from, and no amount of cleanliness prevents them.' },
+  { id: 't8s3', tab: 'science', title: 'Count the dopants', body: 'A 20 nm channel holds about eight dopant atoms. Where they land shifts the threshold voltage by tens of percent, and no process control fixes it — which is why modern channels are undoped.' },
   { id: 't8b', tab: 'silicon', title: 'See what all of this is actually about', body: 'Every part is drawn at true relative area on one 300 mm wafer. An A17 Pro is the small square near the middle; the Cerebras WSE-3 is the wafer. Both are called a chip.' },
   { id: 't8c', tab: 'silicon', title: 'Notice what is missing', body: 'Several cells are empty rather than estimated. Google publishes pod throughput freely and die geometry almost never, and Apple has never published a die size — every Apple area here is someone else measuring a die shot.' },
   { id: 't8d', tab: 'chain', title: 'Count the suppliers', body: 'Click through the seven layers and read the concentration line on each. Three EDA companies worldwide. One company making EUV scanners. That last fact explains more about semiconductor geopolitics than any other single thing.' },
@@ -32,7 +35,7 @@ export const TOUR = [
   { id: 't10', tab: 'compute', title: 'Climb to the trillions and past them', body: 'Move the scale selector from one die to a cluster. Note the power column keeping pace: past a rack, what you can build is set by the substation, not the fab.' },
   { id: 't11', tab: 'quantum', title: 'Meet the other exchange rate', body: 'Pick Shor on RSA-2048, then drag the physical error rate. Between 0.8% and 1.2% the qubit count goes vertical and then to infinity — that cliff is the surface code threshold.' },
   { id: 't12', tab: 'quantum', title: 'See what a fab cannot fix', body: 'Read the comparison table. A logic fab is a statistical discipline that expects failures and designs around them. A quantum chip has no binning and no redundancy, so the same tools do not buy the same safety.' },
-  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Thirty-three questions. Everything needed to answer them is on the other eleven tabs.' },
+  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Thirty-six questions. Everything needed to answer them is on the other twelve tabs.' },
 ]
 
 export const QUIZ = [
@@ -95,6 +98,24 @@ export const QUIZ = [
     opts: ['Wafer diameter', 'The scanner reticle field, about 26 x 33 mm', 'The dicing blade width', 'Package substrate size'],
     a: 1,
     why: 'The scanner prints one field at a time. Anything bigger has to be stitched or split into chiplets — which is exactly what the largest accelerators do.',
+  },
+  {
+    q: 'Subthreshold swing cannot go below about 60 mV/decade at room temperature. Why not?',
+    opts: ['Oxide quality limits it', 'It is kT/q × ln10 — the Boltzmann tail of the carrier energy distribution', 'Lithography variation sets it', 'Contact resistance dominates below that'],
+    a: 1,
+    why: 'It is thermodynamics, not manufacturing. Beating it needs a device that does not switch by thermionic emission — which is what tunnel FETs and negative-capacitance devices attempt. Cooling genuinely works: at 77 K the floor is about 15 mV/decade.',
+  },
+  {
+    q: 'Why does EUV suffer random "stochastic" printing failures when DUV does not?',
+    opts: ['EUV mirrors are less uniform', 'An EUV photon carries ~14× more energy, so the same dose delivers ~14× fewer photons and shot noise rises', 'EUV resist is less sensitive', 'Vacuum introduces contamination'],
+    a: 1,
+    why: 'Photon arrivals are Poisson, so relative noise goes as 1/√N. With only a few thousand photons per feature, the tail of that distribution means some features simply fail — no particle, no misprint. You can only pay it down with dose, which costs throughput on the most expensive tool in the fab.',
+  },
+  {
+    q: 'Thinning gate oxide by roughly 0.2 nm does what to gate leakage?',
+    opts: ['Raises it about 20%', 'Raises it about tenfold', 'Doubles it', 'Leaves it unchanged until 1 nm'],
+    a: 1,
+    why: 'Tunnelling current goes as exp(−2κt) with κ = √(2m*Φ)/ħ. For SiO₂ that works out at one decade per 0.18 nm — an exponential that left the industry no option but a physically thicker, higher-permittivity film.',
   },
   {
     q: 'Why did hafnium oxide replace silicon dioxide as the gate dielectric?',

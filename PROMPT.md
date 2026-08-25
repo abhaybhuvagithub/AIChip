@@ -402,3 +402,34 @@ wrong for nine passes.
   font size below 13px, with SVG user units exempted since they are not
   pixels. I deliberately reintroduced a 10px label to confirm the check fired
   and named the offender before shipping it — an untested guard is not a guard.
+
+---
+
+## Eleventh pass: the science
+
+The site had a great deal of *what* and not enough *why*. Ten tabs on process,
+economics, operations and roadmap, and nowhere did it say why 60 mV/decade is a
+wall or why hafnium replaced an oxide that had worked for forty years.
+
+- **Equations with units, checked against textbook values before anything was
+  drawn.** A throwaway script printed every function's output next to its known
+  value first: kT/q = 25.85 mV, the subthreshold floor at 59.53 mV/decade, a
+  1.121 eV bandgap, n_i = 1.00e10, 1.727 µF/cm² for 2 nm of SiO₂. All of those
+  are now verify checks, so the tab cannot silently drift wrong — nothing else
+  on the site would catch it if it did.
+- **Two figures are worth the whole tab, and both fall out of constants rather
+  than being typed in.** Gate leakage rises a decade per 0.181 nm of SiO₂,
+  computed from √(2m*Φ)/ħ — the "decade per two angstroms" everyone quotes. And
+  a 20 × 20 nm channel contains about eight dopant atoms, so threshold voltage
+  varies by tens of percent from counting statistics alone. Neither is an
+  engineering failure; both are arithmetic.
+- **Say where a model stops being true, in the interface.** The square-law
+  MOSFET is wrong below 100 nm and the tab says so directly under the chart,
+  rather than presenting a first-order result as the truth. It earns its place
+  because every modern model is a correction to it.
+- **The legibility check caught the new tab on its first run**, flagging seven
+  chart labels at 10.5 and 11px. That guard was added one pass earlier and has
+  already paid for itself — which is the argument for adding checks at the
+  moment you fix something rather than afterwards.
+- **The budget rose 125 → 138 kB** and now carries its own history in the file,
+  so each rise names the feature that bought the bytes.
