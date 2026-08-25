@@ -23,11 +23,15 @@ const dist = join(root, 'dist')
 
 // Gzip is what most CDNs actually serve, so budget on transfer size rather
 // than the raw file — raw size punishes readable code for no user benefit.
+// Raised from 115 kB when the discrete-event fab simulation shipped: an
+// engine plus a live dashboard is roughly 9 kB gzipped, and it is the largest
+// single feature on the site. Raising a budget is fine; doing it silently is
+// not.
 const BUDGET = {
-  'js.gzip': 115 * 1024,
+  'js.gzip': 125 * 1024,
   'css.gzip': 6 * 1024,
   'html.raw': 6 * 1024,
-  'total.gzip': 125 * 1024,
+  'total.gzip': 135 * 1024,
 }
 
 let fail = 0

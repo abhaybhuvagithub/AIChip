@@ -9,6 +9,9 @@ export const TOUR = [
   { id: 't1', tab: 'line', title: 'Start where the wafer starts', body: 'Open the fab line and click Crystal growth. A chip begins as sand refined to nine-nines purity and pulled into one continuous crystal. Every later step assumes that lattice is perfect.' },
   { id: 't2', tab: 'line', title: 'Find the step everything orbits', body: 'Click Lithography. A leading-edge part goes through it 60–80 times. Scanner throughput is the constraint the whole fab is scheduled around, which is why one tool costs as much as an aircraft.' },
   { id: 't3', tab: 'line', title: 'Notice the loop', body: 'Coat, expose, develop, etch, deposit, polish — then back to coat. The line is not 17 steps, it is six steps run dozens of times, each pass adding one layer.' },
+  { id: 't3b', tab: 'run', title: 'Run the line and find the jam', body: 'Press run and watch the tool floor. Lithography saturates first and stays there — scanners cost ten times any other tool, so nobody buys spares, and the whole fab is scheduled around them.' },
+  { id: 't3c', tab: 'run', title: 'Buy the wrong tool', body: 'Add etch or CMP tools and watch output barely move. Add scanners and it climbs. A constraint is the only place capital does anything, which is the least intuitive fact in factory economics.' },
+  { id: 't3d', tab: 'run', title: 'Let something go wrong', body: 'Drop metrology sampling to one lot in twenty. A drifting chamber now damages nineteen lots before anyone notices, and the defect density at the bottom gets worse — which is the real cost of not measuring.' },
   { id: 't4', tab: 'wafer', title: 'Watch area punish you twice', body: 'On the wafer map, drag die size up. Gross dies fall, and yield falls at the same time. That double penalty is the entire economic case for chiplets.' },
   { id: 't5', tab: 'wafer', title: 'Change the model, change the story', body: 'Switch between Poisson and negative binomial at a large die size. Same defect density, very different yield — because real defects cluster, and the model you pick decides whether the product looks viable.' },
   { id: 't6', tab: 'wafer', title: 'Read the edge', body: 'Raise edge exclusion. Those outer dies were never countable, and the ring you lose grows with wafer diameter — one of several reasons 450 mm never paid for itself.' },
@@ -26,7 +29,7 @@ export const TOUR = [
   { id: 't10', tab: 'compute', title: 'Climb to the trillions and past them', body: 'Move the scale selector from one die to a cluster. Note the power column keeping pace: past a rack, what you can build is set by the substation, not the fab.' },
   { id: 't11', tab: 'quantum', title: 'Meet the other exchange rate', body: 'Pick Shor on RSA-2048, then drag the physical error rate. Between 0.8% and 1.2% the qubit count goes vertical and then to infinity — that cliff is the surface code threshold.' },
   { id: 't12', tab: 'quantum', title: 'See what a fab cannot fix', body: 'Read the comparison table. A logic fab is a statistical discipline that expects failures and designs around them. A quantum chip has no binning and no redundancy, so the same tools do not buy the same safety.' },
-  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Thirty questions. Everything needed to answer them is on the other ten tabs.' },
+  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Thirty-three questions. Everything needed to answer them is on the other eleven tabs.' },
 ]
 
 export const QUIZ = [
@@ -101,6 +104,24 @@ export const QUIZ = [
     opts: ['Metal contamination of the silicon', 'Topography accumulating until lithography cannot focus', 'Wafer warpage during anneal', 'Copper electromigration'],
     a: 1,
     why: 'Depth of focus at the leading edge is around 100 nm. Without planarising between layers, surface relief exceeds it within a few levels and the pattern stops printing.',
+  },
+  {
+    q: 'A fab line simulation shows a 110-day cycle time against 40 days of actual process time. Where did the other 70 days go?',
+    opts: ['Tool downtime', 'Queueing — lots waiting for a tool', 'Metrology and inspection', 'Transport between tools'],
+    a: 1,
+    why: 'Cycle time divided by raw process time is the X-factor, and 2 to 3 is normal. Most of a wafer\'s life in a fab is spent in a queue, which is why release rate and WIP caps matter as much as tool count.',
+  },
+  {
+    q: 'Adding lithography scanners speeds a line up. Adding etch tools barely does. Why?',
+    opts: ['Etch is faster than lithography', 'Only the constraint limits output — capacity added elsewhere just moves the queue', 'Etch tools are less reliable', 'Lithography is used on more layers'],
+    a: 1,
+    why: 'A line runs at the speed of its bottleneck. Capital spent anywhere else buys an expensive ornament. Scanners are usually the constraint because they cost ten times any other tool, so nobody buys spare ones.',
+  },
+  {
+    q: 'Why do fabs deliberately run below full capacity?',
+    opts: ['To leave room for hot lots', 'Queueing delay goes to infinity as utilisation approaches one', 'To reduce tool wear', 'Regulatory limits on cleanroom occupancy'],
+    a: 1,
+    why: 'The relationship is not linear. In the simulation, moving the release interval from 8.0 to 7.0 hours takes constraint utilisation from 85% to 94% and the X-factor from 1.2 to 5 — the same tools, four times the cycle time.',
   },
   {
     q: 'A wafer map shows failures in a ring around the edge. What does that suggest?',

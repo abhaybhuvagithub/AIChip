@@ -39,6 +39,7 @@ Object.defineProperty(globalThis, 'navigator', {
 // variable cannot be statically analysed and fail here.
 const { default: SandToSilicon } = await import('../src/ui/SandToSilicon.jsx')
 const { default: FabLine } = await import('../src/ui/FabLine.jsx')
+const { default: FabRun } = await import('../src/ui/FabRun.jsx')
 const { default: YieldLab } = await import('../src/ui/YieldLab.jsx')
 const { default: Economics } = await import('../src/ui/Economics.jsx')
 const { default: Nodes } = await import('../src/ui/Nodes.jsx')
@@ -73,7 +74,7 @@ const CASES = [
 ]
 
 const TABS = [
-  ['SandToSilicon', SandToSilicon], ['FabLine', FabLine], ['YieldLab', YieldLab],
+  ['SandToSilicon', SandToSilicon], ['FabLine', FabLine], ['FabRun', FabRun], ['YieldLab', YieldLab],
   ['Economics', Economics], ['Nodes', Nodes], ['Beyond3D', Beyond3D],
   ['Silicon', Silicon], ['ValueChain', ValueChain], ['Compute', Compute],
   ['Quantum', Quantum], ['Quiz', Quiz],

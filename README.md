@@ -10,6 +10,7 @@ Five tabs:
 | Tab | What it does |
 | --- | --- |
 | **Sand → silicon** | The material chain from quartz rock to a finished die, running by itself — no clicking required. A purity ladder on a log scale, and a mass and energy balance worked backwards from the die you configured. Plus what replaces the people: FOUPs, overhead hoist transport, SECS/GEM, run-to-run control. |
+| **Fab run** | A discrete-event simulation of one production line, one hour per tick. Lots of 25 wafers walk 70 mask layers, queue at eight tool groups that occasionally break, and accumulate defects. Left alone it settles at a 110-day cycle time with lithography as the constraint at 94% — and the defect density it earns feeds straight into the yield lab. |
 | **Fab line** | The 17 modules a wafer passes through, from crystal growth to final test. Each opens up into physics, tools, failure modes and duration. A "run a lot" button walks the line. |
 | **Yield lab** | A live 300 mm wafer map drawn to scale. Drag die size, defect density, edge exclusion or scribe width and watch gross dies, yield and good dies move together. Four real yield models, side by side on the same wafer. |
 | **Economics** | Cost per good die, silicon utilisation and gross margin, with eight real product shapes — mobile SoC through SiC power device — computed through the same model. |
@@ -19,7 +20,7 @@ Five tabs:
 | **3D & beyond** | The architecture ladder with drawn cross-sections — planar, FinFET, nanosheet, forksheet, CFET, 2D-material channel — plus backside power delivery, four levels of circuit stacking, and an interactive thermal-wall calculator. Every entry carries a status badge, because "demonstrated at IEDM" and "in a product" are five to ten years apart. |
 | **Silicon** | Twenty real parts — Apple A-series and M-series, Google TPU v1 through the eighth generation, NVIDIA H100/Blackwell/Rubin, AMD MI300X, Cerebras WSE-3 — drawn at true relative area on one 300 mm wafer. Load any of them into the yield lab. |
 | **Value chain** | The seven layers that actually produce a chip, and how few suppliers each has. Arm's licensing model and its 2026 move into shipping its own silicon. Three business models — IDM, fabless plus foundry, and the vertical re-integration Terafab is betting on. A fab-scale calculator that turns wafer starts per month into chips, silicon and compute per year. |
-| **Quiz** | Thirty questions, self-explaining. |
+| **Quiz** | Thirty-three questions, self-explaining. |
 
 ## What is actually modelled
 
@@ -33,6 +34,10 @@ Five tabs:
   clustering mode, so a wafer stays stable while you drag a slider.
 - **Cost** — wafer cost amortised across good dies, plus per-die packaging,
   against a settable selling price.
+- **Fab operations** — lot-level queueing at eight tool groups over 70 mask
+  layers, tool failures on an MTBF basis, defect accumulation per step,
+  excursions that run undetected until a sampled lot reaches metrology, and
+  run-to-run control damping drift. Seeded, so a run is reproducible.
 - **Cell footprint** — relative standard-cell area per architecture at
   iso-node, planar as baseline, from vendor and imec publications.
 - **Thermal wall** — power density as tiers stack, against approximate cooling
@@ -69,6 +74,15 @@ Loss factors in the material chain are published rough figures and vary
 considerably by producer — wire-saw kerf alone destroys 30–40% of a finished
 crystal as dust. The compounded ratio, roughly eight grams of rock per gram of
 shipped silicon, is the figure worth carrying; the individual digits are not.
+
+The fab simulation is calibrated, not fitted. The tool set was sized so that
+lithography is the constraint — which is what it is in a real leading-edge fab,
+because scanners cost ten times any other tool and nobody buys spares — and the
+operating point then produced a 110-day cycle time, an X-factor of 2.7 and
+D0 ≈ 0.06 on its own. Verify checks pin all four, plus Little's law, so a
+refactor cannot quietly make it unrealistic. Not modelled: dispatch priority
+and hot lots, reticle setup, batch tools, staffing, and rework — all of which
+make a real line worse than this, so treat its cycle time as optimistic.
 
 Roadmap positions for forksheet, CFET and 2D-material channels come from imec,
 IEDM and vendor publications through 2026 and carry an explicit status badge.
@@ -129,8 +143,8 @@ that fails fastest:
 | --- | --- |
 | `npm run lint` | Dead imports, unused props, hook misuse. Found three real bugs the first time it ran. |
 | `npm run build` | Anything that does not compile. |
-| `npm run verify` | 283 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
-| `npm run smoke` | Renders all eleven tabs across five configurations, including an unmakeable die and a zero-yield process. Catches components that throw on first render, and output that leaks `NaN` or `undefined` — which reads as broken while passing every other check. |
+| `npm run verify` | 317 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
+| `npm run smoke` | Renders all twelve tabs across five configurations, including an unmakeable die and a zero-yield process. Catches components that throw on first render, and output that leaks `NaN` or `undefined` — which reads as broken while passing every other check. |
 | `npm run budget` | Bundle size against a gzipped budget. This bundle grew 206 kB → 331 kB across six feature passes with nothing watching. |
 
 CI (`.github/workflows/ci.yml`) runs all five on every push and pull request,
@@ -149,7 +163,7 @@ publish means the push succeeded, not that the bytes are being served — a
 sister repo shipped the previous build for weeks with green checks the whole
 time, because nothing closed that loop.
 
-`npm run verify` runs 283 checks across wafer geometry, yield model
+`npm run verify` runs 317 checks across wafer geometry, yield model
 correctness (pinned against hand-computed values), economics invariants,
 defect scatter determinism, architecture and thermal-wall arithmetic, material
 chain mass balance, published specs for real parts, value-chain sourcing

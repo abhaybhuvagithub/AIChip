@@ -177,15 +177,17 @@ group('Content')
   ok('quiz answers all point at a real option', QUIZ.every((q) => q.opts[q.a] !== undefined))
   ok('every quiz question explains itself', QUIZ.every((q) => q.why && q.why.length > 40))
   ok('quiz options are distinct', QUIZ.every((q) => new Set(q.opts).size === q.opts.length))
-  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz'].includes(t.tab)))
+  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run'].includes(t.tab)))
   ok('the tour visits every tab', ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz']
     .every((t) => TOUR.some((s) => s.tab === t)))
   ok('quiz covers the material chain', QUIZ.some((q) => /purity|distill|polysilicon|particle/i.test(q.q)))
   ok('quiz covers real silicon', QUIZ.some((q) => /Cerebras|MI300X|wafer-scale/i.test(q.q)))
   ok('quiz covers the value chain', QUIZ.some((q) => /Arm|EUV scanners|Terafab/i.test(q.q)))
+  ok('quiz covers the fab simulation',
+    QUIZ.some((q) => /X-factor|cycle time|bottleneck|scanners/i.test(q.q)))
   ok('quiz covers 3D transistors and the thermal wall',
     QUIZ.some((q) => /CFET|backside power/i.test(q.q)) && QUIZ.some((q) => /3D memory|3D logic/i.test(q.q)))
-  ok('quiz covers compute and quantum', QUIZ.length >= 30 &&
+  ok('quiz covers compute and quantum', QUIZ.length >= 33 &&
     QUIZ.some((q) => /FP4|sparsity|precision/i.test(q.q)) &&
     QUIZ.some((q) => /qubit|surface code|threshold/i.test(q.q)))
 }
@@ -614,6 +616,112 @@ group('Quantum content')
   ok('threshold is the conventional 1%', THRESHOLD === 0.01)
 }
 
+/* ---------- fab simulation ---------- */
+group('Fab simulation')
+{
+  const { createFab, tick, metrics, snapshot, routeForLayer, defectDensity, toolCapex, TOOL_GROUPS, LOT_SIZE } =
+    await import(join(root, 'src/lib/fabengine.js'))
+
+  ok('every tool group is fully specified', TOOL_GROUPS.length === 8 && TOOL_GROUPS.every((g) =>
+    g.id && g.name && g.hours > 0 && g.tools > 0 && g.mtbf > 0 && g.mttr > 0 && g.capex > 0))
+  // Ticks are whole hours, so fractional process times were silently rounded
+  // up — which moved the constraint off lithography and looked plausible.
+  ok('process times are whole hours', TOOL_GROUPS.every((g) => Number.isInteger(g.hours)))
+  ok('lithography is by far the most expensive tool',
+    TOOL_GROUPS.find((g) => g.id === 'litho').capex >= 10 *
+    Math.max(...TOOL_GROUPS.filter((g) => g.id !== 'litho' && g.id !== 'metro').map((g) => g.capex)))
+
+  ok('a route visits the track twice — coat and develop',
+    routeForLayer(1, 70).filter((x) => x === 'track').length === 2)
+  ok('front-end layers implant, back-end layers deposit',
+    routeForLayer(5, 70).includes('implant') && routeForLayer(65, 70).includes('depo'))
+  ok('metrology is sampled, not on every layer',
+    routeForLayer(5, 70).includes('metro') && !routeForLayer(6, 70).includes('metro'))
+
+  // Determinism is what makes it debuggable and what makes these checks mean
+  // anything at all.
+  const runTo = (n, opts = {}) => {
+    const f = createFab({ seed: 42, layers: 70, ...opts })
+    for (let i = 0; i < n; i++) tick(f)
+    return f
+  }
+  const a = runTo(3000), b = runTo(3000)
+  ok('the same seed gives the same run',
+    a.stats.completed === b.stats.completed && a.t === b.t &&
+    Math.abs((a.done.at(-1)?.defects || 0) - (b.done.at(-1)?.defects || 0)) < 1e-9)
+  ok('a different seed gives a different run',
+    runTo(3000, { seed: 99 }).stats.completed !== undefined &&
+    JSON.stringify(runTo(3000, { seed: 99 }).events) !== JSON.stringify(a.events))
+
+  const long = runTo(20000)
+  const m = metrics(long)
+  ok('lots complete', long.stats.completed > 100, String(long.stats.completed))
+  ok('completed lots never exceed released', long.stats.completed <= long.stats.released)
+  ok('WIP stays bounded rather than exploding', m.wip < long.wipCap, String(m.wip))
+  ok('every lot in the line is queued or running exactly once', (() => {
+    const seen = new Set()
+    for (const g of long.groups) {
+      for (const l of g.queue) { if (seen.has(l.id)) return false; seen.add(l.id) }
+      for (const b of g.busy) { if (seen.has(b.lot.id)) return false; seen.add(b.lot.id) }
+    }
+    return seen.size === long.lots.length
+  })())
+
+  // Calibration. These are the numbers that make the simulation worth having,
+  // and a refactor that quietly moves them has broken it.
+  ok('lithography is the constraint', m.bottleneck.id === 'litho', m.bottleneck.id)
+  ok('the constraint runs hot but not saturated',
+    m.bottleneck.util > 0.85 && m.bottleneck.util < 0.99, (m.bottleneck.util * 100).toFixed(0) + "%")
+  ok('cycle time lands in the real 3–4 month band',
+    m.avgCycleDays > 80 && m.avgCycleDays < 140, `${m.avgCycleDays.toFixed(0)} days`)
+  ok('X-factor lands in the real 2–3 band',
+    m.xFactor > 1.8 && m.xFactor < 3.5, m.xFactor.toFixed(2))
+  ok('raw process time is roughly six weeks',
+    m.rawDays > 30 && m.rawDays < 55, `${m.rawDays.toFixed(0)} days`)
+  ok('one line produces on the order of 2,000 wafers a month',
+    m.wpm > 1200 && m.wpm < 3500, m.wpm.toFixed(0))
+  ok('cycle time exceeds raw process time', m.avgCycleDays > m.rawDays)
+  ok('Little\'s law holds — WIP ≈ throughput × cycle time', (() => {
+    const lotsPerDay = long.stats.completed / (long.t / 24)
+    return near(m.wip, lotsPerDay * m.avgCycleDays, m.wip * 0.25)
+  })())
+
+  const d0 = defectDensity(long.done.at(-1).defects)
+  ok('defect density lands near a mature-line D0',
+    d0 > 0.03 && d0 < 0.12, d0.toFixed(3))
+  ok('run-to-run control lowers defect density', (() => {
+    const on = defectDensity(runTo(20000, { apc: true }).done.at(-1).defects)
+    const off = defectDensity(runTo(20000, { apc: false }).done.at(-1).defects)
+    return off > on
+  })())
+  ok('tools fail and get repaired over a long run',
+    long.events.some((e) => e.kind === 'down'))
+  ok('excursions occur and are eventually caught',
+    long.events.some((e) => e.kind === 'excursion') && long.events.some((e) => e.kind === 'caught'))
+  ok('disabling excursions removes them',
+    !runTo(20000, { excursions: false }).events.some((e) => e.kind === 'excursion'))
+
+  ok('adding scanners raises output', (() => {
+    const few = metrics(runTo(12000, { toolCounts: { litho: 14 } }))
+    const many = metrics(runTo(12000, { toolCounts: { litho: 30 } }))
+    return many.wpm > few.wpm
+  })())
+  ok('starving the constraint makes it the constraint',
+    metrics(runTo(12000, { toolCounts: { litho: 10 } })).bottleneck.id === 'litho')
+
+  const snap = snapshot(long)
+  ok('the snapshot is a plain object with no live references',
+    typeof snap.t === 'number' && Array.isArray(snap.metrics.groups) &&
+    snap.metrics.groups.every((g) => typeof g.util === 'number') &&
+    !('queue' in snap.metrics.groups[0]) && !('busy' in snap.metrics.groups[0]))
+  ok('the snapshot survives serialisation', (() => {
+    try { return JSON.parse(JSON.stringify(snap)).t === snap.t } catch { return false }
+  })())
+  ok('tool capital is in the billions for a leading-edge line',
+    toolCapex(long.groups) > 3000 && toolCapex(long.groups) < 12000)
+  ok('a lot is 25 wafers', LOT_SIZE === 25)
+}
+
 /* ---------- pipeline ---------- */
 group('Pipeline')
 {
@@ -688,6 +796,7 @@ group('Build output')
       ok('author meta tag shipped', html.includes('name="author"') && html.includes('Abhay Bhuva'))
       ok('the provenance note shipped', bundle.includes('Anthropic') && bundle.includes('publicly available'))
       ok('the no-confidential-data statement shipped', /confidential/i.test(bundle))
+      ok('the fab simulation shipped', bundle.includes('X-factor') || bundle.includes('bottleneck'))
       ok('the 3D architecture ladder shipped', bundle.includes('CFET') && bundle.includes('Forksheet'))
       ok('backside power shipped', bundle.includes('PowerVia') || bundle.includes('Backside power'))
       ok('no stray non-latin characters in the copy', !/[\u4e00-\u9fff\u3040-\u30ff]/.test(bundle))

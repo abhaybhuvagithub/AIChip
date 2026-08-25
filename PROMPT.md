@@ -307,3 +307,39 @@ job, no linting, and a smoke test living in `/tmp` and run by hand.
   that CI is read-only, that jobs have timeouts, that deploy is gated on CI and
   only runs from main, that it re-verifies before publishing and confirms
   afterwards.
+
+---
+
+## Eighth pass: simulating the line
+
+The brief was to simulate what actually happens inside a fab. The site had
+seventeen clickable process modules, which is a diagram, not a simulation.
+
+- **A fab is a queueing problem, so it needed a queueing simulation.** Not a
+  formula. Lots of 25 wafers, 70 mask layers, a real route per layer, eight
+  tool groups with MTBF-based failures, defects accumulating per step, and
+  excursions that run undetected until a sampled lot reaches metrology. One
+  tick is one hour and the seed is fixed.
+- **Three bugs, each instructive.** Released lots were never pushed into the
+  first queue, so WIP climbed forever and utilisation stayed at zero — visible
+  immediately because the numbers were checked against reality rather than
+  eyeballed. Then `Math.round(1.5)` silently turned a 1.5-hour track into a
+  2-hour one and moved the constraint off lithography: a wrong answer that
+  looked entirely plausible. Process times are whole hours now, and a verify
+  check asserts it.
+- **Calibrate, then let the numbers fall out.** The tool set was sized so
+  lithography is the constraint, because that is what it is in a real fab. The
+  operating point then produced a 110-day cycle time, an X-factor of 2.7 and
+  D0 ≈ 0.06 without any of those being fitted. Verify pins all four plus
+  Little's law, so a refactor cannot quietly make the simulation unrealistic
+  while still passing.
+- **The lint caught a real architectural error.** The first version held the
+  mutating simulation in a ref and read it during render — which can paint a
+  half-updated line and does not trigger updates. The fix was a snapshot: the
+  loop mutates, then publishes a plain serialisable object, and render reads
+  only that. Configuration changes remount the component so its state
+  initialiser rebuilds the line, rather than a reset effect. That is better
+  code, not a silenced warning.
+- **The budget rose from 115 kB to 125 kB**, and says why in the file. An
+  engine plus a live dashboard is about 9 kB gzipped and is the largest single
+  feature here.

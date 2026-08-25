@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import FabLine from './ui/FabLine.jsx'
+import FabRun from './ui/FabRun.jsx'
 import YieldLab from './ui/YieldLab.jsx'
 import Economics from './ui/Economics.jsx'
 import NodesView from './ui/Nodes.jsx'
@@ -16,6 +17,7 @@ import { PRODUCTS } from './data/nodes.js'
 const TABS = [
   { id: 'sand', label: 'Sand → silicon' },
   { id: 'line', label: 'Fab line' },
+  { id: 'run', label: 'Fab run' },
   { id: 'wafer', label: 'Yield lab' },
   { id: 'economics', label: 'Economics' },
   { id: 'nodes', label: 'Nodes' },
@@ -114,6 +116,7 @@ export default function App() {
       <main className="page">
         {tab === 'sand' && <SandToSilicon cfg={cfg} />}
         {tab === 'line' && <FabLine />}
+        {tab === 'run' && <FabRun cfg={cfg} />}
         {tab === 'wafer' && <YieldLab cfg={cfg} patch={patch} />}
         {tab === 'economics' && <Economics cfg={cfg} patch={patch} />}
         {tab === 'nodes' && <NodesView />}
