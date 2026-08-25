@@ -20,12 +20,12 @@ function Section({ id }) {
   return (
     <svg viewBox="0 0 200 120" width="100%" height="200" role="img" aria-label={`Cross-section: ${id}`}>
       <rect x="0" y="98" width="200" height="22" fill={sub} />
-      <text x="6" y="113" fill="var(--muted)" style={{ fontSize: 7, fontFamily: 'var(--font-mono)' }}>substrate</text>
+      <text x="6" y="113" fill="var(--muted)" style={{ fontSize: 8.5, fontFamily: 'var(--font-mono)' }}>substrate</text>
 
       {id === 'planar' && (<>
         <rect x="30" y="86" width="140" height="12" fill={chan} opacity=".55" />
         <rect x="55" y="72" width="90" height="14" fill={gate} />
-        <text x="100" y="66" textAnchor="middle" fill={gate} style={{ fontSize: 8, fontFamily: 'var(--font-mono)' }}>gate on 1 side</text>
+        <text x="100" y="66" textAnchor="middle" fill={gate} style={{ fontSize: 9.5, fontFamily: 'var(--font-mono)' }}>gate on 1 side</text>
       </>)}
 
       {id === 'finfet' && (<>
@@ -35,7 +35,7 @@ function Section({ id }) {
             <path d={`M ${x - 13} 98 L ${x - 13} 38 L ${x + 13} 38 L ${x + 13} 98`} fill="none" stroke={gate} strokeWidth="7" />
           </g>
         ))}
-        <text x="100" y="28" textAnchor="middle" fill={gate} style={{ fontSize: 8, fontFamily: 'var(--font-mono)' }}>gate on 3 sides · fins</text>
+        <text x="100" y="28" textAnchor="middle" fill={gate} style={{ fontSize: 9.5, fontFamily: 'var(--font-mono)' }}>gate on 3 sides · fins</text>
       </>)}
 
       {id === 'nanosheet' && (<>
@@ -45,7 +45,7 @@ function Section({ id }) {
             <rect x="56" y={y - 6} width="88" height="20" fill="none" stroke={gate} strokeWidth="4" rx="4" />
           </g>
         ))}
-        <text x="100" y="30" textAnchor="middle" fill={gate} style={{ fontSize: 8, fontFamily: 'var(--font-mono)' }}>gate wraps all 4 sides</text>
+        <text x="100" y="30" textAnchor="middle" fill={gate} style={{ fontSize: 9.5, fontFamily: 'var(--font-mono)' }}>gate wraps all 4 sides</text>
       </>)}
 
       {id === 'forksheet' && (<>
@@ -58,7 +58,7 @@ function Section({ id }) {
             <path d={`M 103 ${y - 6} L 166 ${y - 6} L 166 ${y + 14} L 103 ${y + 14}`} fill="none" stroke={gate} strokeWidth="3.5" />
           </g>
         ))}
-        <text x="100" y="26" textAnchor="middle" fill={wall} style={{ fontSize: 8, fontFamily: 'var(--font-mono)' }}>dielectric wall between n and p</text>
+        <text x="100" y="26" textAnchor="middle" fill={wall} style={{ fontSize: 9.5, fontFamily: 'var(--font-mono)' }}>dielectric wall between n and p</text>
       </>)}
 
       {id === 'cfet' && (<>
@@ -68,7 +68,7 @@ function Section({ id }) {
             <rect x="60" y={y - 5} width="80" height="17" fill="none" stroke={gate} strokeWidth="3" rx="3" />
           </g>
         ))}
-        <text x="150" y="42" fill={gate} style={{ fontSize: 7, fontFamily: 'var(--font-mono)' }}>n</text>
+        <text x="150" y="42" fill={gate} style={{ fontSize: 8.5, fontFamily: 'var(--font-mono)' }}>n</text>
         <line x1="30" y1="64" x2="170" y2="64" stroke="var(--border)" strokeWidth="1" strokeDasharray="3 2" />
         {[70, 84].map((y) => (
           <g key={y}>
@@ -76,8 +76,8 @@ function Section({ id }) {
             <rect x="60" y={y - 5} width="80" height="17" fill="none" stroke={gate} strokeWidth="3" rx="3" />
           </g>
         ))}
-        <text x="150" y="82" fill={gate} style={{ fontSize: 7, fontFamily: 'var(--font-mono)' }}>p</text>
-        <text x="100" y="20" textAnchor="middle" fill={gate} style={{ fontSize: 8, fontFamily: 'var(--font-mono)' }}>n stacked on p — one cell, two levels</text>
+        <text x="150" y="82" fill={gate} style={{ fontSize: 8.5, fontFamily: 'var(--font-mono)' }}>p</text>
+        <text x="100" y="20" textAnchor="middle" fill={gate} style={{ fontSize: 9.5, fontFamily: 'var(--font-mono)' }}>n stacked on p — one cell, two levels</text>
       </>)}
 
       {id === '2d' && (<>
@@ -87,7 +87,7 @@ function Section({ id }) {
             <rect x="58" y={y - 7} width="84" height="16" fill="none" stroke={gate} strokeWidth="3" rx="3" />
           </g>
         ))}
-        <text x="100" y="28" textAnchor="middle" fill={gate} style={{ fontSize: 8, fontFamily: 'var(--font-mono)' }}>monolayer channel — 3 atoms thick</text>
+        <text x="100" y="28" textAnchor="middle" fill={gate} style={{ fontSize: 9.5, fontFamily: 'var(--font-mono)' }}>monolayer channel — 3 atoms thick</text>
       </>)}
     </svg>
   )
@@ -132,7 +132,7 @@ export default function Beyond3D({ cfg }) {
           <div className="wafer-stage" style={{ minHeight: 0, marginTop: 10, padding: 8 }}>
             <Section id={a.id} />
           </div>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 22, letterSpacing: '-.02em', marginTop: 12 }}>{a.name}</h3>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 25, letterSpacing: '-.02em', marginTop: 12 }}>{a.name}</h3>
           <div className="one">{a.one}</div>
           <p>{a.what}</p>
         </div>
@@ -185,8 +185,8 @@ export default function Beyond3D({ cfg }) {
               {STATUS[BACKSIDE.status].label}
             </span>
           </div>
-          <p style={{ fontSize: 14.5, lineHeight: 1.62, marginTop: 10 }}>{BACKSIDE.what}</p>
-          <p className="phys" style={{ fontSize: 14.5, lineHeight: 1.62 }}>{BACKSIDE.how}</p>
+          <p style={{ fontSize: 16.5, lineHeight: 1.62, marginTop: 10 }}>{BACKSIDE.what}</p>
+          <p className="phys" style={{ fontSize: 16.5, lineHeight: 1.62 }}>{BACKSIDE.how}</p>
         </div>
         <div className="card">
           <dl className="kv">
@@ -228,7 +228,7 @@ export default function Beyond3D({ cfg }) {
         <div className="grid g3">
           <div className="stat hi">
             <div className="k">Power density</div>
-            <div className="v">{fmt.n(th.density, 2)}<span style={{ fontSize: 15 }}> W/mm²</span></div>
+            <div className="v">{fmt.n(th.density, 2)}<span style={{ fontSize: 17 }}> W/mm²</span></div>
             <div className="sub">{watts(th.totalW)} over {fmt.n(areaMm2, 0)} mm²</div>
           </div>
           <div className="stat">
@@ -238,7 +238,7 @@ export default function Beyond3D({ cfg }) {
           </div>
           <div className={`stat ${th.beyondAll ? 'bad' : 'ok'}`}>
             <div className="k">Cooling required</div>
-            <div className="v" style={{ fontSize: 17 }}>{th.needed ? th.needed.name : 'Nothing known'}</div>
+            <div className="v" style={{ fontSize: 19 }}>{th.needed ? th.needed.name : 'Nothing known'}</div>
             <div className="sub">{th.beyondAll ? 'beyond every approach listed' : `${fmt.n(th.headroom, 1)}× headroom`}</div>
           </div>
         </div>

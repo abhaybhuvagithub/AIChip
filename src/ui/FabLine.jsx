@@ -107,7 +107,7 @@ export default function FabLine() {
         ].map(([k, v]) => (
           <div className="stat" key={k}>
             <div className="k">{k}</div>
-            <div className="sub" style={{ fontSize: 14, color: 'var(--text)', marginTop: 6 }}>{v}</div>
+            <div className="sub" style={{ fontSize: 16, color: 'var(--text)', marginTop: 6 }}>{v}</div>
           </div>
         ))}
       </div>

@@ -121,7 +121,7 @@ export default function SandToSilicon({ cfg }) {
           <div className="eyebrow">Stage {String(i + 1).padStart(2, '0')} · {s.temp}</div>
           <h3>{s.name}</h3>
           <div className="one" style={{ fontFamily: 'var(--font-mono)' }}>{s.formula}</div>
-          <p style={{ color: 'var(--accent)', fontSize: 15, marginBottom: 12 }}>{s.one}</p>
+          <p style={{ color: 'var(--accent)', fontSize: 17, marginBottom: 12 }}>{s.one}</p>
           <p>{s.what}</p>
           <p className="phys">{s.chem}</p>
         </div>

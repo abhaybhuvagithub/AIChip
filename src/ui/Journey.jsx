@@ -92,7 +92,7 @@ export default function Journey({ narrate, setNarrate }) {
         <input className="path-scrub" type="range" min="0" max={view.length - 1} step="1" value={idx}
           onChange={(e) => { setPlaying(false); setI(+e.target.value) }}
           aria-label="Scrub through the process path" />
-        <div className="row" style={{ justifyContent: 'space-between', fontSize: 12, color: 'var(--muted)' }}>
+        <div className="row" style={{ justifyContent: 'space-between', fontSize: 14, color: 'var(--muted)' }}>
           <span>Step {fmt.n(idx + 1)} of {fmt.n(view.length)}</span>
           <span>{fmt.n(s.cumHours)} h elapsed · {fmt.n(s.cumDistance / 1000, 2)} km travelled</span>
         </div>
@@ -112,8 +112,8 @@ export default function Journey({ narrate, setNarrate }) {
             </div>
             <span className="badge">{s.temp} °C</span>
           </div>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 23, letterSpacing: '-.02em', marginTop: 4 }}>{s.name}</h3>
-          <div className="one" style={{ fontFamily: 'var(--font-mono)', fontSize: 13 }}>{s.tool}</div>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 26, letterSpacing: '-.02em', marginTop: 4 }}>{s.name}</h3>
+          <div className="one" style={{ fontFamily: 'var(--font-mono)', fontSize: 15 }}>{s.tool}</div>
           <p style={{ marginTop: 10 }}>{s.what}</p>
           {s.levelLabel && <span className="badge on">{s.levelLabel}</span>}
         </div>
@@ -149,7 +149,7 @@ export default function Journey({ narrate, setNarrate }) {
         </div>
         <div className="stat">
           <div className="k">Distance travelled</div>
-          <div className="v">{fmt.n(totals.km, 1)}<span style={{ fontSize: 15 }}> km</span></div>
+          <div className="v">{fmt.n(totals.km, 1)}<span style={{ fontSize: 17 }}> km</span></div>
           <div className="sub">without leaving the building</div>
         </div>
       </div>

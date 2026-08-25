@@ -827,6 +827,46 @@ group('Fab simulation')
   ok('a lot is 25 wafers', LOT_SIZE === 25)
 }
 
+/* ---------- legibility ---------- */
+group('Legibility')
+{
+  // Text below about 13px is uncomfortable on a laptop and unreadable on a
+  // phone, and this site drifted well under that — 10px and 10.5px labels
+  // shipped for several passes before anyone said so. A floor, enforced.
+  const FLOOR = 13
+  const css = readFileSync(join(root, 'src/styles.css'), 'utf8')
+
+  const cssSizes = [...css.matchAll(/font-size: *([0-9.]+)px/g)].map((m) => parseFloat(m[1]))
+  ok('every stylesheet font-size is at least 13px',
+    cssSizes.every((v) => v >= FLOOR),
+    cssSizes.filter((v) => v < FLOOR).join(', '))
+  ok('the stylesheet actually sets a base size', /body \{[^}]*font-size/.test(css))
+  ok('body copy is at least 16px', (() => {
+    const m = css.match(/body \{[^}]*font-size: *([0-9.]+)px/)
+    return m && parseFloat(m[1]) >= 16
+  })())
+
+  // Inline styles too. Values under 10 are SVG user units inside a viewBox,
+  // not pixels, so they are exempt — everything else is a real font size.
+  const jsxFiles = ['App.jsx', ...readdirSync(join(root, 'src/ui')).map((f) => `ui/${f}`)]
+    .filter((f) => f.endsWith('.jsx'))
+  const offenders = []
+  for (const f of jsxFiles) {
+    const t = readFileSync(join(root, 'src', f), 'utf8')
+    for (const m of t.matchAll(/fontSize: ([0-9.]+)\b/g)) {
+      const v = parseFloat(m[1])
+      if (v >= 10 && v < FLOOR) offenders.push(`${f}:${v}`)
+    }
+  }
+  ok('every inline pixel font size is at least 13px', offenders.length === 0, offenders.join(', '))
+
+  ok('the page title scales with the viewport', /clamp\(/.test(css))
+  ok('body line-height leaves room to read', (() => {
+    const m = css.match(/body \{[^}]*line-height: *([0-9.]+)/)
+    return m && parseFloat(m[1]) >= 1.5
+  })())
+}
+
 /* ---------- pipeline ---------- */
 group('Pipeline')
 {

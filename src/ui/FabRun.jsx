@@ -34,7 +34,7 @@ function DieBuild({ layer, totalLayers }) {
       <g key={`m${m}`}>
         <rect x="4" y={y - 1} width="192" height={h + 2} fill="var(--panel2)" opacity=".5" />
         {bars}
-        <text x="199" y={y + h} textAnchor="end" fill="var(--muted)" style={{ fontSize: 3.2, fontFamily: 'var(--font-mono)' }}>M{m + 1}</text>
+        <text x="199" y={y + h} textAnchor="end" fill="var(--muted)" style={{ fontSize: 4, fontFamily: 'var(--font-mono)' }}>M{m + 1}</text>
       </g>
     )
   }
@@ -44,7 +44,7 @@ function DieBuild({ layer, totalLayers }) {
       aria-label={`Die cross-section at layer ${layer} of ${totalLayers}`}>
       {/* Substrate */}
       <rect x="4" y="118" width="192" height="10" fill="var(--panel2)" />
-      <text x="8" y="125.5" fill="var(--muted)" style={{ fontSize: 3.4, fontFamily: 'var(--font-mono)' }}>Si substrate</text>
+      <text x="8" y="125.5" fill="var(--muted)" style={{ fontSize: 4.2, fontFamily: 'var(--font-mono)' }}>Si substrate</text>
 
       {/* FEOL: wells, then fins/sheets, then the gate stack, then contacts. */}
       {feolProgress > 0.1 && [30, 70, 110, 150].map((x) => (
@@ -65,13 +65,13 @@ function DieBuild({ layer, totalLayers }) {
         </g>
       ))}
       {feolProgress > 0.1 && (
-        <text x="199" y="110" textAnchor="end" fill="var(--muted)" style={{ fontSize: 3.2, fontFamily: 'var(--font-mono)' }}>FEOL</text>
+        <text x="199" y="110" textAnchor="end" fill="var(--muted)" style={{ fontSize: 4, fontFamily: 'var(--font-mono)' }}>FEOL</text>
       )}
 
       {rows}
 
       {layer >= totalLayers && (
-        <text x="100" y="14" textAnchor="middle" fill="var(--ok)" style={{ fontSize: 6, fontFamily: 'var(--font-mono)' }}>
+        <text x="100" y="14" textAnchor="middle" fill="var(--ok)" style={{ fontSize: 7.5, fontFamily: 'var(--font-mono)' }}>
           stack complete
         </text>
       )}
@@ -167,7 +167,7 @@ function Line({ cfg, counts, apc, metroSample, running, speed, setCount, setMetr
             </div>
             <div className="stat">
               <div className="k">Cycle time</div>
-              <div className="v">{m.avgCycleDays > 0 ? fmt.n(m.avgCycleDays, 0) : '—'}<span style={{ fontSize: 15 }}> d</span></div>
+              <div className="v">{m.avgCycleDays > 0 ? fmt.n(m.avgCycleDays, 0) : '—'}<span style={{ fontSize: 17 }}> d</span></div>
               <div className="sub">raw process time is {fmt.n(m.rawDays, 0)} d</div>
             </div>
             <div className={`stat ${m.xFactor > 3.5 ? 'bad' : m.xFactor > 0 ? 'ok' : ''}`}>
@@ -182,7 +182,7 @@ function Line({ cfg, counts, apc, metroSample, running, speed, setCount, setMetr
             </div>
             <div className="stat">
               <div className="k">Bottleneck</div>
-              <div className="v" style={{ fontSize: 19 }}>{m.bottleneckName}</div>
+              <div className="v" style={{ fontSize: 21 }}>{m.bottleneckName}</div>
               <div className="sub">{fmt.pct(m.bottleneckUtil)} utilised</div>
             </div>
             <div className="stat">
@@ -202,7 +202,7 @@ function Line({ cfg, counts, apc, metroSample, running, speed, setCount, setMetr
           {m.groups.map((g) => (
             <div key={g.id} style={{ marginBottom: 9 }}>
               <div className="row" style={{ justifyContent: 'space-between', gap: 6, flexWrap: 'nowrap' }}>
-                <span style={{ fontSize: 13.5, minWidth: 0 }}>
+                <span style={{ fontSize: 15, minWidth: 0 }}>
                   <span style={{ color: g.excursion > 0 ? 'var(--warn)' : 'var(--accent)', marginRight: 6 }}>{g.glyph}</span>
                   {g.name}
                   {g.id === m.bottleneckId && <span className="badge on" style={{ marginLeft: 6 }}>constraint</span>}
@@ -210,7 +210,7 @@ function Line({ cfg, counts, apc, metroSample, running, speed, setCount, setMetr
                 </span>
                 <span className="row" style={{ gap: 4, flexWrap: 'nowrap' }}>
                   <button className="btn sm" onClick={() => setCount(g.id, counts[g.id] - 1)} aria-label={`Remove a ${g.name} tool`}>−</button>
-                  <b style={{ fontFamily: 'var(--font-mono)', fontSize: 13, minWidth: 22, textAlign: 'center' }}>{g.tools}</b>
+                  <b style={{ fontFamily: 'var(--font-mono)', fontSize: 15, minWidth: 22, textAlign: 'center' }}>{g.tools}</b>
                   <button className="btn sm" onClick={() => setCount(g.id, counts[g.id] + 1)} aria-label={`Add a ${g.name} tool`}>+</button>
                 </span>
               </div>
@@ -220,7 +220,7 @@ function Line({ cfg, counts, apc, metroSample, running, speed, setCount, setMetr
                   background: g.util > 0.9 ? 'var(--bad)' : g.util > 0.75 ? 'var(--warn)' : 'var(--ok)',
                 }} />
               </div>
-              <div className="small" style={{ fontSize: 11.5, marginTop: 2 }}>
+              <div className="small" style={{ fontSize: 13.5, marginTop: 2 }}>
                 {fmt.pct(g.util, 0)} busy · {g.queued} lots queued · ${g.capex}M each
               </div>
             </div>

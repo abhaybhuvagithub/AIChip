@@ -36,9 +36,9 @@ function ToScale({ parts, sel, onPick }) {
         )
       })}
       <text x="0" y={-RETICLE.y / 2 - 4} textAnchor="middle" fill="var(--muted)"
-        style={{ fontSize: 6, fontFamily: 'var(--font-mono)' }}>reticle field</text>
+        style={{ fontSize: 7.5, fontFamily: 'var(--font-mono)' }}>reticle field</text>
       <text x="0" y={R + 12} textAnchor="middle" fill="var(--muted)"
-        style={{ fontSize: 7, fontFamily: 'var(--font-mono)' }}>300 mm wafer</text>
+        style={{ fontSize: 8.5, fontFamily: 'var(--font-mono)' }}>300 mm wafer</text>
     </svg>
   )
 }
@@ -106,9 +106,9 @@ export default function Silicon({ cfg, patch, goTab }) {
             </div>
             <span className="badge">{CATEGORIES[s.cat]}</span>
           </div>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 23, letterSpacing: '-.02em', marginTop: 4 }}>{s.name}</h3>
-          <div style={{ color: MAKERS[s.maker].hue, fontSize: 14, margin: '4px 0 12px' }}>{s.notable}</div>
-          <p style={{ fontSize: 14.5, lineHeight: 1.6 }}>{s.what}</p>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 26, letterSpacing: '-.02em', marginTop: 4 }}>{s.name}</h3>
+          <div style={{ color: MAKERS[s.maker].hue, fontSize: 16, margin: '4px 0 12px' }}>{s.notable}</div>
+          <p style={{ fontSize: 16.5, lineHeight: 1.6 }}>{s.what}</p>
 
           <dl className="kv" style={{ marginTop: 12 }}>
             <dt>Made by</dt><dd>{s.foundry} · {s.node}</dd>

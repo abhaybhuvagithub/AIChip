@@ -91,7 +91,10 @@ plus the checks that stop the feature regressing.
 > - An error boundary that explains what broke and offers a way back, never a
 >   blank page.
 > - Keyboard focus visible, ARIA labels on every control, semantic headings,
->   responsive to 360 px.
+>   responsive to 360 px, and **no text below 13px anywhere** — body copy at
+>   16px or more. Enforce the floor with a check; dense, data-heavy interfaces
+>   drift small one component at a time and nobody notices until a reader says
+>   they cannot read it.
 > - Comments that explain *why*, especially where a non-obvious choice was
 >   made or a trap was avoided. No comments that restate the code.
 > - CI that builds, verifies, and deploys on every push to `main`. A failing
@@ -376,3 +379,26 @@ seventeen clickable process modules, which is a diagram, not a simulation.
 - **Voice is browser-native and honestly gated.** Speech synthesis is broadly
   supported; recognition is Chromium-only. Controls that would not work are
   hidden rather than offered and failing.
+
+---
+
+## Tenth pass: legibility
+
+The user said the type was too small to read. They were right, and it had been
+wrong for nine passes.
+
+- **It drifted rather than being decided.** Nothing chose 10.5px labels; each
+  new component was written a half-step smaller than the last to fit more data
+  on screen, and the audit found sizes at 10, 10.5, 11 and 11.5px across the
+  stylesheet and inline styles. A dense interface degrades this way by default.
+- **Fixed with one scale, not with sed on the complaints.** A single mapping
+  applied to every font size in the project, so the proportions between
+  headings, body, labels and data survive the change. Body went to 16.5px with
+  a 1.6 line-height; the smallest mono labels went to 13px.
+- **Then the layout had to follow.** Larger type does not fit in cards sized
+  for smaller type, so the process cards, chain links, God-view nodes and the
+  assistant panel were all widened to match.
+- **A floor check, and proof it works.** Verify now rejects any CSS or inline
+  font size below 13px, with SVG user units exempted since they are not
+  pixels. I deliberately reintroduced a 10px label to confirm the check fired
+  and named the offender before shipping it — an untested guard is not a guard.

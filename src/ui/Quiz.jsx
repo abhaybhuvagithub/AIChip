@@ -47,7 +47,7 @@ export default function Quiz() {
       {done === QUIZ.length && (
         <div className="card" style={{ marginTop: 16, borderColor: 'var(--accent)' }}>
           <div className="eyebrow">Result</div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, letterSpacing: '-.02em' }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 32, letterSpacing: '-.02em' }}>
             {score} / {QUIZ.length}
           </div>
           <p className="small" style={{ marginTop: 8 }}>

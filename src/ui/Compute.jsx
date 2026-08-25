@@ -184,7 +184,7 @@ export default function Compute({ cfg, patch }) {
       <div className="grid g2">
         <div className="card">
           <div className="eyebrow">Three levers, not one</div>
-          <p style={{ fontSize: 14.5, lineHeight: 1.62 }}>
+          <p style={{ fontSize: 16.5, lineHeight: 1.62 }}>
             Density is the slowest of the three and the only one that needs a new node. Narrowing
             precision and counting sparsity are both available on existing silicon, and both were
             spent aggressively over the last few years. That is why a datasheet figure can quadruple
@@ -193,7 +193,7 @@ export default function Compute({ cfg, patch }) {
         </div>
         <div className="card">
           <div className="eyebrow">And why it will stop</div>
-          <p style={{ fontSize: 14.5, lineHeight: 1.62 }}>
+          <p style={{ fontSize: 16.5, lineHeight: 1.62 }}>
             Precision has a floor — below four bits the arithmetic stops being useful for most work —
             and sparsity can only be claimed once. After that, throughput growth comes back to
             density, packaging and power, which is where the reticle limit and the wall socket are

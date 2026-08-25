@@ -82,12 +82,12 @@ export default function GodView({ cfg, snap, goTab }) {
               </div>
               <div className="stat">
                 <div className="k">Constraint</div>
-                <div className="v" style={{ fontSize: 18 }}>{snap.metrics.bottleneckName}</div>
+                <div className="v" style={{ fontSize: 20 }}>{snap.metrics.bottleneckName}</div>
                 <div className="sub">{fmt.pct(snap.metrics.bottleneckUtil)} utilised</div>
               </div>
               <div className={`stat ${snap.metrics.xFactor > 3.5 ? 'bad' : ''}`}>
                 <div className="k">Cycle time</div>
-                <div className="v">{snap.metrics.avgCycleDays > 0 ? fmt.n(snap.metrics.avgCycleDays, 0) : '—'}<span style={{ fontSize: 14 }}> d</span></div>
+                <div className="v">{snap.metrics.avgCycleDays > 0 ? fmt.n(snap.metrics.avgCycleDays, 0) : '—'}<span style={{ fontSize: 16 }}> d</span></div>
                 <div className="sub">X-factor {snap.metrics.xFactor > 0 ? fmt.n(snap.metrics.xFactor, 2) : '—'}</div>
               </div>
             </div>
@@ -106,7 +106,7 @@ export default function GodView({ cfg, snap, goTab }) {
               <div className="eyebrow">Latest from the floor</div>
               {snap.events.slice(0, 4).map((e, i) => (
                 <div key={i} className="small" style={{ marginTop: 6 }}>
-                  <span style={{ color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: 11 }}>day {fmt.n(e.t / 24, 0)} </span>
+                  <span style={{ color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>day {fmt.n(e.t / 24, 0)} </span>
                   {e.text}
                 </div>
               ))}
@@ -126,13 +126,13 @@ export default function GodView({ cfg, snap, goTab }) {
         <div className={`stat ${run.dieYield > 0.7 ? 'ok' : 'bad'}`}><div className="k">Yield</div><div className="v">{fmt.pct(run.dieYield)}</div><div className="sub">{run.modelMeta.label} at D₀ {cfg.d0}</div></div>
         <div className="stat"><div className="k">Cost per good die</div><div className="v">{fmt.usd(run.costPerGoodDie)}</div><div className="sub">silicon plus package</div></div>
         <div className="stat"><div className="k">Quartzite</div><div className="v">{trace.ok ? grams(trace.quartzite) : '—'}</div><div className="sub">per shipped part</div></div>
-        <div className="stat"><div className="k">Energy</div><div className="v">{trace.ok ? fmt.n(trace.energy, 2) : '—'}<span style={{ fontSize: 14 }}> kWh</span></div><div className="sub">materials plus fab</div></div>
-        <div className="stat"><div className="k">Compute</div><div className="v" style={{ fontSize: 20 }}>{ops(thr.opsPerDie)}</div><div className="sub">peak {thr.prec.label}</div></div>
-        <div className="stat"><div className="k">Per watt</div><div className="v" style={{ fontSize: 20 }}>{ops(thr.opsPerWatt, 2)}</div><div className="sub">{watts(c.wattsPerDie)} per die</div></div>
-        <div className={`stat ${th.beyondAll ? 'bad' : ''}`}><div className="k">Cooling class</div><div className="v" style={{ fontSize: 16 }}>{th.needed ? th.needed.name : 'beyond all'}</div><div className="sub">{fmt.n(th.density, 2)} W/mm²</div></div>
+        <div className="stat"><div className="k">Energy</div><div className="v">{trace.ok ? fmt.n(trace.energy, 2) : '—'}<span style={{ fontSize: 16 }}> kWh</span></div><div className="sub">materials plus fab</div></div>
+        <div className="stat"><div className="k">Compute</div><div className="v" style={{ fontSize: 22 }}>{ops(thr.opsPerDie)}</div><div className="sub">peak {thr.prec.label}</div></div>
+        <div className="stat"><div className="k">Per watt</div><div className="v" style={{ fontSize: 22 }}>{ops(thr.opsPerWatt, 2)}</div><div className="sub">{watts(c.wattsPerDie)} per die</div></div>
+        <div className={`stat ${th.beyondAll ? 'bad' : ''}`}><div className="k">Cooling class</div><div className="v" style={{ fontSize: 18 }}>{th.needed ? th.needed.name : 'beyond all'}</div><div className="sub">{fmt.n(th.density, 2)} W/mm²</div></div>
         <div className="stat"><div className="k">Journey</div><div className="v">{fmt.n(journey.steps)}</div><div className="sub">steps, {fmt.n(journey.km, 1)} km travelled</div></div>
-        <div className="stat"><div className="k">Process time</div><div className="v">{fmt.n(journey.days, 0)}<span style={{ fontSize: 14 }}> d</span></div><div className="sub">before any queueing</div></div>
-        <div className="stat"><div className="k">Peak temperature</div><div className="v">{fmt.n(journey.peakTemp)}<span style={{ fontSize: 14 }}> °C</span></div><div className="sub">crystal growth</div></div>
+        <div className="stat"><div className="k">Process time</div><div className="v">{fmt.n(journey.days, 0)}<span style={{ fontSize: 16 }}> d</span></div><div className="sub">before any queueing</div></div>
+        <div className="stat"><div className="k">Peak temperature</div><div className="v">{fmt.n(journey.peakTemp)}<span style={{ fontSize: 16 }}> °C</span></div><div className="sub">crystal growth</div></div>
       </div>
 
       <p className="small" style={{ marginTop: 16, maxWidth: '62ch' }}>

@@ -163,7 +163,7 @@ that fails fastest:
 | --- | --- |
 | `npm run lint` | Dead imports, unused props, hook misuse. Found three real bugs the first time it ran. |
 | `npm run build` | Anything that does not compile. |
-| `npm run verify` | 350 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
+| `npm run verify` | 356 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
 | `npm run smoke` | Renders all thirteen tabs across five configurations, including an unmakeable die and a zero-yield process. Catches components that throw on first render, and output that leaks `NaN` or `undefined` — which reads as broken while passing every other check. |
 | `npm run budget` | Bundle size against a gzipped budget. This bundle grew 206 kB → 331 kB across six feature passes with nothing watching. |
 
@@ -183,9 +183,10 @@ publish means the push succeeded, not that the bytes are being served — a
 sister repo shipped the previous build for weeks with green checks the whole
 time, because nothing closed that loop.
 
-`npm run verify` runs 350 checks across wafer geometry, yield model
+`npm run verify` runs 356 checks across wafer geometry, yield model
 correctness (pinned against hand-computed values), economics invariants,
-defect scatter determinism, architecture and thermal-wall arithmetic, material
+defect scatter determinism, a 13px legibility floor across the stylesheet and
+every inline style, architecture and thermal-wall arithmetic, material
 chain mass balance, published specs for real parts, value-chain sourcing
 separation, the pipeline configuration itself, compute-model
 calibration, surface code arithmetic, content completeness, and the contents of the built bundle. A
