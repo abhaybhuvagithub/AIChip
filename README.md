@@ -9,8 +9,9 @@ Five tabs:
 
 | Tab | What it does |
 | --- | --- |
+| **God view ✨** | One configuration, every consequence — the chain from quartzite through wafer, fab, die, cost and compute on a single screen, with the live line if it is running. Every figure computed from the same die; nothing entered. |
 | **Sand → silicon** | The material chain from quartz rock to a finished die, running by itself — no clicking required. A purity ladder on a log scale, and a mass and energy balance worked backwards from the die you configured. Plus what replaces the people: FOUPs, overhead hoist transport, SECS/GEM, run-to-run control. |
-| **Fab run** | A discrete-event simulation of one production line, one hour per tick. Lots of 25 wafers walk 70 mask layers, queue at eight tool groups that occasionally break, and accumulate defects. Left alone it settles at a 110-day cycle time with lithography as the constraint at 94% — and the defect density it earns feeds straight into the yield lab. |
+| **Fab run** | Two modes. **Travel path** follows one wafer through all 626 process steps from rock to marked part — every repeat listed, with optional spoken narration. **The line** is a discrete-event simulation of one production line, one hour per tick. Lots of 25 wafers walk 70 mask layers, queue at eight tool groups that occasionally break, and accumulate defects. Left alone it settles at a 110-day cycle time with lithography as the constraint at 94% — and the defect density it earns feeds straight into the yield lab. |
 | **Fab line** | The 17 modules a wafer passes through, from crystal growth to final test. Each opens up into physics, tools, failure modes and duration. A "run a lot" button walks the line. |
 | **Yield lab** | A live 300 mm wafer map drawn to scale. Drag die size, defect density, edge exclusion or scribe width and watch gross dies, yield and good dies move together. Four real yield models, side by side on the same wafer. |
 | **Economics** | Cost per good die, silicon utilisation and gross margin, with eight real product shapes — mobile SoC through SiC power device — computed through the same model. |
@@ -134,6 +135,25 @@ npm run build    # production build into dist/
 npm test         # the whole gate — see below
 ```
 
+## The assistant
+
+The ✨ button opens an assistant that answers from the app's live state — the
+running simulation, your die, the yield and cost models, the material chain,
+the process data.
+
+**It is not a language model, and that is deliberate.** This site is a static
+bundle on GitHub Pages: no server, no API key, no runtime network calls. There
+is nowhere to put one. What it is instead is a grounded query engine, which for
+the questions people actually have here — *what is the bottleneck, why is my
+yield low, how much rock is one chip* — is better than a language model would
+be, because every answer is computed from the numbers currently on screen
+rather than recalled. For anything it cannot ground it says so rather than
+inventing something, and a verify check asserts that.
+
+Voice works through the Web Speech API, browser-native and keyless. Spoken
+answers work broadly; voice input is Chromium-only, and the microphone button
+is hidden where it would not work rather than offered and failing.
+
 ## The pipeline
 
 `npm test` is the gate, and it runs the same five stages CI does, in the order
@@ -143,8 +163,8 @@ that fails fastest:
 | --- | --- |
 | `npm run lint` | Dead imports, unused props, hook misuse. Found three real bugs the first time it ran. |
 | `npm run build` | Anything that does not compile. |
-| `npm run verify` | 317 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
-| `npm run smoke` | Renders all twelve tabs across five configurations, including an unmakeable die and a zero-yield process. Catches components that throw on first render, and output that leaks `NaN` or `undefined` — which reads as broken while passing every other check. |
+| `npm run verify` | 350 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
+| `npm run smoke` | Renders all thirteen tabs across five configurations, including an unmakeable die and a zero-yield process. Catches components that throw on first render, and output that leaks `NaN` or `undefined` — which reads as broken while passing every other check. |
 | `npm run budget` | Bundle size against a gzipped budget. This bundle grew 206 kB → 331 kB across six feature passes with nothing watching. |
 
 CI (`.github/workflows/ci.yml`) runs all five on every push and pull request,
@@ -163,7 +183,7 @@ publish means the push succeeded, not that the bytes are being served — a
 sister repo shipped the previous build for weeks with green checks the whole
 time, because nothing closed that loop.
 
-`npm run verify` runs 317 checks across wafer geometry, yield model
+`npm run verify` runs 350 checks across wafer geometry, yield model
 correctness (pinned against hand-computed values), economics invariants,
 defect scatter determinism, architecture and thermal-wall arithmetic, material
 chain mass balance, published specs for real parts, value-chain sourcing

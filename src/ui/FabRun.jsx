@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import Journey from './Journey.jsx'
 import {
   createFab, tick, snapshot, defectDensity, TOOL_GROUPS, LOT_SIZE,
 } from '../lib/fabengine.js'
@@ -78,7 +79,7 @@ function DieBuild({ layer, totalLayers }) {
   )
 }
 
-function Line({ cfg, counts, apc, metroSample, running, speed, setCount, setMetroSample, setApc, onRestart, setRunning, setSpeed }) {
+function Line({ cfg, counts, apc, metroSample, running, speed, setCount, setMetroSample, setApc, onRestart, setRunning, setSpeed, onSnapshot }) {
   // The fab lives in state, not a ref. It is mutated in place by the loop, but
   // render reads only `snap` — never the live object — so a frame can never
   // show a half-updated line.
@@ -104,6 +105,10 @@ function Line({ cfg, counts, apc, metroSample, running, speed, setCount, setMetr
     raf = requestAnimationFrame(loop)
     return () => { alive = false; cancelAnimationFrame(raf) }
   }, [running, speed])
+
+  // Publish upward so God view and the assistant can read the live line
+  // without reaching into this component's state.
+  useEffect(() => { onSnapshot?.(sim.snap) }, [sim.snap, onSnapshot])
 
   const snap = sim.snap
   const m = snap.metrics
@@ -329,13 +334,15 @@ function FootNotes({ wpm }) {
   )
 }
 
-export default function FabRun({ cfg }) {
+export default function FabRun({ cfg, onSnapshot }) {
+  const [mode, setMode] = useState('line')
   const [running, setRunning] = useState(false)
   const [speed, setSpeed] = useState(40)
   const [counts, setCounts] = useState(() => Object.fromEntries(TOOL_GROUPS.map((g) => [g.id, g.tools])))
   const [apc, setApc] = useState(true)
   const [metroSample, setMetroSample] = useState(5)
   const [generation, setGeneration] = useState(0)
+  const [narrate, setNarrate] = useState(false)
 
   // Any configuration change remounts Line, so its state initialiser builds a
   // fresh fab. Remounting is the whole mechanism — no reset effect, and no
@@ -344,12 +351,38 @@ export default function FabRun({ cfg }) {
   const setCount = (id, v) => setCounts((c) => ({ ...c, [id]: Math.max(1, v) }))
 
   return (
-    <Line
-      key={key} cfg={cfg} counts={counts} apc={apc} metroSample={metroSample}
-      running={running} speed={speed}
-      setRunning={setRunning} setSpeed={setSpeed} setCount={setCount}
-      setMetroSample={setMetroSample} setApc={setApc}
-      onRestart={() => { setRunning(false); setGeneration((g) => g + 1) }}
-    />
+    <div>
+      <div className="row" style={{ marginBottom: 4 }}>
+        <button className={`btn ${mode === 'line' ? 'active' : ''}`} onClick={() => setMode('line')}>
+          The line
+        </button>
+        <button className={`btn ${mode === 'journey' ? 'active' : ''}`} onClick={() => setMode('journey')}>
+          Travel path
+        </button>
+      </div>
+
+      {mode === 'journey' ? (
+        <>
+          <div className="eyebrow" style={{ marginTop: 16 }}>Travel path</div>
+          <h1 className="title">Follow one wafer.<br />Every single step.</h1>
+          <p className="lede">
+            Not a summary — the full itinerary, from quartz rock to a marked and trayed part. Around
+            520 steps, most of them the same ten operations repeated seventy times, each pass aligned
+            to the one beneath it within a few nanometres.
+          </p>
+          <div style={{ marginTop: 18 }}>
+            <Journey narrate={narrate} setNarrate={setNarrate} />
+          </div>
+        </>
+      ) : (
+        <Line
+          key={key} cfg={cfg} counts={counts} apc={apc} metroSample={metroSample}
+          running={running} speed={speed} onSnapshot={onSnapshot}
+          setRunning={setRunning} setSpeed={setSpeed} setCount={setCount}
+          setMetroSample={setMetroSample} setApc={setApc}
+          onRestart={() => { setRunning(false); setGeneration((g) => g + 1) }}
+        />
+      )}
+    </div>
   )
 }

@@ -343,3 +343,36 @@ seventeen clickable process modules, which is a diagram, not a simulation.
 - **The budget rose from 115 kB to 125 kB**, and says why in the file. An
   engine plus a live dashboard is about 9 kB gzipped and is the largest single
   feature here.
+
+---
+
+## Ninth pass: God view, travel path, assistant
+
+- **"AI assistant" had a constraint worth naming rather than working around.**
+  This is a static bundle on GitHub Pages — no server, no key, no runtime
+  network. There is nowhere to put a language model, and shipping a key in a
+  public bundle to pretend otherwise would be indefensible. So the assistant is
+  a grounded query engine over the app's own live state instead, and it says so
+  in its own first message. For the questions this site provokes it is the
+  better answer anyway: "what is the bottleneck" is computed off the running
+  simulation rather than recalled. A verify check asserts it returns nothing
+  for what it cannot ground, and another asserts no key or endpoint is in the
+  bundle.
+- **The assistant matched "write me a poem about wafers".** Bare substring
+  matching saw "wafer" and offered to explain wafer slicing. Two guards now: a
+  lookup must be question-shaped, and must match on a word boundary. The
+  failing test came first and is still there.
+- **The travel path refuses to summarise.** 626 steps, every repeat listed,
+  because the repetition *is* the process — a chip is about ten operations run
+  seventy times, and every diagram that collapses that is lying about the
+  thing it depicts. A verify check asserts lithography appears exactly seventy
+  times and that all seventy layers are represented, so a future tidy-up
+  cannot quietly compress it.
+- **Two checks failed because my estimates were wrong, not the code.** I
+  guessed ~500 steps and "months" of process time; the real figures are 626
+  steps and 56 days of pure process time, the three-month number being mostly
+  queueing. Corrected the checks to the computed truth and said why in the
+  comment, rather than nudging the model to match the guess.
+- **Voice is browser-native and honestly gated.** Speech synthesis is broadly
+  supported; recognition is Chromium-only. Controls that would not work are
+  hidden rather than offered and failing.

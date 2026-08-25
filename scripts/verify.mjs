@@ -177,7 +177,7 @@ group('Content')
   ok('quiz answers all point at a real option', QUIZ.every((q) => q.opts[q.a] !== undefined))
   ok('every quiz question explains itself', QUIZ.every((q) => q.why && q.why.length > 40))
   ok('quiz options are distinct', QUIZ.every((q) => new Set(q.opts).size === q.opts.length))
-  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run'].includes(t.tab)))
+  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god'].includes(t.tab)))
   ok('the tour visits every tab', ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz']
     .every((t) => TOUR.some((s) => s.tab === t)))
   ok('quiz covers the material chain', QUIZ.some((q) => /purity|distill|polysilicon|particle/i.test(q.q)))
@@ -616,6 +616,111 @@ group('Quantum content')
   ok('threshold is the conventional 1%', THRESHOLD === 0.01)
 }
 
+/* ---------- journey ---------- */
+group('Travel path')
+{
+  const { buildJourney, journeyTotals, PHASES } = await import(join(root, 'src/lib/journey.js'))
+  const j = buildJourney(70)
+  const t = journeyTotals(j)
+
+  // 626: six material stages, then 70 layers of 8–9 steps with sampled
+  // metrology on top, then eight assembly steps.
+  ok('the journey is around 620 steps', j.length > 560 && j.length < 700, String(j.length))
+  ok('every step is fully described', j.every((s) =>
+    s.name && s.tool && s.what && s.hours > 0 && PHASES[s.phase] && Number.isFinite(s.temp)))
+  ok('steps are indexed in order', j.every((s, i) => s.index === i))
+  ok('cumulative hours increase monotonically',
+    j.every((s, i) => i === 0 || s.cumHours > j[i - 1].cumHours))
+  ok('cumulative distance never decreases',
+    j.every((s, i) => i === 0 || s.cumDistance >= j[i - 1].cumDistance))
+  ok('peak temperature never decreases',
+    j.every((s, i) => i === 0 || s.peakTemp >= j[i - 1].peakTemp))
+
+  ok('the path starts in material and ends in assembly',
+    j[0].phase === 'material' && j[j.length - 1].phase === 'assembly')
+  ok('it ends with the part being marked and shipped', j[j.length - 1].key === 'mark')
+  ok('all four phases are present', Object.keys(PHASES).every((p) => j.some((s) => s.phase === p)))
+
+  // The repetition is the point of the whole tab. If a refactor summarises it
+  // away, the tab is lying about the process.
+  ok('lithography appears once per layer', t.lithoVisits === 70, String(t.lithoVisits))
+  ok('every layer is represented',
+    new Set(j.filter((s) => s.layer > 0 && s.phase !== 'assembly').map((s) => s.layer)).size === 70)
+  ok('front-end layers implant, back-end layers deposit',
+    j.some((s) => s.key === 'implant' && s.layer < 30) &&
+    j.some((s) => s.key === 'depo' && s.layer > 40) &&
+    !j.some((s) => s.key === 'implant' && s.layer > 40))
+  ok('metrology and inspection are sampled, not universal',
+    j.filter((s) => s.key === 'metro').length < 70 && j.filter((s) => s.key === 'inspect').length < 70)
+
+  // Pure process time only. The three-month figure everyone quotes is this
+  // plus queueing, which the fab run tab adds — and which is most of it.
+  ok('pure process time is weeks, not days', t.days > 35 && t.days < 90, `${t.days.toFixed(0)} days`)
+  ok('the wafer travels kilometres inside the fab', t.km > 3 && t.km < 30, `${t.km.toFixed(1)} km`)
+  ok('peak temperature is the crystal furnace', t.peakTemp >= 1000, String(t.peakTemp))
+  ok('phase totals add up to the whole path',
+    Object.values(t.byPhase).reduce((n, p) => n + p.count, 0) === j.length)
+  ok('a different layer count changes the path length', buildJourney(20).length < j.length)
+}
+
+group('Assistant')
+{
+  const { ask, SUGGESTIONS } = await import(join(root, 'src/lib/assistant.js'))
+  const { buildJourney } = await import(join(root, 'src/lib/journey.js'))
+  const cfg = { waferDia: 300, dieX: 10.5, dieY: 10.5, scribe: 0.08, edgeExclusion: 3, d0: 0.07,
+    model: 'negbinom', alpha: 2.5, waferCost: 20000, lineYield: 0.98, testYield: 0.97,
+    packageCost: 6, packageYield: 0.995, asp: 120 }
+  const ctx = { cfg, snap: null, journey: buildJourney(70) }
+
+  ok('every suggested question is actually answerable',
+    SUGGESTIONS.every((q) => ask(q, ctx) !== null),
+    SUGGESTIONS.filter((q) => !ask(q, ctx)).join(' | '))
+  ok('answers are substantial, not one-liners',
+    SUGGESTIONS.every((q) => ask(q, ctx).text.length > 80))
+
+  // The whole point of a grounded assistant is that it refuses rather than
+  // inventing. If this check ever fails, it has started making things up.
+  ok('it returns nothing for questions it cannot ground',
+    ask('what is the capital of France', ctx) === null &&
+    ask('write me a poem about wafers', ctx) === null &&
+    ask('tell me a joke', ctx) === null &&
+    ask('who will win the election', ctx) === null)
+  ok('empty input is handled', ask('', ctx) === null && ask(null, ctx) === null)
+
+  ok('yield answers carry the actual computed numbers', (() => {
+    const a = ask('why is my yield low', ctx)
+    return a && /\d/.test(a.text) && a.text.includes('%')
+  })())
+  ok('answers change when the configuration changes', (() => {
+    const small = ask('what is my yield', ctx).text
+    const big = ask('what is my yield', { ...ctx, cfg: { ...cfg, dieX: 25, dieY: 25 } }).text
+    return small !== big
+  })())
+  ok('it says the line is not running rather than inventing a bottleneck', (() => {
+    const a = ask('what is the bottleneck', ctx)
+    return a && /not going|not running/i.test(a.text)
+  })())
+  ok('it reads a live snapshot when one exists', (() => {
+    const snap = { day: 100, stats: { completed: 5 }, events: [], metrics: {
+      wip: 200, avgCycleDays: 110, rawDays: 40, xFactor: 2.7, wpm: 2000, toolsDown: 1,
+      excursionCount: 0, bottleneckId: 'litho', bottleneckName: 'Lithography', bottleneckUtil: 0.94,
+      groups: [{ id: 'litho', name: 'Lithography', util: 0.94, queued: 12, capex: 200 },
+               { id: 'etch', name: 'Etch', util: 0.8, queued: 3, capex: 12 }],
+    } }
+    const a = ask('what is the bottleneck', { ...ctx, snap })
+    return a && a.text.includes('Lithography') && a.text.includes('94')
+  })())
+  ok('answers point at the tab that owns them',
+    ask('what does one die cost', ctx).tab === 'economics' &&
+    ask('how much rock per chip', ctx).tab === 'sand')
+  ok('it explains process steps by name',
+    ask('what is cmp', ctx) !== null && ask('what is lithography', ctx) !== null)
+  ok('it describes its own limits honestly', (() => {
+    const a = ask('what can you do', ctx)
+    return a && /not a language model/i.test(a.text)
+  })())
+}
+
 /* ---------- fab simulation ---------- */
 group('Fab simulation')
 {
@@ -796,6 +901,11 @@ group('Build output')
       ok('author meta tag shipped', html.includes('name="author"') && html.includes('Abhay Bhuva'))
       ok('the provenance note shipped', bundle.includes('Anthropic') && bundle.includes('publicly available'))
       ok('the no-confidential-data statement shipped', /confidential/i.test(bundle))
+      ok('the God view shipped', bundle.includes('God view') || bundle.includes('godflow'))
+      ok('the travel path shipped', bundle.includes('Travel path') || bundle.includes('Follow one wafer'))
+      ok('the assistant states it is not a language model', /not a language model/i.test(bundle))
+      ok('no API key or endpoint is baked into the bundle',
+        !/sk-ant|api\.anthropic\.com|Bearer /.test(bundle))
       ok('the fab simulation shipped', bundle.includes('X-factor') || bundle.includes('bottleneck'))
       ok('the 3D architecture ladder shipped', bundle.includes('CFET') && bundle.includes('Forksheet'))
       ok('backside power shipped', bundle.includes('PowerVia') || bundle.includes('Backside power'))

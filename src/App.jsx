@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import FabLine from './ui/FabLine.jsx'
 import FabRun from './ui/FabRun.jsx'
+import GodView from './ui/GodView.jsx'
+import Assistant from './ui/Assistant.jsx'
 import YieldLab from './ui/YieldLab.jsx'
 import Economics from './ui/Economics.jsx'
 import NodesView from './ui/Nodes.jsx'
@@ -13,8 +15,10 @@ import Quantum from './ui/Quantum.jsx'
 import Quiz from './ui/Quiz.jsx'
 import { TOUR } from './data/learn.js'
 import { PRODUCTS } from './data/nodes.js'
+import { buildJourney } from './lib/journey.js'
 
 const TABS = [
+  { id: 'god', label: 'God view ✨' },
   { id: 'sand', label: 'Sand → silicon' },
   { id: 'line', label: 'Fab line' },
   { id: 'run', label: 'Fab run' },
@@ -62,6 +66,9 @@ export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem('fabsim.theme') || 'litho')
   const [cfg, setCfg] = useState({ ...DEFAULT, ...(hash || {}) })
   const [tourStep, setTourStep] = useState(-1)
+  const [snap, setSnap] = useState(null)
+  const [assistantOpen, setAssistantOpen] = useState(false)
+  const journey = useMemo(() => buildJourney(70), [])
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
@@ -116,7 +123,8 @@ export default function App() {
       <main className="page">
         {tab === 'sand' && <SandToSilicon cfg={cfg} />}
         {tab === 'line' && <FabLine />}
-        {tab === 'run' && <FabRun cfg={cfg} />}
+        {tab === 'god' && <GodView cfg={cfg} snap={snap} goTab={setTab} />}
+        {tab === 'run' && <FabRun cfg={cfg} onSnapshot={setSnap} />}
         {tab === 'wafer' && <YieldLab cfg={cfg} patch={patch} />}
         {tab === 'economics' && <Economics cfg={cfg} patch={patch} />}
         {tab === 'nodes' && <NodesView />}
@@ -139,6 +147,11 @@ export default function App() {
           </div>
         </aside>
       )}
+
+      <Assistant
+        cfg={cfg} snap={snap} journey={journey} goTab={setTab}
+        open={assistantOpen} setOpen={setAssistantOpen}
+      />
 
       <footer className="footer">
         <div className="page" style={{ padding: 0 }}>

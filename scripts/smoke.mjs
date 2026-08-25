@@ -49,6 +49,9 @@ const { default: ValueChain } = await import('../src/ui/ValueChain.jsx')
 const { default: Compute } = await import('../src/ui/Compute.jsx')
 const { default: Quantum } = await import('../src/ui/Quantum.jsx')
 const { default: Quiz } = await import('../src/ui/Quiz.jsx')
+const { default: GodView } = await import('../src/ui/GodView.jsx')
+const { default: Journey } = await import('../src/ui/Journey.jsx')
+const { default: Assistant } = await import('../src/ui/Assistant.jsx')
 const { default: App } = await import('../src/App.jsx')
 const { default: ErrorBoundary } = await import('../src/ErrorBoundary.jsx')
 
@@ -77,7 +80,7 @@ const TABS = [
   ['SandToSilicon', SandToSilicon], ['FabLine', FabLine], ['FabRun', FabRun], ['YieldLab', YieldLab],
   ['Economics', Economics], ['Nodes', Nodes], ['Beyond3D', Beyond3D],
   ['Silicon', Silicon], ['ValueChain', ValueChain], ['Compute', Compute],
-  ['Quantum', Quantum], ['Quiz', Quiz],
+  ['Quantum', Quantum], ['Quiz', Quiz], ['GodView', GodView], ['Journey', Journey],
 ]
 
 let pass = 0, fail = 0
@@ -86,7 +89,10 @@ const noop = () => {}
 for (const [caseName, cfg] of CASES) {
   for (const [name, C] of TABS) {
     try {
-      const html = renderToString(React.createElement(C, { cfg, patch: noop, goTab: noop }))
+      const html = renderToString(React.createElement(C, {
+        cfg, patch: noop, goTab: noop, onSnapshot: noop,
+        snap: null, journey: [], narrate: false, setNarrate: noop,
+      }))
       if (typeof html !== 'string' || html.length < 400) {
         fail++; console.error(`  ✗ ${name} [${caseName}] rendered only ${html.length} chars`)
       } else if (/NaN|undefined|\[object Object\]/.test(html)) {
@@ -99,6 +105,17 @@ for (const [caseName, cfg] of CASES) {
       fail++; console.error(`  ✗ ${name} [${caseName}] threw: ${e.message}`)
     }
   }
+}
+
+// The assistant closed (a button) and open (a panel), since both render.
+for (const open of [false, true]) {
+  try {
+    const html = renderToString(React.createElement(Assistant, {
+      cfg: BASE, snap: null, journey: [], goTab: noop, open, setOpen: noop,
+    }))
+    if (html.length > 20) pass++
+    else { fail++; console.error(`  ✗ Assistant [open=${open}] rendered nothing`) }
+  } catch (e) { fail++; console.error(`  ✗ Assistant [open=${open}] threw: ${e.message}`) }
 }
 
 // The shell itself, and the error boundary's own failure path.
