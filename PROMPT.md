@@ -138,3 +138,33 @@ Re-run with the change clause appended. What the bar caught this time:
 - Magic-state distillation was going to be omitted for simplicity. It is
   usually the largest single term in a real estimate, so hiding it would have
   made the tool quietly wrong. It is a slider with the caveat attached.
+
+---
+
+## Third pass: the material chain
+
+Appended clause: *"and it should run without human intervention"* — which has
+two readings, and taking only one of them would have been the shallow answer.
+The tab autoplays, and its subject is a factory that genuinely runs unattended.
+
+What the bar caught:
+
+- The mass balance was written forwards first: start with a kilogram of rock,
+  apply yields, see what falls out. Nobody in the industry thinks that way.
+  They start with the part they have to ship and ask what it costs to feed the
+  line, so the chain was rewritten to run backwards from one good die — which
+  also connects it to the yield lab, since a worse defect density now visibly
+  costs more rock.
+- The first draft narrated the furnace as the purification step. It is not.
+  Purity is won in the distillation columns, because trichlorosilane boils at
+  32 °C and a liquid can be fractionally distilled where a metal cannot. The
+  Siemens reactor only converts material that is already clean. Getting this
+  backwards would have been a genuine error dressed as a simplification.
+- "No human intervention" was almost written as a labour-cost story. It is a
+  yield story: a fully gowned person still sheds particles continuously, and a
+  particle is a defect. The copy says that, and says the people are still
+  there — several thousand of them — doing the things that are not moving
+  wafers.
+- The autoplay loop initially listed `progress` as an effect dependency, which
+  restarted the animation every frame and left it frozen at zero. Left in with
+  a comment, because it is the exact mistake the next person will make.

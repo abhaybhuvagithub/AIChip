@@ -19,6 +19,9 @@ const { NODES, PRODUCTS, ARCHITECTURES, FOUNDRIES } = await import(join(root, 's
 const { QUIZ, TOUR } = await import(join(root, 'src/data/learn.js'))
 const { computeThroughput, ops, watts, PRECISIONS, LADDER, SCALE_NAMES, DEFAULT_COMPUTE } =
   await import(join(root, 'src/lib/compute.js'))
+const { CHAIN, AUTOMATION, WHY_NO_HUMANS } = await import(join(root, 'src/data/sand.js'))
+const { traceBack, waferMass, nines, impurityPpb, grams, SI_DENSITY } =
+  await import(join(root, 'src/lib/chain.js'))
 const { physicalPerLogical, logicalErrorRate, requiredDistance, estimateResources, THRESHOLD, ALGORITHMS, MODALITIES, FAB_DIFFERENCES, SHARED } =
   await import(join(root, 'src/lib/quantum.js'))
 
@@ -169,12 +172,82 @@ group('Content')
   ok('quiz answers all point at a real option', QUIZ.every((q) => q.opts[q.a] !== undefined))
   ok('every quiz question explains itself', QUIZ.every((q) => q.why && q.why.length > 40))
   ok('quiz options are distinct', QUIZ.every((q) => new Set(q.opts).size === q.opts.length))
-  ok('tour steps point at real tabs', TOUR.every((t) => ['line', 'wafer', 'economics', 'nodes', 'compute', 'quantum', 'quiz'].includes(t.tab)))
-  ok('the tour visits every tab', ['line', 'wafer', 'economics', 'nodes', 'compute', 'quantum', 'quiz']
+  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', 'compute', 'quantum', 'quiz'].includes(t.tab)))
+  ok('the tour visits every tab', ['sand', 'line', 'wafer', 'economics', 'nodes', 'compute', 'quantum', 'quiz']
     .every((t) => TOUR.some((s) => s.tab === t)))
-  ok('quiz covers compute and quantum', QUIZ.length >= 18 &&
+  ok('quiz covers the material chain', QUIZ.some((q) => /purity|distill|polysilicon|particle/i.test(q.q)))
+  ok('quiz covers compute and quantum', QUIZ.length >= 21 &&
     QUIZ.some((q) => /FP4|sparsity|precision/i.test(q.q)) &&
     QUIZ.some((q) => /qubit|surface code|threshold/i.test(q.q)))
+}
+
+/* ---------- sand to silicon ---------- */
+group('Sand to silicon')
+{
+  // Hand-check: pi * 15cm^2 * 0.0775cm * 2.329 g/cm^3 = 127.6 g
+  ok('300 mm wafer mass is ~127 g', near(waferMass(300), 127.6, 0.6), waferMass(300).toFixed(1))
+  ok('200 mm wafer mass is ~56.7 g', near(waferMass(200), 56.7, 0.4), waferMass(200).toFixed(1))
+  ok('wafer mass scales with the square of diameter', near(waferMass(300) / waferMass(200), 2.25, 0.01))
+  ok('a thinner wafer weighs proportionally less', near(waferMass(300, 387.5) / waferMass(300), 0.5, 0.001))
+  ok('silicon density is the physical value', near(SI_DENSITY, 2.329, 0.001))
+
+  const die = { waferDia: 300, dieX: 10.5, dieY: 10.5, scribe: 0.08, edgeExclusion: 3, d0: 0.07,
+    model: 'negbinom', alpha: 2.5, waferCost: 20000, lineYield: 0.98, testYield: 0.97,
+    packageCost: 6, packageYield: 0.995, asp: 0 }
+  const y = computeRun(die)
+  const t = traceBack(die, y)
+
+  ok('the trace resolves for a shippable die', t.ok)
+  ok('the trace covers every stage in the chain', t.stages.length === CHAIN.length)
+  ok('mass increases monotonically going backwards up the chain',
+    t.stages.every((st, n) => n === 0 || st.massG <= t.stages[n - 1].massG + 1e-12))
+  ok('die mass is wafer mass divided over good dies', near(t.dieMass, t.wafer / y.goodDies, 1e-9))
+  ok('a phone-sized die is a fraction of a gram', t.dieMass > 0.05 && t.dieMass < 1, t.dieMass.toFixed(3))
+  // Compounded loss factors: 2.5 x 1.2 x 1.4 x 1.2 x 1.6 x 1.02 x 1 ~= 8.2
+  ok('rock-to-silicon mass ratio lands near 8x', near(t.quartzite / t.dieMass, 8.2, 1), (t.quartzite / t.dieMass).toFixed(2))
+  ok('quartzite per phone die is a few grams', t.quartzite > 0.3 && t.quartzite < 20, grams(t.quartzite))
+  ok('energy per die is positive and plausible', t.energy > 0.1 && t.energy < 50, `${t.energy.toFixed(2)} kWh`)
+  ok('energy per wafer is in the right order for leading edge',
+    t.energy * y.goodDies > 200 && t.energy * y.goodDies < 3000, `${(t.energy * y.goodDies).toFixed(0)} kWh`)
+  ok('a bigger die needs more rock', (() => {
+    const big = traceBack({ ...die, dieX: 24, dieY: 25 }, computeRun({ ...die, dieX: 24, dieY: 25 }))
+    return big.ok && big.quartzite > t.quartzite
+  })())
+  ok('worse yield raises the rock per shipped die', (() => {
+    const bad = { ...die, d0: 0.5 }
+    const b = traceBack(bad, computeRun(bad))
+    return b.ok && b.quartzite > t.quartzite
+  })())
+  ok('a die that cannot be made returns a refusal, not NaN', (() => {
+    const z = traceBack({ ...die, dieX: 400, dieY: 400 }, computeRun({ ...die, dieX: 400, dieY: 400 }))
+    return z.ok === false && z.stages.length === 0
+  })())
+
+  ok('purity never decreases along the chain',
+    CHAIN.every((c, n) => n === 0 || c.purity >= CHAIN[n - 1].purity))
+  ok('the chain starts at 2N and reaches 9N',
+    near(CHAIN[0].purity, 0.99, 1e-9) && CHAIN.some((c) => near(c.purity, 0.999999999, 1e-12)))
+  ok('nines() reads purity the way the industry says it',
+    nines(0.99) === '2N' && nines(0.999999) === '6N' && nines(0.999999999) === '9N')
+  ok('impurityPpb matches the purity figure',
+    near(impurityPpb(0.999999999), 1, 1e-6) && near(impurityPpb(0.99), 1e7, 1))
+  ok('grams() scales from micrograms to tonnes',
+    grams(0.0000005).endsWith('µg') && grams(0.005).endsWith('mg') && grams(5).endsWith('g') &&
+    grams(5000).endsWith('kg') && grams(5e6).endsWith('t'))
+  ok('grams() handles zero and nonsense', grams(0) === '—' && grams(NaN) === '—')
+
+  ok('every chain stage is fully populated', CHAIN.every((c) =>
+    c.id && c.name && c.formula && c.one && c.what && c.chem && c.autonomy && c.temp && c.stat &&
+    c.purity > 0 && c.purity <= 1 && c.lossFactor >= 1 && c.energyKwhPerKg >= 0))
+  ok('chain ids are unique', new Set(CHAIN.map((c) => c.id)).size === CHAIN.length)
+  ok('the chain runs from quartzite to die',
+    CHAIN[0].id === 'quartzite' && CHAIN[CHAIN.length - 1].id === 'die')
+  ok('every stage explains how it runs unattended',
+    CHAIN.every((c) => c.autonomy.length > 40))
+  ok('automation glossary is populated',
+    AUTOMATION.length >= 6 && AUTOMATION.every((a) => a.k && a.name && a.what.length > 40))
+  ok('the reasons people are excluded are stated',
+    WHY_NO_HUMANS.length >= 4 && WHY_NO_HUMANS.every((w) => w.length > 40))
 }
 
 /* ---------- compute throughput ---------- */
@@ -325,6 +398,7 @@ group('Build output')
       const bundle = readFileSync(join(dist, 'assets', js[0]), 'utf8')
       ok('the fab line content shipped', bundle.includes('Czochralski'))
       ok('the yield models shipped', bundle.includes('Negative binomial') || bundle.includes('negbinom'))
+      ok('the sand-to-silicon chain shipped', bundle.includes('Czochralski') && bundle.includes('Siemens'))
       ok('the compute tab shipped', bundle.includes('TOPS') || bundle.includes('EOPS'))
       ok('the quantum tab shipped', bundle.includes('transmon') || bundle.includes('surface code') || bundle.includes('Millikelvin'))
       ok('no stray console.log in the bundle', !/console\.log\(/.test(bundle))

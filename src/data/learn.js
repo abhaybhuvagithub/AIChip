@@ -3,6 +3,9 @@
 // find out whether the line actually taught anything.
 
 export const TOUR = [
+  { id: 't0a', tab: 'sand', title: 'Let it run', body: 'The chain advances on its own — you do not have to click anything. Watch the purity figure on each card climb from 2N to 9N. Everything before the fab exists to remove impurity; everything after it puts some back on purpose.' },
+  { id: 't0b', tab: 'sand', title: 'Find the step that does the real work', body: 'Purity is not won in the furnace. It is won in the distillation columns, because trichlorosilane boils at 32 °C and a liquid can be fractionally distilled. Turning silicon into a liquid you can purify is the whole trick.' },
+  { id: 't0c', tab: 'sand', title: 'Weigh a chip in rock', body: 'Scroll to the mass balance. It is worked backwards from the die you configured in the yield lab, so making the die bigger there changes how much quartzite it takes here.' },
   { id: 't1', tab: 'line', title: 'Start where the wafer starts', body: 'Open the fab line and click Crystal growth. A chip begins as sand refined to nine-nines purity and pulled into one continuous crystal. Every later step assumes that lattice is perfect.' },
   { id: 't2', tab: 'line', title: 'Find the step everything orbits', body: 'Click Lithography. A leading-edge part goes through it 60–80 times. Scanner throughput is the constraint the whole fab is scheduled around, which is why one tool costs as much as an aircraft.' },
   { id: 't3', tab: 'line', title: 'Notice the loop', body: 'Coat, expose, develop, etch, deposit, polish — then back to coat. The line is not 17 steps, it is six steps run dozens of times, each pass adding one layer.' },
@@ -15,10 +18,28 @@ export const TOUR = [
   { id: 't10', tab: 'compute', title: 'Climb to the trillions and past them', body: 'Move the scale selector from one die to a cluster. Note the power column keeping pace: past a rack, what you can build is set by the substation, not the fab.' },
   { id: 't11', tab: 'quantum', title: 'Meet the other exchange rate', body: 'Pick Shor on RSA-2048, then drag the physical error rate. Between 0.8% and 1.2% the qubit count goes vertical and then to infinity — that cliff is the surface code threshold.' },
   { id: 't12', tab: 'quantum', title: 'See what a fab cannot fix', body: 'Read the comparison table. A logic fab is a statistical discipline that expects failures and designs around them. A quantum chip has no binning and no redundancy, so the same tools do not buy the same safety.' },
-  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Eighteen questions. Everything needed to answer them is on the other six tabs.' },
+  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Twenty-one questions. Everything needed to answer them is on the other seven tabs.' },
 ]
 
 export const QUIZ = [
+  {
+    q: 'Purity in the silicon chain is mainly won by distillation, not by the furnace. Why does that work?',
+    opts: ['Silicon melts at a convenient temperature', 'Silicon is converted to trichlorosilane, a liquid boiling at 32 °C that can be fractionally distilled', 'The furnace burns off impurities as gases', 'Impurities float to the top of the melt'],
+    a: 1,
+    why: 'A metal cannot be fractionally distilled; a liquid can. Converting silicon to trichlorosilane makes the impurities separable by boiling point, and the Siemens reactor afterwards only converts material distillation has already cleaned.',
+  },
+  {
+    q: 'Electronic-grade polysilicon is 99.9999999% pure. What does that mean concretely?',
+    opts: ['One impurity atom per million', 'One impurity atom per billion', 'One impurity atom per thousand', 'One impurity atom per trillion'],
+    a: 1,
+    why: 'Nine nines is one part per billion. At that purity silicon conducts almost nothing — which is exactly the blank slate needed before doping gives it a controlled job.',
+  },
+  {
+    q: 'Why are people kept away from wafers in a modern fab?',
+    opts: ['Union agreements and safety rules', 'A gowned person still sheds particles continuously, and a particle is a defect', 'Wafers are too hot to handle', 'Insurance requirements'],
+    a: 1,
+    why: 'Full gowning reduces shedding but does not stop it. Automation here is a yield requirement, not a labour-cost decision — which is why wafers travel in sealed FOUPs on overhead rails and are exposed only inside a tool.',
+  },
   {
     q: 'Lithography bays are lit in yellow. Why?',
     opts: ['Yellow light penetrates cleanroom air better', 'Photoresist is insensitive to wavelengths above ~500 nm', 'It reduces eye strain on 12-hour shifts', 'It makes particles visible on the wafer'],

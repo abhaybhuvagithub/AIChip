@@ -3,6 +3,7 @@ import FabLine from './ui/FabLine.jsx'
 import YieldLab from './ui/YieldLab.jsx'
 import Economics from './ui/Economics.jsx'
 import NodesView from './ui/Nodes.jsx'
+import SandToSilicon from './ui/SandToSilicon.jsx'
 import Compute from './ui/Compute.jsx'
 import Quantum from './ui/Quantum.jsx'
 import Quiz from './ui/Quiz.jsx'
@@ -10,6 +11,7 @@ import { TOUR } from './data/learn.js'
 import { PRODUCTS } from './data/nodes.js'
 
 const TABS = [
+  { id: 'sand', label: 'Sand → silicon' },
   { id: 'line', label: 'Fab line' },
   { id: 'wafer', label: 'Yield lab' },
   { id: 'economics', label: 'Economics' },
@@ -48,7 +50,7 @@ function readHash() {
 
 export default function App() {
   const hash = readHash()
-  const [tab, setTab] = useState(hash?.tab && TABS.some((t) => t.id === hash.tab) ? hash.tab : 'line')
+  const [tab, setTab] = useState(hash?.tab && TABS.some((t) => t.id === hash.tab) ? hash.tab : 'sand')
   const [theme, setTheme] = useState(() => localStorage.getItem('fabsim.theme') || 'litho')
   const [cfg, setCfg] = useState({ ...DEFAULT, ...(hash || {}) })
   const [tourStep, setTourStep] = useState(-1)
@@ -104,6 +106,7 @@ export default function App() {
       </header>
 
       <main className="page">
+        {tab === 'sand' && <SandToSilicon cfg={cfg} />}
         {tab === 'line' && <FabLine />}
         {tab === 'wafer' && <YieldLab cfg={cfg} patch={patch} />}
         {tab === 'economics' && <Economics cfg={cfg} patch={patch} />}
@@ -127,7 +130,7 @@ export default function App() {
 
       <footer className="footer">
         <div className="page" style={{ padding: 0 }}>
-          <b>FabSim</b> — an interactive walk through how a semiconductor chip is made, what it delivers
+          <b>FabSim</b> — an interactive walk from quartz rock to a finished chip, what it delivers
           once it runs, and the arithmetic that decides whether either is worth doing. Every number on
           the yield, economics, compute and quantum tabs is computed in the browser from the model you
           choose; nothing is fetched and nothing is stored.

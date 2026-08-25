@@ -269,3 +269,37 @@ p.lede { color: var(--muted); font-size: 16px; line-height: 1.6; max-width: 62ch
   .stat .v { font-size: 21px; }
   .tour { right: 10px; bottom: 10px; }
 }
+
+/* ---------- Sand to silicon: the self-running chain ---------- */
+.chain { display: flex; gap: 6px; overflow-x: auto; padding: 2px 2px 10px; }
+.chain::-webkit-scrollbar { height: 6px; }
+.chain::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+.link {
+  flex: 1 0 118px; position: relative; overflow: hidden; text-align: left; cursor: pointer;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+  padding: 10px 11px; color: var(--text); font-family: inherit; transition: border-color .16s;
+}
+.link:hover { border-color: var(--accent); }
+.link.on { border-color: var(--accent); }
+.link.past { opacity: .6; }
+/* The fill is the progress bar and the highlight at once — one element doing
+   one job, rather than a bar bolted under a card. */
+.link-fill {
+  position: absolute; inset: 0 auto 0 0; background: var(--accent);
+  opacity: .14; transition: width .06s linear; pointer-events: none;
+}
+.link-n { display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--muted); letter-spacing: .08em; position: relative; }
+.link-nm { display: block; font-size: 13px; font-weight: 600; line-height: 1.25; margin: 4px 0 5px; letter-spacing: -.01em; position: relative; }
+.link-p { display: block; font-family: var(--font-mono); font-size: 11px; color: var(--accent); position: relative; }
+
+.ladder { display: flex; align-items: flex-end; gap: 6px; height: 150px; margin-top: 12px; }
+.rung { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; }
+.rung-bar { width: 100%; background: var(--muted); opacity: .35; border-radius: 4px 4px 0 0; transition: opacity .2s; }
+.rung.on .rung-bar { background: var(--accent); opacity: 1; }
+.rung-lbl { font-family: var(--font-mono); font-size: 10px; color: var(--muted); margin-top: 5px; }
+.rung.on .rung-lbl { color: var(--accent); }
+
+@media (max-width: 640px) {
+  .link { flex: 0 0 110px; }
+  .ladder { height: 110px; }
+}
