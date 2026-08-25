@@ -16,13 +16,14 @@ Five tabs:
 | **Yield lab** | A live 300 mm wafer map drawn to scale. Drag die size, defect density, edge exclusion or scribe width and watch gross dies, yield and good dies move together. Four real yield models, side by side on the same wafer. |
 | **Economics** | Cost per good die, silicon utilisation and gross margin, with eight real product shapes — mobile SoC through SiC power device — computed through the same model. |
 | **The science** | The physics underneath everything else, computed live: an interactive MOSFET I–V family, the subthreshold floor with a temperature slider, gate tunnelling and why hafnium replaced silicon dioxide, Rayleigh optics, EUV photon shot noise, random dopant fluctuation, and why Dennard scaling ended. |
+| **Clock** | Why frequency stopped in 2005 and the transistors had nothing to do with it. A log ladder from the 740 kHz Intel 4004 to 1.5 THz device f_max, with processor clocks, radio carriers and single-device figures kept visually distinct. Turn the clock up and watch power, heat and signal reach fail in that order. |
 | **Nodes** | 180 nm to 2 nm, with the transistor architecture that made each generation possible, and a drawn cross-section showing how many sides of the channel the gate controls. |
 | **Compute** | Turns the die you configured into operations per second, and climbs from one die to a 100,000-die cluster. Shows why headline throughput outran Moore's law: precision and sparsity, not density. |
 | **Quantum** | A surface code resource calculator — drag the physical error rate and watch the qubit count go vertical at threshold — plus five hardware modalities and a side-by-side of classical against quantum fabrication. |
 | **3D & beyond** | The architecture ladder with drawn cross-sections — planar, FinFET, nanosheet, forksheet, CFET, 2D-material channel — plus backside power delivery, four levels of circuit stacking, and an interactive thermal-wall calculator. Every entry carries a status badge, because "demonstrated at IEDM" and "in a product" are five to ten years apart. |
 | **Silicon** | Twenty real parts — Apple A-series and M-series, Google TPU v1 through the eighth generation, NVIDIA H100/Blackwell/Rubin, AMD MI300X, Cerebras WSE-3 — drawn at true relative area on one 300 mm wafer. Load any of them into the yield lab. |
 | **Value chain** | The seven layers that actually produce a chip, and how few suppliers each has. Arm's licensing model and its 2026 move into shipping its own silicon. Three business models — IDM, fabless plus foundry, and the vertical re-integration Terafab is betting on. A fab-scale calculator that turns wafer starts per month into chips, silicon and compute per year. |
-| **Quiz** | Thirty-six questions, self-explaining. |
+| **Quiz** | Thirty-nine questions, self-explaining. |
 
 ## What is actually modelled
 
@@ -43,6 +44,9 @@ Five tabs:
 - **Device physics** — thermal voltage, Varshni bandgap, intrinsic carriers,
   mass action, oxide capacitance and EOT, square-law drain current,
   subthreshold swing, WKB gate tunnelling, and dynamic power.
+- **Clock physics** — signal velocity c/√ε and reach per cycle, clock period,
+  and power against frequency both at fixed voltage (linear) and with voltage
+  scaling (cubic).
 - **Optics** — Rayleigh resolution and depth of focus, photon energy, and
   Poisson photon statistics per feature.
 - **Cell footprint** — relative standard-cell area per architecture at
@@ -81,6 +85,14 @@ Loss factors in the material chain are published rough figures and vary
 considerably by producer — wire-saw kerf alone destroys 30–40% of a finished
 crystal as dust. The compounded ratio, roughly eight grams of rock per gram of
 shipped silicon, is the figure worth carrying; the individual digits are not.
+
+Clock-tab power figures scale from a 200 W, 5 GHz reference and assume gate
+delay is linear in supply voltage — a first-order model that overstates how
+gracefully this degrades. Device frequencies are published f_max figures for
+indium phosphide research devices, not for anything sold in volume, and the
+tab keeps processor clocks, radio carriers and single-device f_max as visually
+distinct categories because conflating them is how "terahertz chip" claims get
+made. A verify check asserts no processor clock in the ladder is above 100 GHz.
 
 Every equation on the science tab is the textbook one with real units, and
 verify pins the outputs against known values: kT/q = 25.85 mV, the 59.6
@@ -177,8 +189,8 @@ that fails fastest:
 | --- | --- |
 | `npm run lint` | Dead imports, unused props, hook misuse. Found three real bugs the first time it ran. |
 | `npm run build` | Anything that does not compile. |
-| `npm run verify` | 440 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
-| `npm run smoke` | Renders all fourteen tabs across five configurations, including an unmakeable die and a zero-yield process. Catches components that throw on first render, and output that leaks `NaN` or `undefined` — which reads as broken while passing every other check. |
+| `npm run verify` | 469 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
+| `npm run smoke` | Renders all sixteen tabs across five configurations, including an unmakeable die and a zero-yield process. Catches components that throw on first render, and output that leaks `NaN` or `undefined` — which reads as broken while passing every other check. |
 | `npm run budget` | Bundle size against a gzipped budget. This bundle grew 206 kB → 331 kB across six feature passes with nothing watching. |
 
 CI (`.github/workflows/ci.yml`) runs all five on every push and pull request,
@@ -197,7 +209,7 @@ publish means the push succeeded, not that the bytes are being served — a
 sister repo shipped the previous build for weeks with green checks the whole
 time, because nothing closed that loop.
 
-`npm run verify` runs 440 checks across wafer geometry, yield model
+`npm run verify` runs 469 checks across wafer geometry, yield model
 correctness (pinned against hand-computed values), economics invariants,
 defect scatter determinism, a named type scale with a 14px floor and a pinned
 prose tier, WCAG contrast across all ten themes, architecture and thermal-wall arithmetic, material

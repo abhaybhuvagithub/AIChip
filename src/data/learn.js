@@ -23,6 +23,8 @@ export const TOUR = [
   { id: 't8a1', tab: '3d', title: 'Count the gated faces', body: 'Step along the ladder and watch the cross-section. Planar gates one face of the channel, FinFET three, nanosheet four. Each step buys back electrostatic control that short channels took away.' },
   { id: 't8a2', tab: '3d', title: 'Find the step that shrinks nothing', body: 'CFET is the only rung that reduces cell area without reducing any dimension — the pitch stays the same and one device moves underneath the other. That is why it needs backside power to arrive with it.' },
   { id: 't8a3', tab: '3d', title: 'Hit the wall', body: 'Drag the tier slider up on the thermal section. Density scales with tiers; the surface you can remove heat through does not. Then drag activity down and watch the problem vanish — that is exactly the trick stacked memory plays and stacked logic cannot.' },
+  { id: 't8c1', tab: 'clock', title: 'Find the gap', body: 'A single transistor passed a terahertz in 2007. Processors still clock at five or six gigahertz. Click along the ladder and watch the colours — device f_max, radio carriers and processor clocks are three different quantities, and almost every terahertz chip claim swaps one for another.' },
+  { id: 't8c2', tab: 'clock', title: 'Turn the clock up and watch it break', body: 'Drag the target clock past twenty gigahertz. Power goes as the cube of frequency once voltage has to scale with it, so ten times the clock is a thousand times the power — and the signal stops being able to cross your own die within one cycle.' },
   { id: 't8s1', tab: 'science', title: 'Find the floor', body: 'Drag the temperature slider on the subthreshold section. The 60 mV/decade limit is not engineering — it is the Boltzmann tail of the carrier distribution, and it is why supply voltage stopped scaling and you got multiple cores instead of faster ones.' },
   { id: 't8s2', tab: 'science', title: 'Count the photons', body: 'An EUV photon carries fourteen times the energy of an ArF one, so the same dose delivers fourteen times fewer of them. Drop the dose and watch the shot noise climb — that is where stochastic defects come from, and no amount of cleanliness prevents them.' },
   { id: 't8s3', tab: 'science', title: 'Count the dopants', body: 'A 20 nm channel holds about eight dopant atoms. Where they land shifts the threshold voltage by tens of percent, and no process control fixes it — which is why modern channels are undoped.' },
@@ -35,7 +37,7 @@ export const TOUR = [
   { id: 't10', tab: 'compute', title: 'Climb to the trillions and past them', body: 'Move the scale selector from one die to a cluster. Note the power column keeping pace: past a rack, what you can build is set by the substation, not the fab.' },
   { id: 't11', tab: 'quantum', title: 'Meet the other exchange rate', body: 'Pick Shor on RSA-2048, then drag the physical error rate. Between 0.8% and 1.2% the qubit count goes vertical and then to infinity — that cliff is the surface code threshold.' },
   { id: 't12', tab: 'quantum', title: 'See what a fab cannot fix', body: 'Read the comparison table. A logic fab is a statistical discipline that expects failures and designs around them. A quantum chip has no binning and no redundancy, so the same tools do not buy the same safety.' },
-  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Thirty-six questions. Everything needed to answer them is on the other twelve tabs.' },
+  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Thirty-nine questions. Everything needed to answer them is on the other thirteen tabs.' },
 ]
 
 export const QUIZ = [
@@ -98,6 +100,24 @@ export const QUIZ = [
     opts: ['Wafer diameter', 'The scanner reticle field, about 26 x 33 mm', 'The dicing blade width', 'Package substrate size'],
     a: 1,
     why: 'The scanner prints one field at a time. Anything bigger has to be stitched or split into chiplets — which is exactly what the largest accelerators do.',
+  },
+  {
+    q: 'Processor clocks stopped climbing around 2005 at roughly 4 GHz. What stopped them?',
+    opts: ['Transistors could not switch faster', 'Power — going faster needs more voltage, and voltage enters squared', 'Lithography could not print fast-enough gates', 'Memory could not keep up'],
+    a: 1,
+    why: 'Transistors were never the limit — individual devices passed a terahertz two years later. P = αCV²f is linear in frequency, but gate delay scales with supply voltage, so raising the clock raises voltage too and power goes as roughly the cube of frequency.',
+  },
+  {
+    q: 'Why could a 1 THz clock not work even with unlimited power and cooling?',
+    opts: ['Transistors cannot switch that fast', 'A signal travels only about 173 µm per cycle — it could not cross the die', 'Photolithography limits gate length', 'Thermal noise would corrupt the data'],
+    a: 1,
+    why: 'On-chip signals move at c/√ε, roughly 58% of light in vacuum. One picosecond buys 173 microns, which is smaller than a single functional block — a clock that cannot cross its own die in one period is not a clock.',
+  },
+  {
+    q: 'InP transistors have exceeded 1 THz f_max since 2007. Why are there no terahertz processors?',
+    opts: ['Those transistors are too expensive', 'f_max is an amplifier figure for a handful of analog devices, not a logic clock for billions of gates', 'Indium phosphide cannot be etched finely enough', 'They only work below 4 kelvin'],
+    a: 1,
+    why: 'Maximum oscillation frequency describes where a single device stops providing power gain. It is used for radio and instrumentation circuits of a few transistors. Clocking billions of logic gates in lockstep at that rate is a completely different problem — power, heat, distance and clock distribution all fail first.',
   },
   {
     q: 'Subthreshold swing cannot go below about 60 mV/decade at room temperature. Why not?',

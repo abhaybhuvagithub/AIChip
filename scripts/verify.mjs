@@ -177,19 +177,20 @@ group('Content')
   ok('quiz answers all point at a real option', QUIZ.every((q) => q.opts[q.a] !== undefined))
   ok('every quiz question explains itself', QUIZ.every((q) => q.why && q.why.length > 40))
   ok('quiz options are distinct', QUIZ.every((q) => new Set(q.opts).size === q.opts.length))
-  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science'].includes(t.tab)))
+  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science', 'clock'].includes(t.tab)))
   ok('the tour visits every tab', ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz']
     .every((t) => TOUR.some((s) => s.tab === t)))
   ok('quiz covers the material chain', QUIZ.some((q) => /purity|distill|polysilicon|particle/i.test(q.q)))
   ok('quiz covers real silicon', QUIZ.some((q) => /Cerebras|MI300X|wafer-scale/i.test(q.q)))
   ok('quiz covers the value chain', QUIZ.some((q) => /Arm|EUV scanners|Terafab/i.test(q.q)))
+  ok('quiz covers clock frequency', QUIZ.some((q) => /GHz|THz|clock/i.test(q.q)))
   ok('quiz covers the underlying physics',
     QUIZ.some((q) => /subthreshold|60 mV|stochastic|tunnel/i.test(q.q)))
   ok('quiz covers the fab simulation',
     QUIZ.some((q) => /X-factor|cycle time|bottleneck|scanners/i.test(q.q)))
   ok('quiz covers 3D transistors and the thermal wall',
     QUIZ.some((q) => /CFET|backside power/i.test(q.q)) && QUIZ.some((q) => /3D memory|3D logic/i.test(q.q)))
-  ok('quiz covers compute and quantum', QUIZ.length >= 36 &&
+  ok('quiz covers compute and quantum', QUIZ.length >= 39 &&
     QUIZ.some((q) => /FP4|sparsity|precision/i.test(q.q)) &&
     QUIZ.some((q) => /qubit|surface code|threshold/i.test(q.q)))
 }
@@ -971,6 +972,75 @@ group('Physics')
     P.LITHO.every((l, i) => i === 0 || l.year > P.LITHO[i - 1].year))
 }
 
+/* ---------- clock ---------- */
+group('Clock')
+{
+  const C = await import(join(root, 'src/lib/clock.js'))
+
+  ok('on-chip signal velocity is c/sqrt(eps)',
+    near(C.signalVelocity(3.0), 299792458 / Math.sqrt(3), 1))
+  ok('signals move at roughly 58% of light in vacuum',
+    near(C.signalVelocity() / 299792458, 0.577, 0.002))
+
+  // Reach per cycle. These are the numbers the whole argument rests on.
+  ok('5 GHz reaches ~35 mm in one cycle', near(C.reachPerCycle(5e9), 34.6, 0.5), C.reachPerCycle(5e9).toFixed(1))
+  ok('100 GHz reaches ~1.7 mm', near(C.reachPerCycle(1e11), 1.73, 0.05))
+  ok('1 THz reaches ~173 microns', near(C.reachPerCycle(1e12), 0.173, 0.005))
+  ok('reach is inversely proportional to frequency',
+    near(C.reachPerCycle(1e9) / C.reachPerCycle(1e10), 10, 1e-9))
+  ok('a terahertz clock cannot cross a reticle-sized die', C.reachPerCycle(1e12) < 26)
+
+  ok('period is the reciprocal of frequency', near(C.period(1e9).t, 1e-9, 1e-18))
+  ok('period formats down to femtoseconds',
+    C.period(5e9).label.includes('ps') && C.period(1e15).label.includes('fs') &&
+    C.period(1e6).label.includes('µs'))
+
+  // The power wall — linear at fixed voltage, cubic when voltage scales.
+  ok('fixed voltage gives linear power in frequency',
+    near(C.powerAtFrequency({ baseWatts: 200, baseGHz: 5, targetGHz: 10, scaleVoltage: false }), 400, 1e-9))
+  ok('scaling voltage gives cubic power in frequency',
+    near(C.powerAtFrequency({ baseWatts: 200, baseGHz: 5, targetGHz: 10, scaleVoltage: true }), 1600, 1e-9))
+  ok('10x the clock is 1000x the power when voltage scales',
+    near(C.powerAtFrequency({ baseWatts: 200, baseGHz: 5, targetGHz: 50, scaleVoltage: true }) / 200, 1000, 1e-9))
+  ok('a terahertz CMOS clock would need gigawatts',
+    C.powerAtFrequency({ baseWatts: 200, baseGHz: 5, targetGHz: 1000, scaleVoltage: true }) > 1e9)
+  ok('the reference point returns itself',
+    near(C.powerAtFrequency({ baseWatts: 200, baseGHz: 5, targetGHz: 5 }), 200, 1e-9))
+  ok('voltage scales linearly with target clock',
+    near(C.voltageAtFrequency(1.0, 5, 10), 2, 1e-9))
+
+  ok('formatHz picks the right prefix',
+    C.formatHz(1e12).endsWith('THz') && C.formatHz(5e9).endsWith('GHz') &&
+    C.formatHz(4.77e6).endsWith('MHz') && C.formatHz(7.4e5).endsWith('kHz'))
+  ok('formatWatts scales through kW, MW and GW',
+    C.formatWatts(400).endsWith('W') && C.formatWatts(1600).endsWith('kW') &&
+    C.formatWatts(2e6).endsWith('MW') && C.formatWatts(2e9).endsWith('GW'))
+  ok('formatters reject nonsense', C.formatHz(0) === '—' && C.formatWatts(NaN) === '—')
+
+  // Content honesty: the ladder mixes quantities that are routinely conflated,
+  // so it must keep them labelled distinctly.
+  ok('the ladder is populated and chronologically sane',
+    C.LADDER.length >= 12 && C.LADDER.every((l) => l.name && l.note && l.hz > 0 && l.year > 1970 && C.KINDS[l.kind]))
+  ok('the ladder is sorted by frequency',
+    C.LADDER.every((l, i) => i === 0 || l.hz >= C.LADDER[i - 1].hz))
+  ok('processor clocks and device f_max are distinct kinds',
+    C.LADDER.some((l) => l.kind === 'cpu') && C.LADDER.some((l) => l.kind === 'device'))
+  ok('superconducting logic and radio carriers are also distinguished',
+    C.LADDER.some((l) => l.kind === 'sfq') && C.LADDER.some((l) => l.kind === 'radio'))
+  ok('no processor clock in the ladder claims terahertz',
+    C.LADDER.filter((l) => l.kind === 'cpu').every((l) => l.hz < 1e11),
+    C.LADDER.filter((l) => l.kind === 'cpu' && l.hz >= 1e11).map((l) => l.name).join(', '))
+  ok('device f_max above a terahertz is present and dated',
+    C.LADDER.some((l) => l.kind === 'device' && l.hz >= 1e12 && l.year >= 2007))
+  ok('all four walls are explained with a consequence',
+    C.WALLS.length === 4 && C.WALLS.every((w) => w.k && w.what.length > 80 && w.why.length > 60))
+  // The point of the section is to refuse the marketing claim, so assert it.
+  ok('a terahertz CMOS processor is listed as not existing',
+    C.THZ_REAL.some((t) => /does not exist/i.test(t.status)))
+  ok('every terahertz claim carries a status',
+    C.THZ_REAL.length >= 5 && C.THZ_REAL.every((t) => t.name && t.status && t.what.length > 60))
+}
+
 /* ---------- themes ---------- */
 group('Themes and contrast')
 {
@@ -1208,6 +1278,7 @@ group('Build output')
       ok('author meta tag shipped', html.includes('name="author"') && html.includes('Abhay Bhuva'))
       ok('the provenance note shipped', bundle.includes('Anthropic') && bundle.includes('publicly available'))
       ok('the no-confidential-data statement shipped', /confidential/i.test(bundle))
+      ok('the clock tab shipped', bundle.includes('f_max') || bundle.includes('Signal reach'))
       ok('the science tab shipped', bundle.includes('Subthreshold') || bundle.includes('subthreshold'))
       ok('the God view shipped', bundle.includes('God view') || bundle.includes('godflow'))
       ok('the travel path shipped', bundle.includes('Travel path') || bundle.includes('Follow one wafer'))

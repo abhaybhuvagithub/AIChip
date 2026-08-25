@@ -512,3 +512,31 @@ tabs the wrap carried the controls along with it.
   ones assert it sits inside the control row, after the spacer, before the tab
   nav, and that no control follows it — verified by adding a stray button after
   it and watching the last of those fail.
+
+---
+
+## Fifteenth pass: clock speed
+
+"GHz and advanced THz" is a brief that invites a wrong answer. There is no
+terahertz processor, none is coming, and writing the tab as though there might
+be would have been the easy version.
+
+- **The honest story is better than the marketing one.** Individual transistors
+  passed a terahertz in 2007 and reached 1.5 THz by 2013; commodity processors
+  clock at five or six gigahertz. That two-hundred-fold gap, and the four
+  separate walls that create it, is far more interesting than a roadmap to a
+  terahertz CPU would have been.
+- **Compute the refusal, do not assert it.** A terahertz CMOS clock is not
+  dismissed in prose — the tab computes it: 1.6 GW from P ∝ f³, past every
+  cooling approach on the 3D tab, and a signal reach of 173 µm per cycle, which
+  is smaller than one functional block. A clock that cannot cross its own die
+  in one period is not a clock, and that falls out of c/√ε rather than opinion.
+- **Keep conflatable quantities visually distinct.** Device f_max, radio
+  carrier frequency and processor clock are three different things, and almost
+  every terahertz-chip claim comes from swapping one for another. The ladder
+  colours them separately and a verify check asserts no processor clock in it
+  sits above 100 GHz — I moved one to 1.2 THz to confirm the check named it.
+- **Checked the figures rather than recalling them.** InP f_max above 1 THz,
+  the 48 GHz SFQ multiplier, the ~700 GHz RSFQ ceiling and the sub-THz 6G bands
+  are all sourced, and each carries a status so research is never mistaken for
+  shipping.
