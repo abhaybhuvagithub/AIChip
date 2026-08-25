@@ -121,10 +121,17 @@ body {
 
 /* ---------- Toolbar ---------- */
 .toolbar {
-  display: flex; align-items: center; gap: 10px; padding: 10px 16px;
+  display: flex; flex-direction: column; gap: 9px; padding: 10px 16px;
   background: var(--bg); border-bottom: 1px solid var(--border);
-  position: sticky; top: 0; z-index: 40; flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 40;
 }
+.toolbar-top { display: flex; align-items: center; gap: 8px; width: 100%; }
+/* The tabs scroll rather than wrap. Wrapping pushed the row height around as
+   the label lengths changed and shoved the page content down with it. */
+.tabs { overflow-x: auto; flex-wrap: nowrap; scrollbar-width: thin; padding-bottom: 2px; }
+.tabs::-webkit-scrollbar { height: 4px; }
+.tabs::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+.tab { flex: 0 0 auto; }
 .logo {
   font-family: var(--font-display); font-weight: 700; font-size: 20px;
   letter-spacing: -.02em; margin-right: 4px; display: flex; align-items: center; gap: 8px;
@@ -152,7 +159,7 @@ body {
 .btn:disabled { opacity: .45; cursor: not-allowed; }
 select.btn { appearance: auto; padding: 5px 8px; }
 
-.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tabs { display: flex; gap: 6px; }
 .tab {
   background: transparent; border: 1px solid transparent; color: var(--muted);
   padding: 6px 13px; border-radius: var(--r-btn); font-size: 16px; cursor: pointer;
@@ -318,6 +325,8 @@ p.lede { color: var(--muted); font-size: var(--fs-lede); line-height: 1.6; max-w
 }
 @media (max-width: 640px) {
   .toolbar { padding: 9px 12px; gap: 7px; }
+  /* On a narrow screen the label buttons go, but the corner controls stay. */
+  .toolbar-top .btn.sm:not(.modeswitch button) { font-size: var(--fs-label); padding: 3px 8px; }
   .page { padding: 18px 12px 60px; }
   .stat .v { font-size: 24px; }
   .tour { right: 10px; bottom: 10px; }

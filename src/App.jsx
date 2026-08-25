@@ -152,7 +152,31 @@ export default function App() {
   return (
     <div className="app">
       <header className="toolbar">
-        <div className="logo"><span className="mark" aria-hidden="true" />Fab<span>Sim</span></div>
+        {/* Two rows, deliberately. With fourteen tabs a single wrapping row
+            put the mode switch wherever the wrap happened to land it — the
+            controls need their own row to stay in the corner. */}
+        <div className="toolbar-top">
+          <div className="logo"><span className="mark" aria-hidden="true" />Fab<span>Sim</span></div>
+          <div className="spacer" />
+          <button className="btn sm" onClick={share}>{copied ? '✓ Link copied' : 'Copy link'}</button>
+          <button className="btn sm" onClick={() => (tourStep < 0 ? tourNext() : setTourStep(-1))}>
+            {tourStep < 0 ? 'Take the tour' : 'End tour'}
+          </button>
+          <select className="btn sm" value={palette} onChange={(e) => setPalette(e.target.value)}
+            aria-label="Colour palette" title={PALETTES.find((p) => p.id === palette)?.why}>
+            {PALETTES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+          </select>
+          <div className="modeswitch" role="group" aria-label="Light or dark mode">
+            {MODES.map((m) => (
+              <button key={m.id} className={mode === m.id ? 'on' : ''} onClick={() => setMode(m.id)}
+                aria-pressed={mode === m.id}
+                title={m.id === 'auto' ? `Follows your system — currently ${resolved}` : m.label}>
+                {m.id === 'auto' ? '◐' : m.id === 'light' ? '☀' : '☾'}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <nav className="tabs" aria-label="Sections">
           {TABS.map((t) => (
             <button key={t.id} className={`tab ${tab === t.id ? 'on' : ''}`} onClick={() => setTab(t.id)} aria-current={tab === t.id}>
@@ -160,24 +184,6 @@ export default function App() {
             </button>
           ))}
         </nav>
-        <div className="spacer" />
-        <button className="btn sm" onClick={share}>{copied ? '✓ Link copied' : 'Copy link'}</button>
-        <button className="btn sm" onClick={() => (tourStep < 0 ? tourNext() : setTourStep(-1))}>
-          {tourStep < 0 ? 'Take the tour' : 'End tour'}
-        </button>
-        <select className="btn sm" value={palette} onChange={(e) => setPalette(e.target.value)}
-          aria-label="Colour palette" title={PALETTES.find((p) => p.id === palette)?.why}>
-          {PALETTES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
-        </select>
-        <div className="modeswitch" role="group" aria-label="Light or dark mode">
-          {MODES.map((m) => (
-            <button key={m.id} className={mode === m.id ? 'on' : ''} onClick={() => setMode(m.id)}
-              aria-pressed={mode === m.id}
-              title={m.id === 'auto' ? `Follows your system — currently ${resolved}` : m.label}>
-              {m.id === 'auto' ? '◐' : m.id === 'light' ? '☀' : '☾'}
-            </button>
-          ))}
-        </div>
       </header>
 
       <main className="page">

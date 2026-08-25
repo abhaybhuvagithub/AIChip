@@ -1047,6 +1047,29 @@ group('Themes and contrast')
 
   ok('a default applies before JavaScript runs', /:root, \[data-theme="litho"\]\[data-mode="dark"\]/.test(css))
   ok('the mode switch is styled', /\.modeswitch/.test(css))
+
+  // Position, not just presence. The switch drifted before because fourteen
+  // tabs wrapped the toolbar and carried it along; a two-row toolbar with the
+  // controls in the top row is what actually keeps it in the corner.
+  const app = readFileSync(join(root, 'src/App.jsx'), 'utf8')
+  ok('the toolbar has a dedicated control row', /className="toolbar-top"/.test(app))
+  ok('the mode switch sits in that row, after the spacer', (() => {
+    const top = app.indexOf('className="toolbar-top"')
+    const spacer = app.indexOf('className="spacer"', top)
+    const sw = app.indexOf('className="modeswitch"', top)
+    const nav = app.indexOf('<nav className="tabs"', top)
+    return top > -1 && spacer > top && sw > spacer && sw < nav
+  })())
+  ok('the mode switch is the last control in the row', (() => {
+    const sw = app.indexOf('className="modeswitch"')
+    const after = app.slice(sw, app.indexOf('<nav className="tabs"', sw))
+    // Nothing else may open a control between the switch and the tab nav.
+    return !/className="btn sm"/.test(after.replace(/<button key=\{m\.id\}[\s\S]*?<\/button>/g, ''))
+  })())
+  ok('the control row does not wrap', /\.toolbar-top \{[^}]*display: flex/.test(css) &&
+    !/\.toolbar-top \{[^}]*flex-wrap: wrap/.test(css))
+  ok('the tab row scrolls instead of wrapping',
+    /\.tabs \{[^}]*overflow-x: auto/.test(css) && /\.tabs \{[^}]*flex-wrap: nowrap/.test(css))
 }
 
 /* ---------- legibility ---------- */

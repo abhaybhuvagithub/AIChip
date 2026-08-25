@@ -494,3 +494,21 @@ palette choice when you pick it.
   silently reset.
 - **The browser chrome follows.** `theme-color` is updated from the resolved
   `--bg`, so a light page no longer sits under a black status bar on mobile.
+
+---
+
+## Fourteenth pass: pinning the mode switch
+
+The switch was already last in the DOM, so "move it to the corner" was not a
+reordering job — the toolbar was a single wrapping flex row, and with fourteen
+tabs the wrap carried the controls along with it.
+
+- **Fixed the cause, not the position.** The toolbar is now two rows: controls
+  in the top row with the switch in the corner, tabs in their own row below.
+  The tab row scrolls horizontally instead of wrapping, which also stops the
+  toolbar height changing as tab labels change and shoving page content down.
+- **The check asserts position, not presence.** A check that `.modeswitch`
+  exists would have passed the whole time it was in the wrong place. The new
+  ones assert it sits inside the control row, after the spacer, before the tab
+  nav, and that no control follows it — verified by adding a stray button after
+  it and watching the last of those fail.
