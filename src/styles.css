@@ -8,12 +8,20 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-:root, [data-theme="litho"] {
-  --bg: #0b0a07; --panel: #141209; --panel2: #1c1910; --border: #33301f;
-  --text: #f2ede0; --muted: #9a927c; --accent: #ffb020; --ok: #31c48d;
-  --warn: #f4b740; --bad: #f6685e;
-  --wafer: radial-gradient(circle at 32% 24%, #1f1c10 0%, #0b0a07 74%);
-  --sel: #f2ede0; --shadow: rgba(0,0,0,.6); --chip-bg: rgba(20,18,9,.93);
+/* Themes are a palette crossed with a mode, not a flat list.
+   `data-theme` picks the palette, `data-mode` picks dark or light, and Auto
+   resolves the mode from the OS in App.jsx. Ten combinations, each written
+   out rather than derived, because a light theme is not a dark theme with the
+   values flipped — accents that read well on near-black wash out on white and
+   have to be darkened separately.
+
+   Every combination below was checked against WCAG before it was written:
+   text at 7:1 or better against its background (AAA), muted at 4.5:1 or
+   better because muted carries real prose on this site, and accent at 3:1 or
+   better for interface elements. A verify check recomputes all thirty ratios
+   from this file, so a future colour tweak cannot quietly break legibility. */
+
+:root {
   --r-card: 16px; --r-pill: 980px; --r-btn: 999px;
   /* Type scale. Prose is 17–21px; labels and dense data sit lower on purpose. */
   --fs-lede: 21px;      /* section-opening paragraphs */
@@ -27,38 +35,75 @@
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-[data-theme="wafer"] {
-  --bg: #07080d; --panel: #0e1119; --panel2: #141826; --border: #262e42;
-  --text: #e6eaf4; --muted: #7c879c; --accent: #8b7bff; --ok: #31c48d;
-  --warn: #f4b740; --bad: #f6685e;
+:root, [data-theme="litho"][data-mode="dark"] {
+  --bg: #0b0a07; --panel: #141209; --panel2: #1c1910; --border: #3a3627;
+  --text: #f2ede0; --muted: #a8a08a; --accent: #ffb020;
+  --ok: #31c48d; --warn: #f4b740; --bad: #f6685e;
+  --wafer: radial-gradient(circle at 32% 24%, #1f1c10 0%, #0b0a07 74%);
+  --sel: #f2ede0; --shadow: rgba(0,0,0,.6); --chip-bg: rgba(20,18,9,.93);
+}
+[data-theme="litho"][data-mode="light"] {  /* Litho bay — light */
+  --bg: #faf7f0; --panel: #ffffff; --panel2: #f2ede1; --border: #ddd4c2;
+  --text: #17150e; --muted: #5f5a49; --accent: #9a5b00;
+  --ok: #0f6b45; --warn: #8a5000; --bad: #b3271e;
+  --wafer: radial-gradient(circle at 32% 24%, #ffffff 0%, #f0e9da 76%);
+  --sel: #17150e; --shadow: rgba(40,32,10,.14); --chip-bg: rgba(255,255,255,.95);
+}
+[data-theme="wafer"][data-mode="dark"] {  /* Wafer — dark */
+  --bg: #07080d; --panel: #0e1119; --panel2: #141826; --border: #2c3547;
+  --text: #e6eaf4; --muted: #8a95ab; --accent: #8b7bff;
+  --ok: #31c48d; --warn: #f4b740; --bad: #f6685e;
   --wafer: radial-gradient(circle at 32% 24%, #171b2a 0%, #07080d 74%);
   --sel: #e6eaf4; --shadow: rgba(0,0,0,.6); --chip-bg: rgba(14,17,25,.93);
 }
-
-[data-theme="glow"] {
-  --bg: #0a0d12; --panel: #11161f; --panel2: #161d28; --border: #2a3444;
-  --text: #e8edf4; --muted: #7d8a9c; --accent: #37c28e; --ok: #31c48d;
-  --warn: #f4b740; --bad: #f6685e;
+[data-theme="wafer"][data-mode="light"] {  /* Wafer — light */
+  --bg: #f6f6fb; --panel: #ffffff; --panel2: #eeeef7; --border: #d5d6e4;
+  --text: #12141c; --muted: #575e70; --accent: #5540d6;
+  --ok: #0f6b45; --warn: #8a5000; --bad: #b3271e;
+  --wafer: radial-gradient(circle at 32% 24%, #ffffff 0%, #ebebf6 76%);
+  --sel: #12141c; --shadow: rgba(20,22,40,.13); --chip-bg: rgba(255,255,255,.95);
+}
+[data-theme="glow"][data-mode="dark"] {  /* Glow — dark */
+  --bg: #0a0d12; --panel: #11161f; --panel2: #161d28; --border: #2e3849;
+  --text: #e8edf4; --muted: #8b98ab; --accent: #37c28e;
+  --ok: #31c48d; --warn: #f4b740; --bad: #f6685e;
   --wafer: radial-gradient(circle at 32% 24%, #141a26 0%, #0a0d12 72%);
   --sel: #e8edf4; --shadow: rgba(0,0,0,.55); --chip-bg: rgba(17,22,31,.92);
 }
-
-/* Millikelvin — for the quantum tab. A dilution refrigerator runs colder than
-   deep space, and the palette should say so before the copy does. */
-[data-theme="mk"] {
-  --bg: #05090e; --panel: #0b1119; --panel2: #101823; --border: #1f2d3d;
-  --text: #dfeaf5; --muted: #6f8296; --accent: #4dd6e8; --ok: #31c48d;
-  --warn: #f4b740; --bad: #ff6b8a;
+[data-theme="glow"][data-mode="light"] {  /* Glow — light */
+  --bg: #f4f7f6; --panel: #ffffff; --panel2: #eaf1ee; --border: #cfdcd6;
+  --text: #101815; --muted: #516058; --accent: #0a7350;
+  --ok: #0f6b45; --warn: #8a5000; --bad: #b3271e;
+  --wafer: radial-gradient(circle at 32% 24%, #ffffff 0%, #e7f0ec 76%);
+  --sel: #101815; --shadow: rgba(16,32,26,.13); --chip-bg: rgba(255,255,255,.95);
+}
+[data-theme="kesar"][data-mode="dark"] {  /* Kesar — dark */
+  --bg: #0d0906; --panel: #171009; --panel2: #201710; --border: #413021;
+  --text: #f6ece5; --muted: #ab9a8d; --accent: #FC470D;
+  --ok: #31c48d; --warn: #f4b740; --bad: #f6685e;
+  --wafer: radial-gradient(circle at 32% 24%, #241a11 0%, #0d0906 74%);
+  --sel: #f6ece5; --shadow: rgba(0,0,0,.62); --chip-bg: rgba(23,16,9,.93);
+}
+[data-theme="kesar"][data-mode="light"] {  /* Kesar — light */
+  --bg: #fdf6f1; --panel: #ffffff; --panel2: #f8ebe2; --border: #e3d0c2;
+  --text: #1a1109; --muted: #6b5647; --accent: #b83606;
+  --ok: #0f6b45; --warn: #8a5000; --bad: #b3271e;
+  --wafer: radial-gradient(circle at 32% 24%, #ffffff 0%, #f6e8dd 76%);
+  --sel: #1a1109; --shadow: rgba(60,30,10,.14); --chip-bg: rgba(255,255,255,.95);
+}
+[data-theme="mk"][data-mode="dark"] {  /* Millikelvin — dark */
+  --bg: #05090e; --panel: #0b1119; --panel2: #101823; --border: #243347;
+  --text: #dfeaf5; --muted: #8394a8; --accent: #4dd6e8;
+  --ok: #31c48d; --warn: #f4b740; --bad: #ff6b8a;
   --wafer: radial-gradient(circle at 32% 24%, #0e1826 0%, #05090e 74%);
   --sel: #dfeaf5; --shadow: rgba(0,0,0,.65); --chip-bg: rgba(11,17,25,.93);
 }
-
-[data-theme="cleanroom"] {
-  --bg: #f4f5f7; --panel: #ffffff; --panel2: #eef0f4; --border: #d5d9e0;
-  --text: #14171d; --muted: #5a6272; --accent: #b8710a; --ok: #178055;
-  --warn: #a35b00; --bad: #c33a30;
-  --wafer: radial-gradient(circle at 32% 24%, #ffffff 0%, #e9ebf0 76%);
-  --sel: #14171d; --shadow: rgba(20,24,32,.12); --chip-bg: rgba(255,255,255,.95);
+[data-theme="mk"][data-mode="light"] {  /* Millikelvin — light */
+  --bg: #f2f7fa; --panel: #ffffff; --panel2: #e8f1f6; --border: #cbdae4;
+  --text: #0d1620; --muted: #4d5f6e; --accent: #0a6f80;
+  --ok: #0f6b45; --warn: #8a5000; --bad: #b3271e;
+  --wafer: radial-gradient(circle at 32% 24%, #ffffff 0%, #e6eff5 76%);
+  --sel: #0d1620; --shadow: rgba(10,30,45,.13); --chip-bg: rgba(255,255,255,.95);
 }
 
 html, body, #root { height: 100%; }
@@ -383,3 +428,14 @@ p.lede { color: var(--muted); font-size: var(--fs-lede); line-height: 1.6; max-w
   .assistant-fab { right: 10px; bottom: 10px; }
   .godnode { flex: 0 0 126px; }
 }
+
+/* ---------- Mode switch ---------- */
+.modeswitch { display: inline-flex; border: 1px solid var(--border); border-radius: var(--r-btn); overflow: hidden; }
+.modeswitch button {
+  background: var(--panel2); color: var(--muted); border: none; cursor: pointer;
+  padding: 5px 11px; font-size: var(--fs-data); font-family: inherit; line-height: 1;
+  transition: background .16s, color .16s;
+}
+.modeswitch button + button { border-left: 1px solid var(--border); }
+.modeswitch button:hover { color: var(--accent); }
+.modeswitch button.on { background: var(--accent); color: var(--bg); }

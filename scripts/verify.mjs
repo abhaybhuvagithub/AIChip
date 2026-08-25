@@ -971,6 +971,84 @@ group('Physics')
     P.LITHO.every((l, i) => i === 0 || l.year > P.LITHO[i - 1].year))
 }
 
+/* ---------- themes ---------- */
+group('Themes and contrast')
+{
+  const css = readFileSync(join(root, 'src/styles.css'), 'utf8')
+
+  // WCAG 2.1 relative luminance and contrast ratio, computed from the
+  // stylesheet rather than trusted. A colour tweak that quietly makes muted
+  // prose unreadable is exactly the kind of regression nothing else catches.
+  const lin = (c) => { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4) }
+  const lum = (hex) => {
+    const h = hex.replace('#', '')
+    const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.substr(i, 2), 16))
+    return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b)
+  }
+  const contrast = (a, b) => {
+    const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x)
+    return (hi + 0.05) / (lo + 0.05)
+  }
+
+  // Pull every [data-theme][data-mode] block and its custom properties.
+  const blocks = []
+  for (const m of css.matchAll(/\[data-theme="([a-z]+)"\]\[data-mode="(dark|light)"\][^{]*\{([^}]*)\}/g)) {
+    const vars = {}
+    for (const v of m[3].matchAll(/--([a-z0-9-]+): *(#[0-9a-fA-F]{6})/g)) vars[v[1]] = v[2]
+    blocks.push({ palette: m[1], mode: m[2], vars })
+  }
+
+  const PALETTES = ['litho', 'wafer', 'glow', 'kesar', 'mk']
+  ok('every palette has both a dark and a light variant',
+    PALETTES.every((p) => ['dark', 'light'].every((mo) =>
+      blocks.some((b) => b.palette === p && b.mode === mo))),
+    PALETTES.filter((p) => !['dark', 'light'].every((mo) => blocks.some((b) => b.palette === p && b.mode === mo))).join(', '))
+  ok('the kesar palette exists', PALETTES.includes('kesar') && blocks.some((b) => b.palette === 'kesar'))
+  ok('kesar keeps its saffron accent',
+    blocks.find((b) => b.palette === 'kesar' && b.mode === 'dark').vars.accent.toLowerCase() === '#fc470d')
+  ok('ten theme combinations are defined', blocks.length >= 10, String(blocks.length))
+  ok('every block defines the full token set', blocks.every((b) =>
+    ['bg', 'panel', 'panel2', 'border', 'text', 'muted', 'accent', 'ok', 'warn', 'bad', 'sel'].every((k) => b.vars[k])))
+
+  // Contrast. Text at AAA because it is long-form reading; muted at AA
+  // because muted carries the .small prose class, which is most of the
+  // explanatory text on this site; accent at 3:1 as a UI component.
+  const failText = [], failMuted = [], failAccent = [], failPanel = []
+  for (const b of blocks) {
+    const id = `${b.palette}-${b.mode}`
+    if (contrast(b.vars.text, b.vars.bg) < 7) failText.push(`${id} ${contrast(b.vars.text, b.vars.bg).toFixed(2)}`)
+    if (contrast(b.vars.muted, b.vars.bg) < 4.5) failMuted.push(`${id} ${contrast(b.vars.muted, b.vars.bg).toFixed(2)}`)
+    if (contrast(b.vars.accent, b.vars.bg) < 3) failAccent.push(`${id} ${contrast(b.vars.accent, b.vars.bg).toFixed(2)}`)
+    // Cards sit on --panel, not --bg, so text has to clear it there too.
+    if (contrast(b.vars.text, b.vars.panel) < 7) failPanel.push(`${id} ${contrast(b.vars.text, b.vars.panel).toFixed(2)}`)
+  }
+  ok('body text clears AAA (7:1) against the background in every theme', failText.length === 0, failText.join(', '))
+  ok('body text clears AAA against card panels too', failPanel.length === 0, failPanel.join(', '))
+  ok('muted prose clears AA (4.5:1) in every theme', failMuted.length === 0, failMuted.join(', '))
+  ok('accents clear 3:1 for interface use in every theme', failAccent.length === 0, failAccent.join(', '))
+
+  // Light themes must genuinely be light, and dark genuinely dark — a mislabel
+  // here would be invisible in code review and obvious to a user.
+  ok('light modes have light backgrounds',
+    blocks.filter((b) => b.mode === 'light').every((b) => lum(b.vars.bg) > 0.6),
+    blocks.filter((b) => b.mode === 'light' && lum(b.vars.bg) <= 0.6).map((b) => b.palette).join(', '))
+  ok('dark modes have dark backgrounds',
+    blocks.filter((b) => b.mode === 'dark').every((b) => lum(b.vars.bg) < 0.05))
+  ok('light and dark variants of a palette are genuinely different', (() => {
+    for (const p of PALETTES) {
+      const d = blocks.find((b) => b.palette === p && b.mode === 'dark')
+      const l = blocks.find((b) => b.palette === p && b.mode === 'light')
+      if (d.vars.accent === l.vars.accent) return false   // an inverted dark theme, not a light one
+    }
+    return true
+  })())
+  ok('borders are visible against their panels',
+    blocks.every((b) => contrast(b.vars.border, b.vars.panel) > 1.2))
+
+  ok('a default applies before JavaScript runs', /:root, \[data-theme="litho"\]\[data-mode="dark"\]/.test(css))
+  ok('the mode switch is styled', /\.modeswitch/.test(css))
+}
+
 /* ---------- legibility ---------- */
 group('Legibility')
 {
@@ -1127,8 +1205,10 @@ group('Build output')
     if (css.length) {
       const sheet = readFileSync(join(dist, 'assets', css[0]), 'utf8')
       // The minifier drops the quotes in attribute selectors, so accept both.
-      ok('all five themes shipped', ['litho', 'wafer', 'glow', 'mk', 'cleanroom'].every((t) =>
+      ok('all five palettes shipped', ['litho', 'wafer', 'glow', 'kesar', 'mk'].every((t) =>
         sheet.includes(`data-theme="${t}"`) || sheet.includes(`data-theme=${t}`)))
+      ok('both modes shipped', ['dark', 'light'].every((m) =>
+        sheet.includes(`data-mode="${m}"`) || sheet.includes(`data-mode=${m}`)))
       ok('reduced motion is respected', sheet.includes('prefers-reduced-motion'))
     }
     const readme = readFileSync(join(root, 'README.md'), 'utf8')

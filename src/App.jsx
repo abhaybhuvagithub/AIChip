@@ -35,13 +35,26 @@ const TABS = [
   { id: 'quiz', label: 'Quiz' },
 ]
 
-const THEMES = [
-  { id: 'litho', label: 'Litho bay' },
-  { id: 'wafer', label: 'Wafer' },
-  { id: 'glow', label: 'Glow' },
-  { id: 'mk', label: 'Millikelvin' },
-  { id: 'cleanroom', label: 'Cleanroom' },
+// Palette and mode are independent. Each palette has a hand-tuned light
+// variant rather than a derived one, because inverting a dark theme produces
+// accents that wash out on white.
+const PALETTES = [
+  { id: 'litho', label: 'Litho bay', why: 'Amber — lithography bays are lit yellow so resist does not expose.' },
+  { id: 'wafer', label: 'Wafer', why: 'The iridescence of a polished wafer under light.' },
+  { id: 'glow', label: 'Glow', why: 'Carried over from ArchSim, so the two sites sit on one shelf.' },
+  { id: 'kesar', label: 'Kesar', why: 'Saffron. Also from ArchSim.' },
+  { id: 'mk', label: 'Millikelvin', why: 'For the quantum tab — colder than deep space.' },
 ]
+const MODES = [
+  { id: 'auto', label: 'Auto' },
+  { id: 'light', label: 'Light' },
+  { id: 'dark', label: 'Dark' },
+]
+
+const systemPrefersDark = () =>
+  typeof window !== 'undefined' && window.matchMedia
+    ? window.matchMedia('(prefers-color-scheme: dark)').matches
+    : true
 
 const DEFAULT = {
   ...PRODUCTS[0], preset: PRODUCTS[0].id,
@@ -65,7 +78,20 @@ function readHash() {
 export default function App() {
   const hash = readHash()
   const [tab, setTab] = useState(hash?.tab && TABS.some((t) => t.id === hash.tab) ? hash.tab : 'sand')
-  const [theme, setTheme] = useState(() => localStorage.getItem('fabsim.theme') || 'litho')
+  const [palette, setPalette] = useState(() => {
+    const saved = localStorage.getItem('fabsim.palette')
+    // Migrate the old flat theme names, so an existing visitor's choice is
+    // not silently thrown away by the restructure.
+    const legacy = localStorage.getItem('fabsim.theme')
+    if (saved) return saved
+    if (legacy === 'cleanroom') return 'litho'
+    return PALETTES.some((p) => p.id === legacy) ? legacy : 'litho'
+  })
+  const [mode, setMode] = useState(() => {
+    if (localStorage.getItem('fabsim.mode')) return localStorage.getItem('fabsim.mode')
+    return localStorage.getItem('fabsim.theme') === 'cleanroom' ? 'light' : 'auto'
+  })
+  const [systemDark, setSystemDark] = useState(systemPrefersDark)
   const [cfg, setCfg] = useState({ ...DEFAULT, ...(hash || {}) })
   const [tourStep, setTourStep] = useState(-1)
   const [snap, setSnap] = useState(null)
@@ -73,10 +99,32 @@ export default function App() {
   const journey = useMemo(() => buildJourney(70), [])
   const [copied, setCopied] = useState(false)
 
+  // Auto follows the OS live, not just at load — someone whose machine flips
+  // at sunset should see this flip with it.
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('fabsim.theme', theme)
-  }, [theme])
+    if (!window.matchMedia) return
+    const mq = window.matchMedia('(prefers-color-scheme: dark)')
+    const on = (e) => setSystemDark(e.matches)
+    mq.addEventListener?.('change', on)
+    return () => mq.removeEventListener?.('change', on)
+  }, [])
+
+  const resolved = mode === 'auto' ? (systemDark ? 'dark' : 'light') : mode
+
+  useEffect(() => {
+    const el = document.documentElement
+    el.setAttribute('data-theme', palette)
+    el.setAttribute('data-mode', resolved)
+    localStorage.setItem('fabsim.palette', palette)
+    localStorage.setItem('fabsim.mode', mode)
+    // Keep the browser chrome in step — otherwise a light page sits under a
+    // black status bar on mobile.
+    const meta = document.querySelector('meta[name="theme-color"]')
+    if (meta) {
+      meta.setAttribute('content',
+        getComputedStyle(el).getPropertyValue('--bg').trim() || '#0b0a07')
+    }
+  }, [palette, mode, resolved])
 
   useEffect(() => {
     const p = new URLSearchParams()
@@ -117,9 +165,19 @@ export default function App() {
         <button className="btn sm" onClick={() => (tourStep < 0 ? tourNext() : setTourStep(-1))}>
           {tourStep < 0 ? 'Take the tour' : 'End tour'}
         </button>
-        <select className="btn sm" value={theme} onChange={(e) => setTheme(e.target.value)} aria-label="Theme">
-          {THEMES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+        <select className="btn sm" value={palette} onChange={(e) => setPalette(e.target.value)}
+          aria-label="Colour palette" title={PALETTES.find((p) => p.id === palette)?.why}>
+          {PALETTES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
         </select>
+        <div className="modeswitch" role="group" aria-label="Light or dark mode">
+          {MODES.map((m) => (
+            <button key={m.id} className={mode === m.id ? 'on' : ''} onClick={() => setMode(m.id)}
+              aria-pressed={mode === m.id}
+              title={m.id === 'auto' ? `Follows your system — currently ${resolved}` : m.label}>
+              {m.id === 'auto' ? '◐' : m.id === 'light' ? '☀' : '☾'}
+            </button>
+          ))}
+        </div>
       </header>
 
       <main className="page">

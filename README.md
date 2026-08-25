@@ -177,7 +177,7 @@ that fails fastest:
 | --- | --- |
 | `npm run lint` | Dead imports, unused props, hook misuse. Found three real bugs the first time it ran. |
 | `npm run build` | Anything that does not compile. |
-| `npm run verify` | 419 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
+| `npm run verify` | 435 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
 | `npm run smoke` | Renders all fourteen tabs across five configurations, including an unmakeable die and a zero-yield process. Catches components that throw on first render, and output that leaks `NaN` or `undefined` — which reads as broken while passing every other check. |
 | `npm run budget` | Bundle size against a gzipped budget. This bundle grew 206 kB → 331 kB across six feature passes with nothing watching. |
 
@@ -197,10 +197,10 @@ publish means the push succeeded, not that the bytes are being served — a
 sister repo shipped the previous build for weeks with green checks the whole
 time, because nothing closed that loop.
 
-`npm run verify` runs 419 checks across wafer geometry, yield model
+`npm run verify` runs 435 checks across wafer geometry, yield model
 correctness (pinned against hand-computed values), economics invariants,
 defect scatter determinism, a named type scale with a 14px floor and a pinned
-prose tier, architecture and thermal-wall arithmetic, material
+prose tier, WCAG contrast across all ten themes, architecture and thermal-wall arithmetic, material
 chain mass balance, published specs for real parts, value-chain sourcing
 separation, the pipeline configuration itself, compute-model
 calibration, surface code arithmetic, content completeness, and the contents of the built bundle. A
@@ -217,7 +217,17 @@ The default accent is amber, and the theme is called *Litho bay*, because a
 lithography bay is lit yellow — photoresist is blind above about 500 nm, so
 yellow light lets people work without exposing every wafer in the room.
 
-Five themes ship: Litho bay, Wafer, Glow, Millikelvin, and Cleanroom (light).
+Themes are a **palette crossed with a mode**, not a flat list. Five palettes —
+Litho bay, Wafer, Glow, Kesar, Millikelvin — each with a hand-tuned light and
+dark variant, plus Auto, which follows the operating system live rather than
+only at load.
+
+A light theme is not a dark theme with the values flipped: accents that read
+well on near-black wash out on white, so every light variant has its own
+darkened accent. All thirty contrast ratios are recomputed from the stylesheet
+by a verify check — body text at AAA (7:1) against both background and card
+panel, muted at AA (4.5:1) because muted carries most of the explanatory prose
+here, and accents at 3:1 for interface use.
 
 ## The prompt
 

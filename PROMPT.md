@@ -50,8 +50,14 @@ plus the checks that stop the feature regressing.
 > Carry the token system from `ArchSim-System-Design-Studio`: the same CSS
 > variable names (`--bg --panel --panel2 --border --text --muted --accent
 > --ok --warn --bad`), pill buttons, `--r-card` geometry, IBM Plex Sans for
-> body, IBM Plex Mono for data and labels, Space Grotesk for display. Ship
-> at least one light theme and respect `prefers-reduced-motion`.
+> body, IBM Plex Mono for data and labels, Space Grotesk for display.
+>
+> Theming is a **palette crossed with a mode**, never a flat list with one
+> light entry: every palette gets a hand-tuned light variant, plus an Auto mode
+> that follows the OS live. A light theme is not an inverted dark one — accents
+> that work on near-black wash out on white and must be darkened separately.
+> Compute WCAG contrast for every combination in the verify suite rather than
+> eyeballing it. Respect `prefers-reduced-motion`.
 >
 > Ground the palette in the subject rather than a default: the default accent
 > is amber because lithography bays are lit yellow so photoresist does not
@@ -459,3 +465,32 @@ print.
   18px, notes ≥ 17px, lede ≥ 20px, the scale monotonic, and `.small` required
   to reference the token rather than a bare value. I set `--fs-note` back to
   15px to confirm two checks fired before shipping.
+
+---
+
+## Thirteenth pass: palette × mode
+
+The theme list had five entries of which exactly one was light, which is not a
+light mode — it is a light theme someone has to know to find, and it loses your
+palette choice when you pick it.
+
+- **Restructured to two independent axes.** `data-theme` selects the palette,
+  `data-mode` selects dark or light, and Auto resolves from the OS *and keeps
+  following it* — a machine that flips at sunset flips the page with it, rather
+  than only being read at load. Kesar joins from ArchSim, saffron accent intact.
+- **Every light variant is hand-written, not derived.** Inverting a dark theme
+  produces accents that wash out: the amber that carries Litho bay at 10.8:1 on
+  near-black manages 1.9:1 on white. Each light palette has its own darkened
+  accent, chosen against a contrast calculation rather than by eye.
+- **Contrast is computed in the suite, from the stylesheet.** All thirty ratios
+  — text on background, text on card panel, muted on background, accent on
+  background — recomputed by parsing the CSS. Text must clear AAA, muted must
+  clear AA because muted carries the `.small` prose class, accents 3:1. Two
+  further checks assert light modes are actually light and that a palette's two
+  variants genuinely differ, since a mislabel would be invisible in review and
+  obvious to a user.
+- **Existing choices are migrated, not discarded.** Someone who had picked the
+  old `cleanroom` theme lands on Litho bay in light mode rather than being
+  silently reset.
+- **The browser chrome follows.** `theme-color` is updated from the resolved
+  `--bg`, so a light page no longer sits under a black status bar on mobile.
