@@ -193,9 +193,25 @@ npm run build    # production build into dist/
 npm test         # the whole gate — see below
 ```
 
+## Navigation
+
+A fixed glass sidebar groups the seventeen destinations into six sections —
+Start, Making it, Why it works, The real world, The business, Check — each with
+an icon from the set below.
+
+The translucency is built from `--panel` with `color-mix`, so one rule works
+across all five palettes and both modes: a light palette gets light glass, a
+dark one dark glass, and neither needs its own declaration. A `@supports` block
+falls back to an opaque panel where `backdrop-filter` is unavailable, because
+translucency with nothing blurring behind it is worse than no glass at all.
+
+Below 1020px it becomes a drawer with a scrim, closing itself once a
+destination is chosen, and its transition is disabled under
+`prefers-reduced-motion`.
+
 ## Icons
 
-A drawn icon set (`src/ui/Icon.jsx`): **64 technical drawings** on a shared
+A drawn icon set (`src/ui/Icon.jsx`): **74 technical drawings** on a shared
 24×24 grid, averaging four to five shapes each. Packages, chip function, IP
 blocks, the sixteen fab tool types, the material chain, six transistor
 architectures, five quantum modalities and the industry layers.
@@ -250,7 +266,7 @@ that fails fastest:
 | --- | --- |
 | `npm run lint` | Dead imports, unused props, hook misuse. Found three real bugs the first time it ran. |
 | `npm run build` | Anything that does not compile. |
-| `npm run verify` | 591 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
+| `npm run verify` | 609 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
 | `npm run smoke` | Renders all sixteen tabs across five configurations, including an unmakeable die and a zero-yield process. Catches components that throw on first render, and output that leaks `NaN` or `undefined` — which reads as broken while passing every other check. |
 | `npm run budget` | Bundle size against a gzipped budget. This bundle grew 206 kB → 331 kB across six feature passes with nothing watching. |
 
@@ -270,7 +286,7 @@ publish means the push succeeded, not that the bytes are being served — a
 sister repo shipped the previous build for weeks with green checks the whole
 time, because nothing closed that loop.
 
-`npm run verify` runs 591 checks across wafer geometry, yield model
+`npm run verify` runs 609 checks across wafer geometry, yield model
 correctness (pinned against hand-computed values), economics invariants,
 defect scatter determinism, a named type scale with a 14px floor and a pinned
 prose tier, WCAG contrast across all ten themes, architecture and thermal-wall arithmetic, material

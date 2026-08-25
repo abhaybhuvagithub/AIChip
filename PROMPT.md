@@ -727,3 +727,31 @@ sliver and its label was being cut off mid-word.
   exists would pass while the label was still cut off mid-word. The suite
   checks the ellipsis, the min-width, the focus-visible rule, the aria-label
   and both suppression cases.
+
+---
+
+## Twenty-second pass: the glass sidebar
+
+Seventeen destinations in a horizontally scrolling tab row had stopped being
+navigation and become a haystack. Moving them into a sidebar was the excuse;
+grouping them was the actual improvement.
+
+- **Glass built from tokens, not from rgba.** The translucency comes from
+  `color-mix(in srgb, var(--panel) 62%, transparent)`, so one declaration
+  serves five palettes and two modes — light palettes get light glass
+  automatically. Hardcoding an rgba would have meant ten variants and nine
+  chances to get one wrong, and there is a check asserting none crept in.
+- **Translucency without blur is worse than no glass.** `backdrop-filter` is
+  not universal, and where it is missing a see-through panel leaves text
+  floating on whatever is behind it. A `@supports not` block falls back to an
+  opaque panel. I deleted the fallback to confirm the check fired.
+- **Glass has a lit edge in the physical world.** A one-pixel gradient down the
+  inner border is the difference between something that reads as glass and
+  something that reads as flat transparency.
+- **Grouping was the point.** Six named sections with an icon each, and the
+  groups are *derived* from the tab list rather than declared separately, so
+  adding a tab cannot leave it orphaned outside a group.
+- **Three older checks failed, correctly.** They guarded the tab row that no
+  longer exists. I rewrote them against the new structure rather than deleting
+  them — a check that fails because the thing it guarded moved is doing exactly
+  its job, and deleting it would throw away the coverage.

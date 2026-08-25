@@ -3,6 +3,7 @@ import FabLine from './ui/FabLine.jsx'
 import FabRun from './ui/FabRun.jsx'
 import GodView from './ui/GodView.jsx'
 import Assistant from './ui/Assistant.jsx'
+import Icon from './ui/Icon.jsx'
 import YieldLab from './ui/YieldLab.jsx'
 import Economics from './ui/Economics.jsx'
 import NodesView from './ui/Nodes.jsx'
@@ -22,24 +23,36 @@ import { PRODUCTS } from './data/nodes.js'
 import { buildJourney } from './lib/journey.js'
 
 const TABS = [
-  { id: 'god', label: 'God view ✨' },
-  { id: 'sand', label: 'Sand → silicon' },
-  { id: 'line', label: 'Fab line' },
-  { id: 'run', label: 'Fab run' },
-  { id: 'wafer', label: 'Yield lab' },
-  { id: 'economics', label: 'Economics' },
-  { id: 'science', label: 'The science' },
-  { id: 'clock', label: 'Clock' },
-  { id: 'nodes', label: 'Nodes' },
-  { id: '3d', label: '3D & beyond' },
-  { id: 'silicon', label: 'Silicon' },
-  { id: 'chain', label: 'Value chain' },
-  { id: 'business', label: '0 → market' },
-  { id: 'ethics', label: 'Discipline' },
-  { id: 'compute', label: 'Compute' },
-  { id: 'quantum', label: 'Quantum' },
-  { id: 'quiz', label: 'Quiz' },
+  { id: 'god', label: 'God view ✨', icon: 'spark', group: 'Start' },
+
+  { id: 'sand', label: 'Sand → silicon', icon: 'quartzite', group: 'Making it' },
+  { id: 'line', label: 'Fab line', icon: 'scanner', group: 'Making it' },
+  { id: 'run', label: 'Fab run', icon: 'foundry', group: 'Making it' },
+  { id: 'wafer', label: 'Yield lab', icon: 'wafer', group: 'Making it' },
+
+  { id: 'science', label: 'The science', icon: 'atom', group: 'Why it works' },
+  { id: 'clock', label: 'Clock', icon: 'clock', group: 'Why it works' },
+  { id: '3d', label: '3D & beyond', icon: 'layers', group: 'Why it works' },
+  { id: 'nodes', label: 'Nodes', icon: 'timeline', group: 'Why it works' },
+  { id: 'quantum', label: 'Quantum', icon: 'transmon', group: 'Why it works' },
+
+  { id: 'silicon', label: 'Silicon', icon: 'soc', group: 'The real world' },
+  { id: 'chain', label: 'Value chain', icon: 'route', group: 'The real world' },
+  { id: 'compute', label: 'Compute', icon: 'chart', group: 'The real world' },
+
+  { id: 'economics', label: 'Economics', icon: 'money', group: 'The business' },
+  { id: 'business', label: '0 → market', icon: 'iplicense', group: 'The business' },
+  { id: 'ethics', label: 'Discipline', icon: 'shield', group: 'The business' },
+
+  { id: 'quiz', label: 'Quiz', icon: 'quiz', group: 'Check' },
 ]
+
+/** Groups, in the order they appear, derived so the two cannot drift apart. */
+const GROUPS = TABS.reduce((acc, t) => {
+  const g = acc.find((x) => x.label === t.group)
+  if (g) g.tabs.push(t); else acc.push({ label: t.group, tabs: [t] })
+  return acc
+}, [])
 
 // Palette and mode are independent. Each palette has a hand-tuned light
 // variant rather than a derived one, because inverting a dark theme produces
@@ -104,6 +117,7 @@ export default function App() {
   const [tourStep, setTourStep] = useState(-1)
   const [snap, setSnap] = useState(null)
   const [assistantOpen, setAssistantOpen] = useState(false)
+  const [navOpen, setNavOpen] = useState(false)
   const journey = useMemo(() => buildJourney(70), [])
   const [copied, setCopied] = useState(false)
 
@@ -159,40 +173,60 @@ export default function App() {
 
   return (
     <div className="app">
-      <header className="toolbar">
-        {/* Two rows, deliberately. With fourteen tabs a single wrapping row
-            put the mode switch wherever the wrap happened to land it — the
-            controls need their own row to stay in the corner. */}
-        <div className="toolbar-top">
+      {/* Frosted sidebar. Seventeen destinations need grouping and vertical
+          room; the old scrolling tab row gave them neither. */}
+      <aside className={`sidebar ${navOpen ? 'open' : ''}`} aria-label="Sections">
+        <div className="side-head">
           <div className="logo"><span className="mark" aria-hidden="true" />Fab<span>Sim</span></div>
-          <div className="spacer" />
-          <button className="btn sm" onClick={share}>{copied ? '✓ Link copied' : 'Copy link'}</button>
-          <button className="btn sm" onClick={() => (tourStep < 0 ? tourNext() : setTourStep(-1))}>
-            {tourStep < 0 ? 'Take the tour' : 'End tour'}
-          </button>
-          <select className="btn sm" value={palette} onChange={(e) => setPalette(e.target.value)}
-            aria-label="Colour palette" title={PALETTES.find((p) => p.id === palette)?.why}>
-            {PALETTES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
-          </select>
-          <div className="modeswitch" role="group" aria-label="Light or dark mode">
-            {MODES.map((m) => (
-              <button key={m.id} className={mode === m.id ? 'on' : ''} onClick={() => setMode(m.id)}
-                aria-pressed={mode === m.id}
-                title={m.id === 'auto' ? `Follows your system — currently ${resolved}` : m.label}>
-                {m.id === 'auto' ? '◐' : m.id === 'light' ? '☀' : '☾'}
-              </button>
-            ))}
-          </div>
+          <button className="side-close btn sm" onClick={() => setNavOpen(false)} aria-label="Close navigation">✕</button>
         </div>
-
-        <nav className="tabs" aria-label="Sections">
-          {TABS.map((t) => (
-            <button key={t.id} className={`tab ${tab === t.id ? 'on' : ''}`} onClick={() => setTab(t.id)} aria-current={tab === t.id}>
-              {t.label}
-            </button>
+        <nav className="side-nav">
+          {GROUPS.map((g) => (
+            <div className="side-group" key={g.label}>
+              <div className="side-group-label">{g.label}</div>
+              {g.tabs.map((t) => (
+                <button
+                  key={t.id}
+                  className={`side-tab ${tab === t.id ? 'on' : ''}`}
+                  onClick={() => { setTab(t.id); setNavOpen(false) }}
+                  aria-current={tab === t.id ? 'page' : undefined}
+                >
+                  <Icon name={t.icon} size={20} />
+                  <span>{t.label}</span>
+                </button>
+              ))}
+            </div>
           ))}
         </nav>
-      </header>
+      </aside>
+
+      {navOpen && <div className="side-scrim" onClick={() => setNavOpen(false)} aria-hidden="true" />}
+
+      <div className="shell">
+        <header className="toolbar">
+          <div className="toolbar-top">
+            <button className="side-open btn sm" onClick={() => setNavOpen(true)} aria-label="Open navigation">☰</button>
+            <div className="crumb">{TABS.find((t) => t.id === tab)?.label}</div>
+            <div className="spacer" />
+            <button className="btn sm" onClick={share}>{copied ? '✓ Link copied' : 'Copy link'}</button>
+            <button className="btn sm" onClick={() => (tourStep < 0 ? tourNext() : setTourStep(-1))}>
+              {tourStep < 0 ? 'Take the tour' : 'End tour'}
+            </button>
+            <select className="btn sm" value={palette} onChange={(e) => setPalette(e.target.value)}
+              aria-label="Colour palette" title={PALETTES.find((p) => p.id === palette)?.why}>
+              {PALETTES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+            </select>
+            <div className="modeswitch" role="group" aria-label="Light or dark mode">
+              {MODES.map((m) => (
+                <button key={m.id} className={mode === m.id ? 'on' : ''} onClick={() => setMode(m.id)}
+                  aria-pressed={mode === m.id}
+                  title={m.id === 'auto' ? `Follows your system — currently ${resolved}` : m.label}>
+                  {m.id === 'auto' ? '◐' : m.id === 'light' ? '☀' : '☾'}
+                </button>
+              ))}
+            </div>
+          </div>
+        </header>
 
       <main className="page">
         {tab === 'sand' && <SandToSilicon cfg={cfg} />}
@@ -226,12 +260,8 @@ export default function App() {
         </aside>
       )}
 
-      <Assistant
-        cfg={cfg} snap={snap} journey={journey} goTab={setTab}
-        open={assistantOpen} setOpen={setAssistantOpen}
-      />
 
-      <footer className="footer">
+        <footer className="footer">
         <div className="page" style={{ padding: 0 }}>
           <b>FabSim</b> — an interactive walk from quartz rock to a finished chip, what it delivers
           once it runs, and the arithmetic that decides whether either is worth doing. Every number on
@@ -255,7 +285,13 @@ export default function App() {
             <a href="https://github.com/abhaybhuvagithub/AIChip" target="_blank" rel="noopener noreferrer">Source</a>
           </span>
         </div>
-      </footer>
+        </footer>
+      </div>
+
+      <Assistant
+        cfg={cfg} snap={snap} journey={journey} goTab={setTab}
+        open={assistantOpen} setOpen={setAssistantOpen}
+      />
     </div>
   )
 }

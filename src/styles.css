@@ -119,22 +119,90 @@ body {
 ::selection { background: var(--accent); color: var(--bg); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
 
+/* ---------- Glass sidebar ----------
+   The translucency is built from --panel via color-mix, so a single rule
+   works across all five palettes and both modes: a light palette gets light
+   glass, a dark one gets dark glass, and neither needs its own declaration.
+
+   backdrop-filter is the whole effect, and it is not universal — the @supports
+   block below falls back to an opaque panel rather than leaving text floating
+   on a half-transparent background nothing is blurring. */
+.sidebar {
+  position: fixed; top: 0; left: 0; bottom: 0; width: 258px; z-index: 50;
+  display: flex; flex-direction: column;
+  background: color-mix(in srgb, var(--panel) 62%, transparent);
+  backdrop-filter: blur(26px) saturate(150%);
+  -webkit-backdrop-filter: blur(26px) saturate(150%);
+  border-right: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+  box-shadow: 1px 0 30px -12px var(--shadow);
+}
+/* A one-pixel highlight down the inner edge. Glass in the physical world has
+   a lit edge; without it the panel reads as flat translucency. */
+.sidebar::after {
+  content: ''; position: absolute; inset: 0 0 0 auto; width: 1px;
+  background: linear-gradient(to bottom,
+    color-mix(in srgb, var(--text) 22%, transparent),
+    transparent 45%,
+    color-mix(in srgb, var(--text) 10%, transparent));
+  pointer-events: none;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .sidebar { background: var(--panel); }
+}
+
+.side-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 16px 12px; flex: 0 0 auto;
+}
+.side-close { display: none; }
+
+.side-nav { flex: 1; overflow-y: auto; padding: 0 10px 20px; scrollbar-width: thin; }
+.side-nav::-webkit-scrollbar { width: 5px; }
+.side-nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+.side-group { margin-bottom: 16px; }
+.side-group-label {
+  font-family: var(--font-mono); font-size: var(--fs-label); text-transform: uppercase;
+  letter-spacing: .12em; color: var(--muted); padding: 0 8px 7px;
+}
+.side-tab {
+  display: flex; align-items: center; gap: 11px; width: 100%; text-align: left;
+  background: transparent; border: 1px solid transparent; color: var(--muted);
+  padding: 9px 10px; border-radius: 10px; font-size: var(--fs-data);
+  font-family: inherit; cursor: pointer; transition: color .14s, background .14s;
+  margin-bottom: 2px;
+}
+.side-tab:hover { color: var(--text); background: color-mix(in srgb, var(--panel2) 70%, transparent); }
+.side-tab.on {
+  color: var(--accent); font-weight: 600;
+  background: color-mix(in srgb, var(--accent) 13%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 34%, transparent);
+}
+.side-tab span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.side-scrim { display: none; }
+.side-open { display: none; }
+
 /* ---------- Toolbar ---------- */
 .toolbar {
   display: flex; flex-direction: column; gap: 9px; padding: 10px 16px;
-  background: var(--bg); border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--border);
   position: sticky; top: 0; z-index: 40;
 }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .toolbar { background: var(--bg); }
+}
 .toolbar-top { display: flex; align-items: center; gap: 8px; width: 100%; }
-/* The tabs scroll rather than wrap. Wrapping pushed the row height around as
-   the label lengths changed and shoved the page content down with it. */
-.tabs { overflow-x: auto; flex-wrap: nowrap; scrollbar-width: thin; padding-bottom: 2px; }
-.tabs::-webkit-scrollbar { height: 4px; }
-.tabs::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
-.tab { flex: 0 0 auto; }
+.crumb {
+  font-family: var(--font-display); font-size: 19px; letter-spacing: -.02em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
 .logo {
   font-family: var(--font-display); font-weight: 700; font-size: 20px;
-  letter-spacing: -.02em; margin-right: 4px; display: flex; align-items: center; gap: 8px;
+  letter-spacing: -.02em; display: flex; align-items: center; gap: 8px;
 }
 .logo span { color: var(--accent); }
 .logo .mark {
@@ -147,7 +215,7 @@ body {
 
 .btn {
   background: var(--panel2); color: var(--text); border: 1px solid var(--border);
-  border-radius: var(--r-btn); padding: 6px 14px; font-size: 16px; cursor: pointer;
+  border-radius: var(--r-btn); padding: 6px 14px; font-size: var(--fs-data); cursor: pointer;
   transition: border-color .16s, color .16s, background .16s;
   white-space: nowrap; font-family: inherit; letter-spacing: -.01em;
 }
@@ -155,20 +223,12 @@ body {
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 600; }
 .btn.primary:hover { color: var(--bg); filter: brightness(1.08); }
 .btn.active, .btn.active:hover { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 600; }
-.btn.sm { padding: 3px 10px; font-size: 14px; }
+.btn.sm { padding: 3px 10px; font-size: var(--fs-label); }
 .btn:disabled { opacity: .45; cursor: not-allowed; }
 select.btn { appearance: auto; padding: 5px 8px; }
 
-.tabs { display: flex; gap: 6px; }
-.tab {
-  background: transparent; border: 1px solid transparent; color: var(--muted);
-  padding: 6px 13px; border-radius: var(--r-btn); font-size: 16px; cursor: pointer;
-  font-family: inherit; transition: all .16s;
-}
-.tab:hover { color: var(--text); background: var(--panel2); }
-.tab.on { color: var(--bg); background: var(--accent); font-weight: 600; }
-
 /* ---------- Shell ---------- */
+.shell { margin-left: 258px; min-width: 0; display: flex; flex-direction: column; flex: 1; }
 .page { max-width: 1180px; margin: 0 auto; padding: 26px 16px 72px; width: 100%; }
 .eyebrow {
   font-family: var(--font-mono); font-size: 14px; text-transform: uppercase;
@@ -323,6 +383,23 @@ p.lede { color: var(--muted); font-size: var(--fs-lede); line-height: 1.6; max-w
   *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
   .step:hover { transform: none; }
 }
+@media (max-width: 1020px) {
+  /* Below this the sidebar would eat too much of the page, so it becomes a
+     drawer: off-canvas by default, over the content when opened. */
+  .shell { margin-left: 0; }
+  .sidebar { transform: translateX(-100%); transition: transform .22s ease; width: 280px; }
+  .sidebar.open { transform: none; }
+  .side-open, .side-close { display: inline-flex; }
+  .side-scrim {
+    display: block; position: fixed; inset: 0; z-index: 45;
+    background: color-mix(in srgb, var(--bg) 55%, transparent);
+    backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sidebar { transition: none; }
+}
+
 @media (max-width: 640px) {
   .toolbar { padding: 9px 12px; gap: 7px; }
   /* On a narrow screen the label buttons go, but the corner controls stay. */

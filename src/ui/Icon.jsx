@@ -492,6 +492,64 @@ export const ICONS = {
     <path d="M20 14.2 v-1.5" {...HAIR} />
   </>),
 
+  // ==================================================== NAVIGATION ========
+  // A handful of concept icons the technical set does not cover, drawn in the
+  // same hand so the sidebar does not look borrowed from elsewhere.
+  spark: (<>
+    <path d="M12 2.5 l1.8 5.6 l5.7 1.9 l-5.7 1.9 l-1.8 5.6 l-1.8 -5.6 l-5.7 -1.9 l5.7 -1.9 z" />
+    <path d="M18.5 15.5 l0.8 2.2 l2.2 0.8 l-2.2 0.8 l-0.8 2.2 l-0.8 -2.2 l-2.2 -0.8 l2.2 -0.8 z" {...THIN} />
+  </>),
+  chart: (<>
+    <path d="M3.5 3.5 v17 h17" {...THIN} />
+    <rect x="6.5" y="12" width="2.8" height="5.5" rx="0.4" {...F} />
+    <rect x="11" y="8.5" width="2.8" height="9" rx="0.4" {...F} />
+    <rect x="15.5" y="5.5" width="2.8" height="12" rx="0.4" {...F} />
+  </>),
+  money: (<>
+    <path d="M3.5 3.5 v17 h17" {...THIN} />
+    <path d="M6 17 l3.5 -5 l3.5 2.5 l6 -8.5" strokeWidth="1.6" />
+    <path d="M15 5.5 h4 v4" {...THIN} />
+  </>),
+  clock: (<>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M12 6.5 v5.5 l3.5 2.2" strokeWidth="1.5" />
+    {rep(12, 0, 330, (a, i) => {
+      const r = (a * Math.PI) / 180
+      return <path key={i} d={`M${12 + 7.2 * Math.sin(r)} ${12 - 7.2 * Math.cos(r)} l${0.9 * Math.sin(r)} ${-0.9 * Math.cos(r)}`} {...HAIR} />
+    })}
+  </>),
+  atom: (<>
+    <circle cx="12" cy="12" r="1.9" {...F} />
+    <ellipse cx="12" cy="12" rx="9" ry="3.6" {...THIN} />
+    <ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(60 12 12)" {...THIN} />
+    <ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(120 12 12)" {...THIN} />
+  </>),
+  layers: (<>
+    <path d="M12 3 L21 7.5 L12 12 L3 7.5 z" />
+    <path d="M3 12 L12 16.5 L21 12" {...THIN} />
+    <path d="M3 16.5 L12 21 L21 16.5" {...HAIR} />
+  </>),
+  timeline: (<>
+    <path d="M3 12 h18" {...THIN} />
+    {rep(4, 5.5, 18.5, (t, i) => <circle key={i} cx={t} cy="12" r="1.5" {...F} />)}
+    <path d="M5.5 10.5 v-4 M18.5 13.5 v4" {...HAIR} />
+    <path d="M10 13.5 v3.5 M14 10.5 v-3.5" {...HAIR} />
+  </>),
+  shield: (<>
+    <path d="M12 2.8 l7.5 3 v5.6 c0 4.6 -3.1 8.2 -7.5 9.8 c-4.4 -1.6 -7.5 -5.2 -7.5 -9.8 v-5.6 z" />
+    <path d="M8.6 12 l2.4 2.4 l4.4 -4.8" strokeWidth="1.6" />
+  </>),
+  quiz: (<>
+    <rect x="4" y="3" width="16" height="18" rx="2" />
+    <path d="M9.2 9.2 a2.8 2.8 0 1 1 3.4 2.7 v1.6" strokeWidth="1.4" />
+    <circle cx="12" cy="16.8" r="0.9" {...F} />
+  </>),
+  route: (<>
+    <circle cx="6" cy="6" r="2.4" />
+    <circle cx="18" cy="18" r="2.4" />
+    <path d="M8.4 6 h5.6 a4 4 0 0 1 0 8 h-4 a4 4 0 0 0 0 8 h5.6" strokeDasharray="2.5 2" {...THIN} />
+  </>),
+
   // ================================================= INDUSTRY LAYERS ======
   eda: (<>
     <rect x="2.5" y="4" width="19" height="13" rx="1.5" />

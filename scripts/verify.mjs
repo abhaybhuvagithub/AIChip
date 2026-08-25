@@ -1567,6 +1567,55 @@ group('Themes and contrast')
   ok('a default applies before JavaScript runs', /:root, \[data-theme="litho"\]\[data-mode="dark"\]/.test(css))
   ok('the mode switch is styled', /\.modeswitch/.test(css))
 
+  // ---- glass sidebar ----
+  const app2 = readFileSync(join(root, 'src/App.jsx'), 'utf8')
+  ok('the sidebar exists and is fixed', /\.sidebar \{[^}]*position: fixed/.test(css))
+  ok('the sidebar is actually glass, not just translucent',
+    /\.sidebar \{[^}]*backdrop-filter: blur/.test(css))
+  ok('the webkit prefix is present for Safari',
+    /\.sidebar \{[^}]*-webkit-backdrop-filter/.test(css))
+  // Translucency without blur support is worse than no glass at all — text on
+  // a see-through panel nothing is blurring.
+  ok('there is an opaque fallback where backdrop-filter is unsupported',
+    /@supports not \(\(backdrop-filter/.test(css) && /\.sidebar \{ background: var\(--panel\); \}/.test(css))
+  ok('the glass adapts to palette and mode rather than being hardcoded',
+    /\.sidebar \{[^}]*color-mix\(in srgb, var\(--panel\)/.test(css))
+  ok('no hardcoded rgba glass slipped in',
+    !/\.sidebar \{[^}]*background: rgba\(/.test(css))
+  ok('the glass has a lit inner edge', /\.sidebar::after[^}]*linear-gradient/.test(css))
+
+  ok('navigation is grouped rather than a flat list of seventeen',
+    /const GROUPS = TABS\.reduce/.test(app2) && /group: '/.test(app2))
+  ok('groups are derived from the tabs so the two cannot drift apart',
+    /acc\.find\(\(x\) => x\.label === t\.group\)/.test(app2))
+  ok('every tab carries an icon', (() => {
+    const block = app2.slice(app2.indexOf('const TABS = ['), app2.indexOf('const GROUPS'))
+    const ids = (block.match(/\{ id: '/g) || []).length
+    const icons = (block.match(/icon: '/g) || []).length
+    return ids > 0 && ids === icons
+  })())
+  ok('every tab icon exists in the icon set', (() => {
+    const iconFile = readFileSync(join(root, 'src/ui/Icon.jsx'), 'utf8')
+    const have = [...iconFile.matchAll(/^ {2}([a-z][a-zA-Z0-9]*): \(<>/gm)].map((m) => m[1])
+    const block = app2.slice(app2.indexOf('const TABS = ['), app2.indexOf('const GROUPS'))
+    const used = [...block.matchAll(/icon: '([a-zA-Z0-9]+)'/g)].map((m) => m[1])
+    return used.length > 0 && used.every((u) => have.includes(u))
+  })())
+  ok('the main column is offset by the sidebar width',
+    /\.shell \{[^}]*margin-left: \d+px/.test(css))
+  ok('the sidebar becomes a drawer on narrow screens',
+    /\.sidebar \{ transform: translateX\(-100%\)/.test(css) && /\.sidebar\.open/.test(css))
+  ok('the drawer has an open control, a close control and a scrim',
+    /className="side-open/.test(app2) && /className="side-close/.test(app2) && /className="side-scrim/.test(app2))
+  ok('the drawer closes after a destination is chosen',
+    /setTab\(t\.id\); setNavOpen\(false\)/.test(app2))
+  ok('the current section is marked for assistive technology',
+    /aria-current=\{tab === t\.id \? 'page' : undefined\}/.test(app2))
+  ok('the drawer transition respects reduced motion',
+    /prefers-reduced-motion[\s\S]{0,120}\.sidebar \{ transition: none/.test(css))
+  ok('the toolbar shows which section you are in',
+    /className="crumb"/.test(app2))
+
   // Position, not just presence. The switch drifted before because fourteen
   // tabs wrapped the toolbar and carried it along; a two-row toolbar with the
   // controls in the top row is what actually keeps it in the corner.
@@ -1576,19 +1625,21 @@ group('Themes and contrast')
     const top = app.indexOf('className="toolbar-top"')
     const spacer = app.indexOf('className="spacer"', top)
     const sw = app.indexOf('className="modeswitch"', top)
-    const nav = app.indexOf('<nav className="tabs"', top)
-    return top > -1 && spacer > top && sw > spacer && sw < nav
+    const end = app.indexOf('</header>', top)
+    return top > -1 && spacer > top && sw > spacer && sw < end
   })())
   ok('the mode switch is the last control in the row', (() => {
     const sw = app.indexOf('className="modeswitch"')
-    const after = app.slice(sw, app.indexOf('<nav className="tabs"', sw))
-    // Nothing else may open a control between the switch and the tab nav.
+    const after = app.slice(sw, app.indexOf('</header>', sw))
+    // Nothing else may open a control between the switch and the end of the row.
     return !/className="btn sm"/.test(after.replace(/<button key=\{m\.id\}[\s\S]*?<\/button>/g, ''))
   })())
   ok('the control row does not wrap', /\.toolbar-top \{[^}]*display: flex/.test(css) &&
     !/\.toolbar-top \{[^}]*flex-wrap: wrap/.test(css))
-  ok('the tab row scrolls instead of wrapping',
-    /\.tabs \{[^}]*overflow-x: auto/.test(css) && /\.tabs \{[^}]*flex-wrap: nowrap/.test(css))
+  // Navigation moved from a horizontal tab row into the sidebar, so the rule
+  // that mattered is now that the sidebar scrolls its own list.
+  ok('the sidebar scrolls its own destination list',
+    /\.side-nav \{[^}]*overflow-y: auto/.test(css))
 }
 
 /* ---------- legibility ---------- */
