@@ -452,17 +452,62 @@ p.lede { color: var(--muted); font-size: var(--fs-lede); line-height: 1.6; max-w
 /* ---------- Business phase line ---------- */
 .bizline { display: flex; gap: 3px; align-items: stretch; }
 .bizphase {
-  min-width: 0; text-align: left; cursor: pointer; font-family: inherit; color: var(--text);
+  /* min-width keeps the shortest phase from collapsing to a sliver; without
+     it the one-month tapeout block is a few pixels wide and unclickable. */
+  min-width: 68px; text-align: left; cursor: pointer; font-family: inherit; color: var(--text);
   background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
   padding: 10px 9px; transition: background .16s, border-color .16s;
+  position: relative; overflow: visible;
 }
 .bizphase:hover { border-color: var(--accent); }
 .bizphase.on { border-color: var(--accent); background: var(--panel2); box-shadow: 0 0 0 1px var(--accent); }
-.bizphase-n { display: block; font-size: var(--fs-label); font-weight: 600; line-height: 1.25; }
-.bizphase-m { display: block; font-family: var(--font-mono); font-size: var(--fs-label); color: var(--muted); margin-top: 4px; }
+.bizphase-n { display: flex; font-size: var(--fs-label); font-weight: 600; line-height: 1.25; min-width: 0; }
+/* Truncate cleanly rather than overflowing the block. The full text lives in
+   the tooltip, so an ellipsis here is a signal rather than a loss. */
+.bizphase-t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.bizphase-m { display: block; font-family: var(--font-mono); font-size: var(--fs-label); color: var(--muted); margin-top: 4px; white-space: nowrap; }
+
+/* ---------- Tooltip ----------
+   Reusable: anything with [data-tip] gets one. Shown on hover and on keyboard
+   focus, so it is not mouse-only. */
+[data-tip] { position: relative; }
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute; bottom: calc(100% + 9px); left: 50%; transform: translateX(-50%);
+  background: var(--chip-bg); border: 1px solid var(--accent); border-radius: 10px;
+  padding: 9px 12px; width: max-content; max-width: 280px;
+  font-family: var(--font-body); font-size: var(--fs-data); font-weight: 400;
+  color: var(--text); line-height: 1.45; text-align: left; white-space: normal;
+  box-shadow: 0 10px 28px var(--shadow); backdrop-filter: blur(10px);
+  opacity: 0; pointer-events: none; transition: opacity .14s; z-index: 60;
+}
+[data-tip]::before {
+  content: ''; position: absolute; bottom: calc(100% + 4px); left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 9px; height: 9px; background: var(--chip-bg);
+  border-right: 1px solid var(--accent); border-bottom: 1px solid var(--accent);
+  opacity: 0; pointer-events: none; transition: opacity .14s; z-index: 61;
+}
+[data-tip]:hover::after, [data-tip]:focus-visible::after,
+[data-tip]:hover::before, [data-tip]:focus-visible::before { opacity: 1; }
+/* The end blocks would push their tooltip off-screen if it stayed centred. */
+.bizline > [data-tip]:first-child::after { left: 0; transform: none; }
+.bizline > [data-tip]:last-child::after { left: auto; right: 0; transform: none; }
+
+/* Touch has no hover. Tapping a phase already opens its full detail card
+   below, so the tooltip is suppressed rather than left to stick on tap. */
+@media (hover: none) {
+  [data-tip]::after, [data-tip]::before { display: none; }
+}
 @media (max-width: 760px) {
   .bizline { overflow-x: auto; }
-  .bizphase { flex: 0 0 130px !important; }
+  .bizphase { flex: 0 0 150px !important; }
+  /* A scroll container clips its overflow on BOTH axes — setting overflow-x
+     to auto silently makes overflow-y auto too — so a tooltip drawn above the
+     block would be cut off here. The blocks are a fixed, roomier width at this
+     breakpoint and clicking one opens its full detail card below, so the
+     tooltip is suppressed rather than shown broken. */
+  .bizline [data-tip]::after, .bizline [data-tip]::before { display: none; }
 }
 
 /* Icon + label pairs. The gap and baseline alignment are set once here so

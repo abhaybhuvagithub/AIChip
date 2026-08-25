@@ -106,9 +106,24 @@ export default function Business({ cfg, goTab }) {
       <h2 className="sec">The seven phases</h2>
       <div className="bizline">
         {PHASES.map((x) => (
-          <button key={x.id} className={`bizphase ${phase === x.id ? 'on' : ''}`}
-            style={{ flex: x.months }} onClick={() => setPhase(x.id)} aria-pressed={phase === x.id}>
-            <span className="bizphase-n iconrow"><Icon name={x.icon} size={17} />{x.name}</span>
+          <button
+            key={x.id}
+            className={`bizphase ${phase === x.id ? 'on' : ''}`}
+            style={{ flex: x.months }}
+            onClick={() => setPhase(x.id)}
+            aria-pressed={phase === x.id}
+            // Blocks are sized by duration, so the one-month tapeout is
+            // necessarily narrow and its label has to truncate. The tooltip
+            // carries the full text on hover and on keyboard focus; the
+            // aria-label carries it for screen readers, which never see the
+            // truncation in the first place.
+            data-tip={`${x.name} — ${x.months} months, ${fmt.pct(x.cashShare, 0)} of the budget`}
+            aria-label={`${x.name}, ${x.months} months, ${fmt.pct(x.cashShare, 0)} of the budget`}
+          >
+            <span className="bizphase-n iconrow">
+              <Icon name={x.icon} size={17} />
+              <span className="bizphase-t">{x.name}</span>
+            </span>
             <span className="bizphase-m">{x.months} mo · {fmt.pct(x.cashShare, 0)}</span>
           </button>
         ))}

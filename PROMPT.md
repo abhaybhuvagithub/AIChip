@@ -700,3 +700,30 @@ important thing to correct.
   important. On dual use the tab says plainly that reasonable people disagree
   about where the line sits — because they do, and claiming otherwise would be
   the same false confidence.
+
+---
+
+## Twenty-first pass: the truncated phase labels
+
+A small fix with a general lesson. The business-tab phase blocks are sized by
+duration — `flex: months` — so the one-month tapeout block is necessarily a
+sliver and its label was being cut off mid-word.
+
+- **Fix the cause as well as the symptom.** A tooltip alone would have left a
+  block a few pixels wide and barely clickable. So: a `min-width` floor so the
+  shortest phase stays usable, `text-overflow: ellipsis` so a truncated label
+  reads as deliberate rather than broken, and only then the tooltip carrying
+  the full text.
+- **Hover is not the only way in.** The tooltip opens on `:focus-visible` as
+  well as `:hover`, so keyboard users get it, and an `aria-label` carries the
+  full text for screen readers — which never see the truncation and would
+  otherwise be read a half-word.
+- **A CSS trap worth knowing.** Setting `overflow-x: auto` silently makes
+  `overflow-y` auto too, so a tooltip drawn above a block inside a horizontally
+  scrolling rail is clipped. Rather than ship it broken at that breakpoint, the
+  blocks get a roomier fixed width there and the tooltip is suppressed — the
+  detail card below already carries everything.
+- **Checks assert the compensations, not the tooltip.** Asserting a tooltip
+  exists would pass while the label was still cut off mid-word. The suite
+  checks the ellipsis, the min-width, the focus-visible rule, the aria-label
+  and both suppression cases.

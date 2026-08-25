@@ -1270,6 +1270,30 @@ group('Business case')
     return Bz.MARKETS.every((x) => x.id === 'auto' || a.erosion <= x.erosion) &&
       Bz.MARKETS.every((x) => x.id === 'auto' || a.life >= x.life)
   })())
+  // The phase blocks are sized by duration, so the shortest necessarily
+  // truncates. These assert the compensations are in place rather than the
+  // label merely being cut off.
+  const css2 = readFileSync(join(root, 'src/styles.css'), 'utf8')
+  const biz = readFileSync(join(root, 'src/ui/Business.jsx'), 'utf8')
+  ok('phase blocks carry a hover tooltip', /data-tip=/.test(biz) && /\[data-tip\]::after/.test(css2))
+  ok('the tooltip content includes the full name, duration and budget share',
+    /data-tip=\{`\$\{x\.name\} — \$\{x\.months\} months/.test(biz))
+  ok('the tooltip also opens on keyboard focus, not hover alone',
+    /\[data-tip\]:focus-visible::after/.test(css2))
+  ok('screen readers get the full label regardless of truncation',
+    /aria-label=\{`\$\{x\.name\}, \$\{x\.months\} months/.test(biz))
+  ok('truncated labels end in an ellipsis rather than being cut',
+    /\.bizphase-t \{[^}]*text-overflow: ellipsis/.test(css2))
+  ok('the shortest phase cannot collapse to an unclickable sliver',
+    /\.bizphase \{[^}]*min-width: \d+px/.test(css2))
+  ok('tooltips are suppressed where hover does not exist',
+    /@media \(hover: none\)[^}]*\{[\s\S]{0,200}?\[data-tip\]::after/.test(css2))
+  ok('tooltips are suppressed inside the scrolling phase rail',
+    /\.bizline \[data-tip\]::after/.test(css2))
+  ok('end blocks shift their tooltip inward so it cannot run off-screen',
+    /\.bizline > \[data-tip\]:first-child::after/.test(css2) &&
+    /\.bizline > \[data-tip\]:last-child::after/.test(css2))
+
   ok('the four rules are stated at length',
     Bz.RULES.length === 4 && Bz.RULES.every((r) => r.k && r.what.length > 120))
 }
