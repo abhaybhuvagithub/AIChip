@@ -303,3 +303,12 @@ p.lede { color: var(--muted); font-size: 16px; line-height: 1.6; max-width: 62ch
   .link { flex: 0 0 110px; }
   .ladder { height: 110px; }
 }
+
+/* ---------- Curator credit ---------- */
+.credit { display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.credit a {
+  color: var(--accent); text-decoration: none; font-size: 13px;
+  border: 1px solid var(--border); border-radius: var(--r-btn);
+  padding: 3px 11px; transition: border-color .16s, background .16s;
+}
+.credit a:hover { border-color: var(--accent); background: var(--panel2); }

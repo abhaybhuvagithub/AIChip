@@ -537,6 +537,9 @@ group('Build output')
       // The provenance note is a claim the repo makes to its readers, so it
       // is checked like any other shipped content rather than trusted to
       // survive refactors.
+      ok('the curator credit shipped', bundle.includes('Curated by') && bundle.includes('linkedin.com/in/abhaybhuva'))
+      ok('external links carry rel=noopener', !/target:"_blank"/.test(bundle) || bundle.includes('noopener'))
+      ok('author meta tag shipped', html.includes('name="author"') && html.includes('Abhay Bhuva'))
       ok('the provenance note shipped', bundle.includes('Anthropic') && bundle.includes('publicly available'))
       ok('the no-confidential-data statement shipped', /confidential/i.test(bundle))
       ok('the value chain shipped', bundle.includes('Terafab') && bundle.includes('Neoverse'))
@@ -556,6 +559,9 @@ group('Build output')
     const readme = readFileSync(join(root, 'README.md'), 'utf8')
     ok('README states how the project was built', /Claude/.test(readme) && /Anthropic/.test(readme))
     ok('README states that no confidential data was used', /No confidential/i.test(readme))
+    ok('README credits the curator with both links',
+      /Curated by/.test(readme) && /linkedin\.com\/in\/abhaybhuva/.test(readme) &&
+      /github\.com\/abhaybhuvagithub/.test(readme))
     ok('robots.txt was copied', existsSync(join(dist, 'robots.txt')))
     ok('sitemap.xml was copied', existsSync(join(dist, 'sitemap.xml')))
     ok('.nojekyll was copied', existsSync(join(dist, '.nojekyll')))

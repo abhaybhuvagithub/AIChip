@@ -131,6 +131,10 @@ Five themes ship: Litho bay, Wafer, Glow, Millikelvin, and Cleanroom (light).
 so the next change is held to the same bar. It is written to be re-run against
 a new feature.
 
+## Curated by
+
+**Abhay Bhuva** — [LinkedIn](https://www.linkedin.com/in/abhaybhuva) · [GitHub](https://github.com/abhaybhuvagithub)
+
 ## How this was built
 
 Developed with [Claude](https://claude.ai), Anthropic's AI assistant.

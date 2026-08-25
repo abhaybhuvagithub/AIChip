@@ -150,6 +150,13 @@ export default function App() {
           internal data from any company was used, and none of the figures represent anyone's
           non-public specifications. Where a number could not be sourced publicly, it is marked as an
           estimate or left blank rather than guessed.
+          <br /><br />
+          <span className="credit">
+            Curated by <b>Abhay Bhuva</b>
+            <a href="https://www.linkedin.com/in/abhaybhuva" target="_blank" rel="noopener noreferrer me">LinkedIn</a>
+            <a href="https://github.com/abhaybhuvagithub" target="_blank" rel="noopener noreferrer me">GitHub</a>
+            <a href="https://github.com/abhaybhuvagithub/AIChip" target="_blank" rel="noopener noreferrer">Source</a>
+          </span>
         </div>
       </footer>
     </div>
