@@ -977,18 +977,15 @@ group('Legibility')
   // Text below about 13px is uncomfortable on a laptop and unreadable on a
   // phone, and this site drifted well under that — 10px and 10.5px labels
   // shipped for several passes before anyone said so. A floor, enforced.
-  const FLOOR = 13
+  const FLOOR = 14
   const css = readFileSync(join(root, 'src/styles.css'), 'utf8')
 
   const cssSizes = [...css.matchAll(/font-size: *([0-9.]+)px/g)].map((m) => parseFloat(m[1]))
-  ok('every stylesheet font-size is at least 13px',
+  ok('every stylesheet font-size is at least 14px',
     cssSizes.every((v) => v >= FLOOR),
     cssSizes.filter((v) => v < FLOOR).join(', '))
   ok('the stylesheet actually sets a base size', /body \{[^}]*font-size/.test(css))
-  ok('body copy is at least 16px', (() => {
-    const m = css.match(/body \{[^}]*font-size: *([0-9.]+)px/)
-    return m && parseFloat(m[1]) >= 16
-  })())
+  ok('the body rule routes through the scale', /body \{[^}]*font-size: var\(--fs-body\)/.test(css))
 
   // Inline styles too. Values under 10 are SVG user units inside a viewBox,
   // not pixels, so they are exempt — everything else is a real font size.
@@ -1002,7 +999,32 @@ group('Legibility')
       if (v >= 10 && v < FLOOR) offenders.push(`${f}:${v}`)
     }
   }
-  ok('every inline pixel font size is at least 13px', offenders.length === 0, offenders.join(', '))
+  ok('every inline pixel font size is at least 14px', offenders.length === 0, offenders.join(', '))
+
+  // The real complaint was never the label sizes — it was the prose. `.small`
+  // alone carries most of the explanatory text on this site, and at 15.5px it
+  // read as fine print. These pin the prose tier specifically.
+  const tok = (name) => {
+    const m = css.match(new RegExp(`--${name}: *([0-9.]+)px`))
+    return m ? parseFloat(m[1]) : null
+  }
+  ok('a named type scale exists rather than scattered values',
+    ['fs-lede', 'fs-prose', 'fs-body', 'fs-note', 'fs-data', 'fs-label'].every((t) => tok(t) !== null))
+  ok('the scale is monotonic', (() => {
+    const v = ['fs-lede', 'fs-prose', 'fs-body', 'fs-note', 'fs-data', 'fs-label'].map(tok)
+    return v.every((x, i) => i === 0 || x <= v[i - 1])
+  })())
+  ok('body text is at least 17px', tok('fs-body') >= 17)
+  ok('card prose is at least 18px', tok('fs-prose') >= 18)
+  ok('explanatory notes are at least 17px', tok('fs-note') >= 17)
+  ok('lead paragraphs are at least 20px', tok('fs-lede') >= 20)
+  ok('the .small class uses the note tier, not a bare value',
+    /\.small \{ font-size: var\(--fs-note\)/.test(css))
+  ok('table cells use the data tier', /\.tbl \{[^}]*font-size: var\(--fs-data\)/.test(css))
+  ok('prose line-height leaves room to read', (() => {
+    const m = css.match(/\.small \{[^}]*line-height: *([0-9.]+)/)
+    return m && parseFloat(m[1]) >= 1.6
+  })())
 
   ok('the page title scales with the viewport', /clamp\(/.test(css))
   ok('body line-height leaves room to read', (() => {

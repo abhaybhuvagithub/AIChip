@@ -185,8 +185,8 @@ export default function Beyond3D({ cfg }) {
               {STATUS[BACKSIDE.status].label}
             </span>
           </div>
-          <p style={{ fontSize: 16.5, lineHeight: 1.62, marginTop: 10 }}>{BACKSIDE.what}</p>
-          <p className="phys" style={{ fontSize: 16.5, lineHeight: 1.62 }}>{BACKSIDE.how}</p>
+          <p style={{ fontSize: 18, lineHeight: 1.62, marginTop: 10 }}>{BACKSIDE.what}</p>
+          <p className="phys" style={{ fontSize: 18, lineHeight: 1.62 }}>{BACKSIDE.how}</p>
         </div>
         <div className="card">
           <dl className="kv">
@@ -228,7 +228,7 @@ export default function Beyond3D({ cfg }) {
         <div className="grid g3">
           <div className="stat hi">
             <div className="k">Power density</div>
-            <div className="v">{fmt.n(th.density, 2)}<span style={{ fontSize: 17 }}> W/mm²</span></div>
+            <div className="v">{fmt.n(th.density, 2)}<span style={{ fontSize: 18.5 }}> W/mm²</span></div>
             <div className="sub">{watts(th.totalW)} over {fmt.n(areaMm2, 0)} mm²</div>
           </div>
           <div className="stat">

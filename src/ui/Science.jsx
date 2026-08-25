@@ -51,7 +51,7 @@ function IVCurve({ vth, wOverL, mu, cox }) {
             fill="none" stroke="var(--accent)" strokeWidth="2" opacity={0.35 + n * 0.22} />
           <text x={W - 14} y={y(c.pts[c.pts.length - 1][1]) - 5} textAnchor="end"
             fill="var(--accent)" opacity={0.5 + n * 0.15}
-            style={{ fontSize: 13, fontFamily: 'var(--font-mono)' }}>V_GS {c.vgs}</text>
+            style={{ fontSize: 14.5, fontFamily: 'var(--font-mono)' }}>V_GS {c.vgs}</text>
         </g>
       ))}
       {/* The saturation boundary, V_DS = V_GS − V_th. Left of it the device is
@@ -59,11 +59,11 @@ function IVCurve({ vth, wOverL, mu, cox }) {
       <polyline
         points={gates.filter((g) => g > vth).map((g) => `${x(g - vth)},${y(drainCurrent({ vgs: g, vds: g - vth, vth, wOverL, mu, cox }))}`).join(' ')}
         fill="none" stroke="var(--warn)" strokeWidth="1.4" strokeDasharray="4 3" />
-      <text x={PL + 8} y={20} fill="var(--warn)" style={{ fontSize: 13, fontFamily: 'var(--font-mono)' }}>
+      <text x={PL + 8} y={20} fill="var(--warn)" style={{ fontSize: 14.5, fontFamily: 'var(--font-mono)' }}>
         V_DS = V_GS − V_th
       </text>
-      <text x={W / 2} y={H - 8} textAnchor="middle" fill="var(--muted)" style={{ fontSize: 14 }}>Drain voltage V_DS (V)</text>
-      <text x={14} y={H / 2} textAnchor="middle" fill="var(--muted)" transform={`rotate(-90 14 ${H / 2})`} style={{ fontSize: 14 }}>
+      <text x={W / 2} y={H - 8} textAnchor="middle" fill="var(--muted)" style={{ fontSize: 15 }}>Drain voltage V_DS (V)</text>
+      <text x={14} y={H / 2} textAnchor="middle" fill="var(--muted)" transform={`rotate(-90 14 ${H / 2})`} style={{ fontSize: 15 }}>
         Drain current — peak {(iMax * 1e6).toFixed(0)} µA
       </text>
     </svg>
@@ -95,7 +95,7 @@ function SubVtCurve({ n, T, vth }) {
         return (
           <g key={d}>
             <line x1={PL} y1={y(i)} x2={W - 12} y2={y(i)} stroke="var(--border)" opacity=".45" />
-            <text x={PL - 6} y={y(i) + 4} textAnchor="end" fill="var(--muted)" style={{ fontSize: 13, fontFamily: 'var(--font-mono)' }}>
+            <text x={PL - 6} y={y(i) + 4} textAnchor="end" fill="var(--muted)" style={{ fontSize: 14.5, fontFamily: 'var(--font-mono)' }}>
               1e{Math.round(Math.log10(i))}
             </text>
           </g>
@@ -103,8 +103,8 @@ function SubVtCurve({ n, T, vth }) {
       })}
       <polyline points={pts.map(([v, i]) => `${x(v)},${y(i)}`).join(' ')} fill="none" stroke="var(--accent)" strokeWidth="2.2" />
       <line x1={x(vth)} y1={16} x2={x(vth)} y2={H - PB} stroke="var(--warn)" strokeDasharray="4 3" />
-      <text x={x(vth) + 5} y={26} fill="var(--warn)" style={{ fontSize: 13, fontFamily: 'var(--font-mono)' }}>V_th</text>
-      <text x={W / 2} y={H - 8} textAnchor="middle" fill="var(--muted)" style={{ fontSize: 14 }}>Gate voltage V_GS (V) — current on a log scale</text>
+      <text x={x(vth) + 5} y={26} fill="var(--warn)" style={{ fontSize: 14.5, fontFamily: 'var(--font-mono)' }}>V_th</text>
+      <text x={W / 2} y={H - 8} textAnchor="middle" fill="var(--muted)" style={{ fontSize: 15 }}>Gate voltage V_GS (V) — current on a log scale</text>
     </svg>
   )
 }
@@ -203,7 +203,7 @@ export default function Science() {
         </div>
         <div className="card" style={{ alignSelf: 'start' }}>
           <div className="eyebrow">Subthreshold swing</div>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 15, color: 'var(--accent)', margin: '8px 0 12px' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 16.5, color: 'var(--accent)', margin: '8px 0 12px' }}>
             SS = n · (kT/q) · ln 10
           </div>
           <Slider label="Temperature" value={T} set={setT} min={77} max={450} step={1} unit=" K"
@@ -329,12 +329,12 @@ export default function Science() {
           <div className="grid g2">
             <div className="stat hi">
               <div className="k">Half-pitch</div>
-              <div className="v">{res.toFixed(1)}<span style={{ fontSize: 15 }}> nm</span></div>
+              <div className="v">{res.toFixed(1)}<span style={{ fontSize: 16.5 }}> nm</span></div>
               <div className="sub">{L.name} at NA {L.naMax}</div>
             </div>
             <div className="stat">
               <div className="k">Depth of focus</div>
-              <div className="v">{dof.toFixed(0)}<span style={{ fontSize: 15 }}> nm</span></div>
+              <div className="v">{dof.toFixed(0)}<span style={{ fontSize: 16.5 }}> nm</span></div>
               <div className="sub">total, both sides of best focus</div>
             </div>
           </div>

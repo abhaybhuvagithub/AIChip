@@ -105,7 +105,7 @@ export default function Quantum() {
           {above && (
             <div className="card" style={{ marginTop: 12, borderColor: 'var(--bad)' }}>
               <div className="eyebrow" style={{ color: 'var(--bad)' }}>Above threshold</div>
-              <p style={{ fontSize: 16.5, lineHeight: 1.6, marginTop: 6 }}>
+              <p style={{ fontSize: 18, lineHeight: 1.6, marginTop: 6 }}>
                 At {fmt.pct(p, 2)} per operation you are above the surface code threshold of {fmt.pct(THRESHOLD, 0)}.
                 Adding qubits now makes things <i>worse</i>: the correction machinery introduces more errors
                 than it removes. This is the wall the entire hardware effort exists to get under, and

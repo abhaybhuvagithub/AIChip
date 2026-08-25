@@ -167,7 +167,7 @@ function Line({ cfg, counts, apc, metroSample, running, speed, setCount, setMetr
             </div>
             <div className="stat">
               <div className="k">Cycle time</div>
-              <div className="v">{m.avgCycleDays > 0 ? fmt.n(m.avgCycleDays, 0) : '—'}<span style={{ fontSize: 17 }}> d</span></div>
+              <div className="v">{m.avgCycleDays > 0 ? fmt.n(m.avgCycleDays, 0) : '—'}<span style={{ fontSize: 18.5 }}> d</span></div>
               <div className="sub">raw process time is {fmt.n(m.rawDays, 0)} d</div>
             </div>
             <div className={`stat ${m.xFactor > 3.5 ? 'bad' : m.xFactor > 0 ? 'ok' : ''}`}>
@@ -202,7 +202,7 @@ function Line({ cfg, counts, apc, metroSample, running, speed, setCount, setMetr
           {m.groups.map((g) => (
             <div key={g.id} style={{ marginBottom: 9 }}>
               <div className="row" style={{ justifyContent: 'space-between', gap: 6, flexWrap: 'nowrap' }}>
-                <span style={{ fontSize: 15, minWidth: 0 }}>
+                <span style={{ fontSize: 16.5, minWidth: 0 }}>
                   <span style={{ color: g.excursion > 0 ? 'var(--warn)' : 'var(--accent)', marginRight: 6 }}>{g.glyph}</span>
                   {g.name}
                   {g.id === m.bottleneckId && <span className="badge on" style={{ marginLeft: 6 }}>constraint</span>}
@@ -210,7 +210,7 @@ function Line({ cfg, counts, apc, metroSample, running, speed, setCount, setMetr
                 </span>
                 <span className="row" style={{ gap: 4, flexWrap: 'nowrap' }}>
                   <button className="btn sm" onClick={() => setCount(g.id, counts[g.id] - 1)} aria-label={`Remove a ${g.name} tool`}>−</button>
-                  <b style={{ fontFamily: 'var(--font-mono)', fontSize: 15, minWidth: 22, textAlign: 'center' }}>{g.tools}</b>
+                  <b style={{ fontFamily: 'var(--font-mono)', fontSize: 16.5, minWidth: 22, textAlign: 'center' }}>{g.tools}</b>
                   <button className="btn sm" onClick={() => setCount(g.id, counts[g.id] + 1)} aria-label={`Add a ${g.name} tool`}>+</button>
                 </span>
               </div>
@@ -220,7 +220,7 @@ function Line({ cfg, counts, apc, metroSample, running, speed, setCount, setMetr
                   background: g.util > 0.9 ? 'var(--bad)' : g.util > 0.75 ? 'var(--warn)' : 'var(--ok)',
                 }} />
               </div>
-              <div className="small" style={{ fontSize: 13.5, marginTop: 2 }}>
+              <div className="small" style={{ fontSize: 14.5, marginTop: 2 }}>
                 {fmt.pct(g.util, 0)} busy · {g.queued} lots queued · ${g.capex}M each
               </div>
             </div>

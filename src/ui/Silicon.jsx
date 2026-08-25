@@ -107,8 +107,8 @@ export default function Silicon({ cfg, patch, goTab }) {
             <span className="badge">{CATEGORIES[s.cat]}</span>
           </div>
           <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 26, letterSpacing: '-.02em', marginTop: 4 }}>{s.name}</h3>
-          <div style={{ color: MAKERS[s.maker].hue, fontSize: 16, margin: '4px 0 12px' }}>{s.notable}</div>
-          <p style={{ fontSize: 16.5, lineHeight: 1.6 }}>{s.what}</p>
+          <div style={{ color: MAKERS[s.maker].hue, fontSize: 17, margin: '4px 0 12px' }}>{s.notable}</div>
+          <p style={{ fontSize: 18, lineHeight: 1.6 }}>{s.what}</p>
 
           <dl className="kv" style={{ marginTop: 12 }}>
             <dt>Made by</dt><dd>{s.foundry} · {s.node}</dd>

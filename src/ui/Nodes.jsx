@@ -61,7 +61,7 @@ export default function Nodes() {
         <div className="card">
           <div className="eyebrow">{a.years}</div>
           <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 25, letterSpacing: '-.02em' }}>{a.name}</h3>
-          <p style={{ fontSize: 16.5, lineHeight: 1.62, marginTop: 10 }}>{a.why}</p>
+          <p style={{ fontSize: 18, lineHeight: 1.62, marginTop: 10 }}>{a.why}</p>
         </div>
       </div>
 
@@ -81,7 +81,7 @@ export default function Nodes() {
                 <td>
                   <div className="row" style={{ gap: 8, flexWrap: 'nowrap' }}>
                     <div className="bar" style={{ flex: 1 }}><i style={{ width: `${(n.mtr / maxD) * 100}%` }} /></div>
-                    <span className="num" style={{ fontSize: 14, color: 'var(--muted)', minWidth: 38, textAlign: 'right' }}>{fmt.n(n.mtr, n.mtr < 10 ? 1 : 0)}</span>
+                    <span className="num" style={{ fontSize: 15, color: 'var(--muted)', minWidth: 38, textAlign: 'right' }}>{fmt.n(n.mtr, n.mtr < 10 ? 1 : 0)}</span>
                   </div>
                 </td>
                 <td className="small">{n.note}</td>
@@ -99,7 +99,7 @@ export default function Nodes() {
       <div className="grid g2">
         <div className="card">
           <div className="eyebrow">Patterning</div>
-          <p style={{ fontSize: 16.5, lineHeight: 1.62 }}>
+          <p style={{ fontSize: 18, lineHeight: 1.62 }}>
             Immersion DUV runs 193 nm light through water and stops around 38 nm half-pitch. Below
             that, the pattern has to be split across two, three or four masks and re-printed —
             multiplying cost and stacking overlay error. EUV at 13.5 nm does the same pitch in one
@@ -108,7 +108,7 @@ export default function Nodes() {
         </div>
         <div className="card">
           <div className="eyebrow">Interconnect</div>
-          <p style={{ fontSize: 16.5, lineHeight: 1.62 }}>
+          <p style={{ fontSize: 18, lineHeight: 1.62 }}>
             Transistors kept shrinking; wires stopped cooperating. As copper lines narrow, electrons
             scatter off grain boundaries and the diffusion barrier, so resistance climbs faster than
             cross-section falls. Delay is now dominated by wiring, not switching — which is what

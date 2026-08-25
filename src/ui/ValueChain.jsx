@@ -43,8 +43,8 @@ export default function ValueChain({ cfg }) {
       <div className="detail">
         <div className="card">
           <div className="eyebrow">{l.name}</div>
-          <p style={{ fontSize: 16.5, lineHeight: 1.62, marginTop: 8 }}>{l.what}</p>
-          <p className="phys" style={{ fontSize: 16.5, lineHeight: 1.62 }}>{l.capture}</p>
+          <p style={{ fontSize: 18, lineHeight: 1.62, marginTop: 8 }}>{l.what}</p>
+          <p className="phys" style={{ fontSize: 18, lineHeight: 1.62 }}>{l.capture}</p>
         </div>
         <div className="card">
           <dl className="kv">
@@ -58,7 +58,7 @@ export default function ValueChain({ cfg }) {
 
       <h2 className="sec">Arm: selling the design, not the chip</h2>
       <div className="card">
-        <p style={{ fontSize: 16.5, lineHeight: 1.62 }}>{ARM.what}</p>
+        <p style={{ fontSize: 18, lineHeight: 1.62 }}>{ARM.what}</p>
       </div>
       <div className="grid g2" style={{ marginTop: 12 }}>
         {ARM.licences.map((x) => (
@@ -71,11 +71,11 @@ export default function ValueChain({ cfg }) {
       <div className="grid g2" style={{ marginTop: 12 }}>
         <div className="card" style={{ borderColor: 'var(--accent)' }}>
           <div className="eyebrow">The licensor becomes a supplier</div>
-          <p style={{ fontSize: 16.5, lineHeight: 1.62, marginTop: 8 }}>{ARM.ownSilicon}</p>
+          <p style={{ fontSize: 18, lineHeight: 1.62, marginTop: 8 }}>{ARM.ownSilicon}</p>
         </div>
         <div className="card">
           <div className="eyebrow">And the pressure from below</div>
-          <p style={{ fontSize: 16.5, lineHeight: 1.62, marginTop: 8 }}>{ARM.tension}</p>
+          <p style={{ fontSize: 18, lineHeight: 1.62, marginTop: 8 }}>{ARM.tension}</p>
         </div>
       </div>
 
@@ -89,7 +89,7 @@ export default function ValueChain({ cfg }) {
         <div className="card">
           <div className="eyebrow">{m.who}</div>
           <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 24, letterSpacing: '-.02em' }}>{m.name}</h3>
-          <p style={{ fontSize: 16.5, lineHeight: 1.62, marginTop: 10 }}>{m.how}</p>
+          <p style={{ fontSize: 18, lineHeight: 1.62, marginTop: 10 }}>{m.how}</p>
         </div>
         <div className="card">
           <dl className="kv">
@@ -114,7 +114,7 @@ export default function ValueChain({ cfg }) {
       <div className="grid g3">
         <div className="stat hi">
           <div className="k">Wafer starts</div>
-          <div className="v">{fmt.n(t.wpm / 1000)}k<span style={{ fontSize: 17 }}>/mo</span></div>
+          <div className="v">{fmt.n(t.wpm / 1000)}k<span style={{ fontSize: 18.5 }}>/mo</span></div>
           <div className="sub">{fmt.n(wafersYear / 1e6, 2)} million a year</div>
         </div>
         <div className="stat">
@@ -151,7 +151,7 @@ export default function ValueChain({ cfg }) {
           <div className="eyebrow" style={{ margin: 0, color: 'var(--warn)' }}>Status</div>
           <span className="badge">{TERAFAB.status}</span>
         </div>
-        <p style={{ fontSize: 16.5, lineHeight: 1.62, marginTop: 10 }}>{TERAFAB.why}</p>
+        <p style={{ fontSize: 18, lineHeight: 1.62, marginTop: 10 }}>{TERAFAB.why}</p>
       </div>
 
       <div className="grid g2" style={{ marginTop: 12 }}>
@@ -179,7 +179,7 @@ export default function ValueChain({ cfg }) {
 
       <div className="card" style={{ marginTop: 12 }}>
         <div className="eyebrow">The case against</div>
-        <p style={{ fontSize: 16.5, lineHeight: 1.62, marginTop: 8 }}>{TERAFAB.against}</p>
+        <p style={{ fontSize: 18, lineHeight: 1.62, marginTop: 8 }}>{TERAFAB.against}</p>
       </div>
 
       <p className="small" style={{ marginTop: 18, maxWidth: '62ch' }}>

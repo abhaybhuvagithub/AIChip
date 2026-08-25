@@ -91,10 +91,12 @@ plus the checks that stop the feature regressing.
 > - An error boundary that explains what broke and offers a way back, never a
 >   blank page.
 > - Keyboard focus visible, ARIA labels on every control, semantic headings,
->   responsive to 360 px, and **no text below 13px anywhere** — body copy at
->   16px or more. Enforce the floor with a check; dense, data-heavy interfaces
->   drift small one component at a time and nobody notices until a reader says
->   they cannot read it.
+>   responsive to 360 px, and a **named type scale** with prose and labels
+>   separated: reading text at 17–21px, scan labels no lower than 14px. Define
+>   the scale as CSS custom properties and enforce both the floor and the prose
+>   tier with checks. Dense, data-heavy interfaces drift small one component at
+>   a time, and the class that carries most of the explanatory prose is the one
+>   that ends up smallest.
 > - Comments that explain *why*, especially where a non-obvious choice was
 >   made or a trap was avoided. No comments that restate the code.
 > - CI that builds, verifies, and deploys on every push to `main`. A failing
@@ -433,3 +435,27 @@ wall or why hafnium replaced an oxide that had worked for forty years.
   moment you fix something rather than afterwards.
 - **The budget rose 125 → 138 kB** and now carries its own history in the file,
   so each rise names the feature that bought the bytes.
+
+---
+
+## Twelfth pass: prose, specifically
+
+Raising every size proportionally last pass was the wrong shape of fix. The
+label sizes had been the visible offenders, so they got the attention, and the
+class carrying most of the actual reading text — `.small`, used under nearly
+every chart and table on the site — came out at 15.5px and still read as fine
+print.
+
+- **The distinction that was missing: prose you read versus labels you scan.**
+  They had been sized as if they were the same thing, and prose lost every
+  time, because a label at 14px is fine and a paragraph at 15.5px is not.
+- **Fixed with named tokens rather than another sweep.** `--fs-lede` 21px,
+  `--fs-prose` 18px, `--fs-body` 17.5px, `--fs-note` 17px, `--fs-data` 16.5px,
+  `--fs-label` 14.5px. The selectors now reference the scale, so the next
+  adjustment is one line and the relationships cannot drift apart again.
+- **Line-height moved with size**, since raising size alone makes long
+  paragraphs worse, not better — notes went to 1.68, body to 1.65.
+- **Checks now pin the tier, not just a floor.** Body ≥ 17px, card prose ≥
+  18px, notes ≥ 17px, lede ≥ 20px, the scale monotonic, and `.small` required
+  to reference the token rather than a bare value. I set `--fs-note` back to
+  15px to confirm two checks fired before shipping.
