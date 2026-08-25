@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { CHAIN, AUTOMATION, WHY_NO_HUMANS } from '../data/sand.js'
-import { traceBack, nines, impurityPpb, grams, waferMass } from '../lib/chain.js'
+import { traceBack, nines, impurityPpb, grams } from '../lib/chain.js'
 import { computeRun, fmt } from '../lib/fab.js'
 
 const STEP_MS = 3600
@@ -48,7 +48,9 @@ export default function SandToSilicon({ cfg }) {
   const traceStage = trace.stages?.find((x) => x.id === s.id)
   const maxPpb = 1e7
 
-  const go = (n) => { setI(n); setProgress(0); t0.current = performance.now() }
+  // Setting `i` re-runs the animation effect, which resets the clock itself —
+  // so this must not also touch t0, or the two writes race on the same frame.
+  const go = (n) => { setI(n); setProgress(0) }
 
   return (
     <div>

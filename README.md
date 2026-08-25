@@ -117,14 +117,43 @@ nearest-neighbour, decoder latency, and codes other than the surface code.
 npm install
 npm run dev      # local dev server
 npm run build    # production build into dist/
-npm test         # build, then run the verification suite
+npm test         # the whole gate — see below
 ```
 
-`npm run verify` runs 258 checks across wafer geometry, yield model
+## The pipeline
+
+`npm test` is the gate, and it runs the same five stages CI does, in the order
+that fails fastest:
+
+| Stage | What it catches |
+| --- | --- |
+| `npm run lint` | Dead imports, unused props, hook misuse. Found three real bugs the first time it ran. |
+| `npm run build` | Anything that does not compile. |
+| `npm run verify` | 283 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
+| `npm run smoke` | Renders all eleven tabs across five configurations, including an unmakeable die and a zero-yield process. Catches components that throw on first render, and output that leaks `NaN` or `undefined` — which reads as broken while passing every other check. |
+| `npm run budget` | Bundle size against a gzipped budget. This bundle grew 206 kB → 331 kB across six feature passes with nothing watching. |
+
+CI (`.github/workflows/ci.yml`) runs all five on every push and pull request,
+plus a dependency audit, and uploads the build as an artifact. It installs with
+`npm ci` against the committed lockfile and reads the Node version from
+`.nvmrc`, so a CI build and a local build are the same build.
+
+Deploy (`.github/workflows/deploy.yml`) runs only from `main`, calls CI as its
+gate, rebuilds and re-verifies the exact artifact it is about to publish, then
+publishes from a throwaway clone rather than switching branches in place.
+
+The last step is the one worth having: **`scripts/postdeploy.mjs` polls the
+live URL until `index.html` references the exact content-hashed asset that was
+just built, then fetches that asset to confirm it is not a 404.** A green
+publish means the push succeeded, not that the bytes are being served — a
+sister repo shipped the previous build for weeks with green checks the whole
+time, because nothing closed that loop.
+
+`npm run verify` runs 283 checks across wafer geometry, yield model
 correctness (pinned against hand-computed values), economics invariants,
 defect scatter determinism, architecture and thermal-wall arithmetic, material
 chain mass balance, published specs for real parts, value-chain sourcing
-separation, compute-model
+separation, the pipeline configuration itself, compute-model
 calibration, surface code arithmetic, content completeness, and the contents of the built bundle. A
 failure blocks deployment — see `.github/workflows/deploy.yml`.
 

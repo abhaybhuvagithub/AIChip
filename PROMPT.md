@@ -73,6 +73,14 @@ plus the checks that stop the feature regressing.
 >
 > **Production-grade means**
 >
+> - A pipeline, not a script. `npm test` must be the whole gate — lint, build,
+>   verify, smoke, budget — in the order that fails fastest, and CI must run
+>   exactly that, installing from a committed lockfile against a pinned Node
+>   version so a CI build and a local build are the same build. Deploy runs
+>   only from the default branch, is gated on CI, and does not count as
+>   successful until the live URL is confirmed to be serving the exact
+>   content-hashed asset that was just built. A green publish step means the
+>   push succeeded, not that the bytes are being served.
 > - A `scripts/verify.mjs` suite that runs on `npm test` and fails the build.
 >   It must pin the maths against hand-worked cases (not against whatever the
 >   code currently returns), check invariants across a sweep rather than a
@@ -261,3 +269,41 @@ per-die economics.
 - **A stray CJK character appeared mid-sentence in the copy** — an artefact,
   not a decision. Caught on a read-back before shipping, and there is now a
   bundle check for non-Latin characters so it cannot recur silently.
+
+---
+
+## Seventh pass: the pipeline
+
+The checks were good and the delivery around them was not. One workflow, one
+job, no linting, and a smoke test living in `/tmp` and run by hand.
+
+- **A check that lives outside the repo is not a check.** The smoke test had
+  been run manually for six sessions. It is now `scripts/smoke.mjs`, part of
+  `npm test`, and it renders all eleven tabs across five configurations —
+  including an unmakeable die and a zero-yield process — asserting not only
+  that nothing throws but that no output leaks `NaN`, `undefined` or
+  `[object Object]`. That last class reads as broken to a user while passing
+  every other check, which makes it worse than a crash.
+- **Linting earned its place immediately.** First run found a dead import, an
+  unused prop threaded through two files, and a genuine hook-purity violation
+  where `performance.now()` was called in a function defined during render.
+  That last one was also redundant — setting the index already re-runs the
+  effect that resets the clock — so the fix removed a race rather than
+  suppressing a warning. Rules that fight prose (`no-unescaped-entities` on a
+  site that is mostly prose) are turned off with a stated reason; rules that
+  catch bugs are not.
+- **Budget the transfer, not the source.** The bundle grew 206 kB to 331 kB
+  across six feature passes with nothing watching. The budget is set close to
+  current size on purpose — a budget with generous headroom never fires — and
+  raising it is fine as long as the commit says what bought the bytes.
+- **The deploy did not close its own loop.** Publishing successfully is not the
+  same as being served, and this repo's own history contains the failure mode:
+  a sister project shipped the previous build for weeks with green checks,
+  because `git checkout` replaced a gitignored `dist/` with the deploy
+  branch's tracked copy. Publishing now happens from a throwaway clone, and
+  the job only passes once the live URL serves the exact content-hashed asset
+  that was built.
+- **The pipeline is itself something that can regress**, so verify checks it:
+  that CI is read-only, that jobs have timeouts, that deploy is gated on CI and
+  only runs from main, that it re-verifies before publishing and confirms
+  afterwards.

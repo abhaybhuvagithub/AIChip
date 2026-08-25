@@ -1,0 +1,81 @@
+# Checks. Runs on every push and every pull request, including branches that
+# never deploy — the point is that a change is known-good before it is merged,
+# not after it is live.
+name: CI
+
+on:
+  push:
+    # main is covered by the deploy workflow, which calls this one as its gate.
+    # Running both would double every check on every merge.
+    branches-ignore: [main, gh-pages]
+  pull_request:
+  workflow_call:
+  workflow_dispatch:
+
+# Least privilege: this workflow only reads code.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, build, verify, smoke, budget
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # `ci` not `install`: fails if the lockfile and package.json disagree,
+      # which is what makes a build reproducible.
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify
+        run: npm run verify
+
+      # Renders every tab across five configurations, including ones designed
+      # to produce Infinity and NaN. The build cannot catch a component that
+      # throws on first render; this can.
+      - name: Smoke
+        run: npm run smoke
+
+      - name: Bundle budget
+        run: npm run budget
+
+      # Uploaded so a reviewer can download and open a PR's build without
+      # running anything locally.
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: dist
+          retention-days: 7
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # High and critical only. Failing a static site's build on a moderate
+      # advisory in a build-time dependency teaches people to ignore the job.
+      - run: npm audit --audit-level=high --omit=dev

@@ -614,6 +614,49 @@ group('Quantum content')
   ok('threshold is the conventional 1%', THRESHOLD === 0.01)
 }
 
+/* ---------- pipeline ---------- */
+group('Pipeline')
+{
+  const read = (f) => existsSync(join(root, f)) ? readFileSync(join(root, f), 'utf8') : null
+  const pkg = JSON.parse(read('package.json'))
+
+  ok('lockfile is committed', existsSync(join(root, 'package-lock.json')))
+  ok('node version is pinned for CI', existsSync(join(root, '.nvmrc')))
+  ok('engines declares a minimum node', /\d/.test(pkg.engines?.node || ''))
+
+  const gate = pkg.scripts?.test || ''
+  ok('npm test is the whole gate',
+    ['lint', 'build', 'verify', 'smoke', 'budget'].every((s) => gate.includes(s)), gate)
+  ok('lint runs before build in the gate', gate.indexOf('lint') < gate.indexOf('build'))
+  ok('every gate script exists',
+    ['lint', 'build', 'verify', 'smoke', 'budget'].every((s) => pkg.scripts[s]))
+  ok('the check scripts are committed',
+    ['scripts/verify.mjs', 'scripts/smoke.mjs', 'scripts/budget.mjs', 'scripts/postdeploy.mjs']
+      .every((f) => existsSync(join(root, f))))
+  ok('eslint config is committed', existsSync(join(root, 'eslint.config.js')))
+
+  const ci = read('.github/workflows/ci.yml')
+  const dep = read('.github/workflows/deploy.yml')
+  ok('CI workflow exists', !!ci)
+  ok('deploy workflow exists', !!dep)
+  ok('CI runs on pull requests', /pull_request/.test(ci))
+  ok('CI is callable as a gate', /workflow_call/.test(ci))
+  ok('CI runs every check', ['lint', 'build', 'verify', 'smoke', 'budget'].every((s) => ci.includes(`npm run ${s}`)))
+  ok('CI installs from the lockfile', /npm ci/.test(ci))
+  ok('CI reads the pinned node version', /node-version-file/.test(ci))
+  ok('workflows declare least-privilege permissions', /permissions:/.test(ci) && /permissions:/.test(dep))
+  ok('CI is read-only', /permissions:\s*\n\s*contents: read/.test(ci))
+  ok('jobs have timeouts so a hang cannot burn an hour',
+    /timeout-minutes/.test(ci) && /timeout-minutes/.test(dep))
+  ok('deploy is gated on CI', /needs: gate/.test(dep) && /uses: \.\/\.github\/workflows\/ci\.yml/.test(dep))
+  ok('deploy only runs from main', /branches: \[main\]/.test(dep))
+  ok('deploy does not cancel itself mid-push', /cancel-in-progress: false/.test(dep))
+  ok('deploy re-verifies the artifact it ships', /npm run verify/.test(dep))
+  ok('deploy confirms the live site afterwards', /postdeploy\.mjs/.test(dep))
+  ok('dependabot is configured', existsSync(join(root, '.github/dependabot.yml')))
+  ok('a PR template exists', existsSync(join(root, '.github/pull_request_template.md')))
+}
+
 /* ---------- build output ---------- */
 group('Build output')
 {

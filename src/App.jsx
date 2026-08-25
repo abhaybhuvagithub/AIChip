@@ -119,7 +119,7 @@ export default function App() {
         {tab === 'nodes' && <NodesView />}
         {tab === '3d' && <Beyond3D cfg={cfg} />}
         {tab === 'silicon' && <Silicon cfg={cfg} patch={patch} goTab={setTab} />}
-        {tab === 'chain' && <ValueChain cfg={cfg} patch={patch} />}
+        {tab === 'chain' && <ValueChain cfg={cfg} />}
         {tab === 'compute' && <Compute cfg={cfg} patch={patch} />}
         {tab === 'quantum' && <Quantum />}
         {tab === 'quiz' && <Quiz />}

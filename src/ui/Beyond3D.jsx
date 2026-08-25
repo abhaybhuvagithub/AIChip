@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { ARCH, STATUS, BACKSIDE, STACKING, BEYOND_CMOS, THERMAL_LIMITS } from '../data/arch3d.js'
-import { cellArea, areaReduction, stackThermal } from '../lib/thermal.js'
-import { computeRun, fmt } from '../lib/fab.js'
+import { areaReduction, stackThermal } from '../lib/thermal.js'
+import { fmt } from '../lib/fab.js'
 import { DEFAULT_COMPUTE, watts } from '../lib/compute.js'
 
 /**

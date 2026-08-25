@@ -4,7 +4,7 @@ import { computeRun, fmt } from '../lib/fab.js'
 import { computeThroughput, ops, watts, DEFAULT_COMPUTE } from '../lib/compute.js'
 import { waferMass, grams } from '../lib/chain.js'
 
-export default function ValueChain({ cfg, patch }) {
+export default function ValueChain({ cfg }) {
   const [layer, setLayer] = useState('foundry')
   const [tier, setTier] = useState('gigafab')
   const [model, setModel] = useState('fabless')
