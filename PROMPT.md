@@ -880,3 +880,37 @@ site had accumulated well over a hundred without ever expanding them.
 - **Say what it is not.** The tab states plainly that the list is not
   exhaustive, because a genuinely complete semiconductor glossary would run to
   thousands of entries and be useless. A check asserts that admission stays.
+
+---
+
+## Twenty-seventh pass: Trace
+
+Asked for something the site did not have and that does not exist elsewhere —
+an identity, not another explainer. The gap was obvious once named: fifteen
+tabs answering fifteen questions look like fifteen separate facts, and the site
+had never made the claim that they are one argument.
+
+- **The idea: a causal graph, not another calculator.** 57 facts across eight
+  layers from constants of nature out to geopolitics, each listing what causes
+  it. Pick any consequence — many cores, one EUV supplier, chips as statecraft
+  — and the ancestry is computed as a chain from a constant to that
+  consequence, readable as a sentence.
+- **Longest path, not shortest, and that was the key decision.** The first
+  version answered "why does a laptop have many cores" through the speed of
+  light in three hops: true, thin, useless. The longest path runs Boltzmann →
+  kT/q → the 60 mV/decade floor → threshold voltage → supply voltage → power
+  density → the clock stopping → multicore. When the question is *why*, the
+  fullest chain is the right answer rather than the tersest.
+- **Strata, not a hairball.** A force-directed graph of 57 nodes and 90 edges
+  would look impressive and communicate nothing. Layering by distance from
+  first principles is legible *and* makes the actual claim — that causation
+  runs one way, from physics outward.
+- **The structure is checked as structure.** Acyclic, or "because" stops
+  meaning anything. Every node must reach a root, or it is an assertion
+  floating free. And causes may not flow backwards through the layers, because
+  an edge from economics to physics would be economics causing thermodynamics.
+  I added exactly that edge to confirm two checks fired and named it.
+- **The headline is a computed fact, not a slogan.** Boltzmann's constant is
+  upstream of 29 of 57 nodes. The tab says so and then says what it is not: an
+  argument rather than a proof, with contingencies that could have gone another
+  way, and a check asserts that disclaimer stays.

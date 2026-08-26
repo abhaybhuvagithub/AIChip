@@ -177,7 +177,7 @@ group('Content')
   ok('quiz answers all point at a real option', QUIZ.every((q) => q.opts[q.a] !== undefined))
   ok('every quiz question explains itself', QUIZ.every((q) => q.why && q.why.length > 40))
   ok('quiz options are distinct', QUIZ.every((q) => new Set(q.opts).size === q.opts.length))
-  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science', 'clock', 'business', 'ethics', 'unsolved', 'acronyms'].includes(t.tab)))
+  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science', 'clock', 'business', 'ethics', 'unsolved', 'acronyms', 'trace'].includes(t.tab)))
   ok('the tour visits every tab', ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz']
     .every((t) => TOUR.some((s) => s.tab === t)))
   ok('quiz covers the material chain', QUIZ.some((q) => /purity|distill|polysilicon|particle/i.test(q.q)))
@@ -1224,6 +1224,96 @@ group('Icons')
   })())
 }
 
+/* ---------- trace: the causal graph ---------- */
+group('Trace')
+{
+  const T = await import(join(root, 'src/data/trace.js'))
+
+  ok('the graph is substantial', T.NODES.length >= 50, String(T.NODES.length))
+  ok('node ids are unique', new Set(T.NODES.map((n) => n.id)).size === T.NODES.length)
+  ok('every node is fully described', T.NODES.every((n) =>
+    n.id && n.label && n.note && n.note.length > 40 &&
+    T.LAYERS.some((l) => l.id === n.layer) && Array.isArray(n.from)))
+
+  // Structural integrity. "Because" stops meaning anything if the graph has a
+  // cycle, and a node that reaches no root is an assertion floating free.
+  ok('every edge points at a node that exists',
+    T.NODES.every((n) => n.from.every((f) => T.node(f))),
+    T.NODES.flatMap((n) => n.from.filter((f) => !T.node(f)).map((f) => `${n.id}→${f}`)).join(', '))
+  ok('the graph is acyclic', (() => {
+    const seen = new Set(), stack = new Set()
+    let ok_ = true
+    const visit = (id) => {
+      if (stack.has(id)) { ok_ = false; return }
+      if (seen.has(id)) return
+      seen.add(id); stack.add(id)
+      for (const f of T.node(id).from) visit(f)
+      stack.delete(id)
+    }
+    T.NODES.forEach((n) => visit(n.id))
+    return ok_
+  })())
+  ok('every non-root traces back to a root', T.NODES
+    .filter((n) => n.from.length)
+    .every((n) => T.ancestry(n.id).some((a) => T.node(a).from.length === 0)))
+  ok('roots are only in the nature layer',
+    T.roots().every((r) => T.node(r).layer === 'nature'))
+  ok('there are a dozen roots or fewer — the claim is that there are few',
+    T.roots().length <= 12, String(T.roots().length))
+  // Causes flow one way. An edge from a later layer to an earlier one would
+  // mean economics causing physics.
+  ok('causes never flow backwards through the layers', (() => {
+    const rank = Object.fromEntries(T.LAYERS.map((l, i) => [l.id, i]))
+    return T.NODES.every((n) => n.from.every((f) => rank[T.node(f).layer] <= rank[n.layer]))
+  })(), T.NODES.flatMap((n) => {
+    const rank = Object.fromEntries(T.LAYERS.map((l, i) => [l.id, i]))
+    return n.from.filter((f) => rank[T.node(f).layer] > rank[n.layer]).map((f) => `${f}→${n.id}`)
+  }).join(', '))
+  ok('every layer is populated',
+    T.LAYERS.every((l) => T.NODES.some((n) => n.layer === l.id)))
+
+  // Path selection. The longest path is the explanation; the first version
+  // used the shortest and produced true, thin answers.
+  ok('the principal path is the longest, not the shortest', (() => {
+    const p = T.principalPath('multicore'), sp = T.shortestPath('multicore')
+    return p.length > sp.length
+  })())
+  ok('every path starts at a root and ends at the node asked for',
+    T.NODES.every((n) => {
+      const p = T.principalPath(n.id)
+      return p[p.length - 1] === n.id && T.node(p[0]).from.length === 0
+    }))
+  ok('the multicore chain runs through the subthreshold floor', (() => {
+    const p = T.principalPath('multicore')
+    return p.includes('boltzmann') && p.includes('ssfloor') && p.includes('powerwall')
+  })(), T.principalPath('multicore').join(' → '))
+  ok('chains are deep enough to be explanations rather than restatements',
+    T.principalPath('geopolitics').length >= 4 && T.principalPath('matureNodes').length >= 5)
+
+  // The headline claim of the tab.
+  ok("Boltzmann's constant is upstream of most of the graph",
+    T.reach('boltzmann') > T.NODES.length * 0.4, `${T.reach('boltzmann')}/${T.NODES.length}`)
+  ok('every root reaches something', T.roots().every((r) => T.reach(r) >= 1))
+  ok('ancestry and descendants are consistent', T.NODES.every((n) =>
+    T.ancestry(n.id).filter((a) => a !== n.id).every((a) => T.descendants(a).includes(n.id))))
+
+  ok('every entry question points at a real node',
+    T.QUESTIONS.every((q) => T.node(q.node)), T.QUESTIONS.filter((q) => !T.node(q.node)).map((q) => q.node).join(', '))
+  ok('there are enough entry points to explore from', T.QUESTIONS.length >= 8)
+  ok('cross-references point at real tabs', (() => {
+    const TABS = ['god', 'trace', 'sand', 'line', 'run', 'wafer', 'science', 'clock', '3d', 'nodes',
+      'quantum', 'silicon', 'chain', 'compute', 'economics', 'business', 'ethics', 'unsolved',
+      'acronyms', 'quiz']
+    return T.NODES.filter((n) => n.tab).every((n) => TABS.includes(n.tab))
+  })())
+  // The tab must not overclaim. Real causation in a field this size is a
+  // thicket, and the page says so.
+  ok('the tab states what it is not', (() => {
+    const ui = readFileSync(join(root, 'src/ui/Trace.jsx'), 'utf8')
+    return /argument, not a proof/i.test(ui) && /could have gone another way/i.test(ui)
+  })())
+}
+
 /* ---------- acronyms ---------- */
 group('Acronym glossary')
 {
@@ -2050,6 +2140,7 @@ group('Build output')
       ok('the provenance note shipped', bundle.includes('Anthropic') && bundle.includes('publicly available'))
       ok('the no-confidential-data statement shipped', /confidential/i.test(bundle))
       ok('the icon set shipped', bundle.includes('waferscale') && bundle.includes('iplicense'))
+      ok('the trace graph shipped', bundle.includes('downstream') && bundle.includes('Boltzmann'))
       ok('the acronym glossary shipped', bundle.includes('acronyms') || bundle.includes('DIBL'))
       ok('the open problems tab shipped', bundle.includes('Open problems') || bundle.includes('nobody has solved'))
       ok('the open problems caveat shipped', /obvious in hindsight/i.test(bundle))

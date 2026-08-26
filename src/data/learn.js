@@ -3,6 +3,8 @@
 // find out whether the line actually taught anything.
 
 export const TOUR = [
+  { id: 't000', tab: 'trace', title: 'Start with the argument', body: 'Fifteen tabs answering fifteen questions look like fifteen facts. They are not. Pick "why does my laptop have eight cores" and walk it back — eight steps from the width of a thermal energy distribution to the shape of every processor you own.' },
+  { id: 't001', tab: 'trace', title: 'See how far one constant reaches', body: "Boltzmann's constant sits upstream of more than half the graph. Not as a metaphor — every link in the chain is on this site with the arithmetic attached." },
   { id: 't00', tab: 'god', title: 'Start where everything connects', body: 'God view shows one configuration and every consequence of it at once — grams of rock, process steps, dies per wafer, cost, compute, cooling class. Click any node in the chain to jump to the tab that owns it.' },
   { id: 't01', tab: 'god', title: 'Ask instead of hunting', body: 'The ✨ button, bottom right, opens an assistant that reads the live state and computes answers. Try "what is the bottleneck" or "why is my yield low". It has no server behind it, so if it cannot ground an answer it says so.' },
   { id: 't0a', tab: 'sand', title: 'Let it run', body: 'The chain advances on its own — you do not have to click anything. Watch the purity figure on each card climb from 2N to 9N. Everything before the fab exists to remove impurity; everything after it puts some back on purpose.' },

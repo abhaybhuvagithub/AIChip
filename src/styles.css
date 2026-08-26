@@ -612,3 +612,32 @@ h3.iconrow { display: flex; gap: 10px; }
 .acro-key { font-family: var(--font-mono); font-size: 19px; letter-spacing: -.01em; }
 .acro-exp { font-size: var(--fs-data); color: var(--muted); }
 .acro-mean { font-size: var(--fs-note); line-height: 1.6; margin-top: 7px; }
+
+/* ---------- Trace: the causal graph ---------- */
+.trace-qs { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); }
+.trace-q {
+  text-align: left; cursor: pointer; font-family: inherit; color: var(--text);
+  background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+  padding: 13px 15px; font-size: var(--fs-note); line-height: 1.45;
+  transition: border-color .16s, background .16s;
+}
+.trace-q:hover { border-color: var(--accent); }
+.trace-q.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+
+.trace-chain { display: flex; flex-direction: column; }
+.trace-step { display: flex; gap: 15px; cursor: pointer; }
+.trace-rail { display: flex; flex-direction: column; align-items: center; flex: 0 0 auto; width: 16px; }
+.trace-dot { width: 13px; height: 13px; border-radius: 50%; margin-top: 6px; flex: 0 0 auto; }
+.trace-line { flex: 1; width: 2px; background: var(--border); margin: 4px 0 -4px; }
+.trace-body { padding-bottom: 20px; min-width: 0; }
+.trace-step.end .trace-body { padding-bottom: 4px; }
+.trace-step:hover .trace-label { color: var(--accent); }
+.trace-layer {
+  font-family: var(--font-mono); font-size: var(--fs-label);
+  text-transform: uppercase; letter-spacing: .1em;
+}
+.trace-label {
+  font-family: var(--font-display); font-size: 21px; letter-spacing: -.02em;
+  margin: 3px 0 5px; line-height: 1.25; transition: color .14s;
+}
+.trace-note { font-size: var(--fs-note); color: var(--muted); line-height: 1.6; max-width: 68ch; margin-bottom: 8px; }

@@ -9,6 +9,7 @@ Five tabs:
 
 | Tab | What it does |
 | --- | --- |
+| **Trace** | The argument the rest of the site is making. A 57-node causal graph from constants of nature out to geopolitics — pick any consequence and walk it back. Boltzmann's constant is upstream of more than half of it. |
 | **God view ✨** | One configuration, every consequence — the chain from quartzite through wafer, fab, die, cost and compute on a single screen, with the live line if it is running. Every figure computed from the same die; nothing entered. |
 | **Sand → silicon** | The material chain from quartz rock to a finished die, running by itself — no clicking required. A purity ladder on a log scale, and a mass and energy balance worked backwards from the die you configured. Plus what replaces the people: FOUPs, overhead hoist transport, SECS/GEM, run-to-run control. |
 | **Fab run** | Two modes. **Travel path** follows one wafer through all 626 process steps from rock to marked part — every repeat listed, with optional spoken narration. **The line** is a discrete-event simulation of one production line, one hour per tick. Lots of 25 wafers walk 70 mask layers, queue at eight tool groups that occasionally break, and accumulate defects. Left alone it settles at a 110-day cycle time with lithography as the constraint at 94% — and the defect density it earns feeds straight into the yield lab. |
@@ -48,6 +49,10 @@ Five tabs:
 - **Device physics** — thermal voltage, Varshni bandgap, intrinsic carriers,
   mass action, oxide capacitance and EOT, square-law drain current,
   subthreshold swing, WKB gate tunnelling, and dynamic power.
+- **Causal graph** — 57 facts and their dependencies, asserted acyclic, with
+  every node required to trace back to a root and causes forbidden from
+  flowing backwards through the layers. The explanation shown is the longest
+  path, not the shortest.
 - **Rigour** — per-step yield required for a target line yield over N steps,
   the DPMO-to-sigma conversion on the standard 1.5σ-shift convention, and test
   escapes against market DPPM targets.
