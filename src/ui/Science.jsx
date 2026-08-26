@@ -1,6 +1,9 @@
 import React, { useMemo, useState } from 'react'
 import {
-  K, SILICON, DIELECTRICS, LITHO,
+  K, SILICON, DIELECTRICS, LITHO, MATERIALS, WEAROUT, CU,
+  mobilityVsDoping, mobilityComponents, driftVelocity, saturationField,
+  naturalLength, shortChannel, copperResistivity, rcDelay,
+  blackMttf, accelerationFactor,
   thermalVoltage, bandgap, intrinsicCarriers, carriers,
   oxideCap, eot, physicalForEot,
   drainCurrent, subthresholdCurrent, subthresholdSwing, ssFloor,
@@ -123,6 +126,15 @@ export default function Science() {
   const [k1, setK1] = useState(0.31)
   const [dose, setDose] = useState(30)
   const [feature, setFeature] = useState(16)
+  // Transport, short-channel, interconnect and reliability
+  const [doping, setDoping] = useState(1e17)
+  const [chanL, setChanL] = useState(15)
+  const [tbody, setTbody] = useState(5)
+  const [gates, setGates] = useState(4)
+  const [wireW, setWireW] = useState(20)
+  const [wireL, setWireL] = useState(500)
+  const [jDens, setJDens] = useState(1e6)
+  const [tJunc, setTJunc] = useState(100)
 
   const d = DIELECTRICS.find((x) => x.id === diel)
   const cox = oxideCap(tox, d.k)
@@ -135,6 +147,13 @@ export default function Science() {
   const ph = photonStatistics({ lambdaNm: L.lambda, doseMjCm2: dose, featureNm: feature })
   const phArf = photonStatistics({ lambdaNm: 193, doseMjCm2: dose, featureNm: feature })
   const rdf = useMemo(() => dopantFluctuation({ wNm: 20, lNm: 20 }), [])
+  const mob = mobilityComponents({ dopingCm3: doping, T })
+  const lam = naturalLength({ toxNm: eotNm, tbodyNm: tbody, gates })
+  const sc = shortChannel({ lengthNm: chanL, lambdaNm: lam })
+  const cu = copperResistivity({ widthNm: wireW })
+  const rc = rcDelay({ widthNm: wireW, lengthUm: wireL })
+  const rcFat = rcDelay({ widthNm: wireW * 5, lengthUm: wireL })
+  const af = accelerationFactor({ tUse: 328, tStress: tJunc + 273 })
   const cRun = carriers(1e17, 'n', T)
 
   return (
@@ -420,6 +439,325 @@ export default function Science() {
               1 nF at 1 V, 3 GHz, 10% activity = {dynamicPower({ capF: 1e-9, volts: 1, freqHz: 3e9 }).toFixed(2)} W
             </span>
           </div>
+        </div>
+      </div>
+
+      {/* ---------------------------------------------- 7. why silicon */}
+      <h2 className="sec">7 · Why silicon, when others are better at conducting</h2>
+      <p className="small" style={{ marginBottom: 12, maxWidth: '68ch' }}>
+        Germanium has three times the electron mobility. Gallium arsenide has six. Silicon carbide
+        blocks ten times the field. Silicon won anyway, and not on any of the electrical numbers.
+      </p>
+      <div className="tbl-wrap">
+        <table className="tbl">
+          <thead><tr><th>Material</th><th>Bandgap</th><th>Gap type</th><th>µ electrons</th><th>Breakdown</th><th>Thermal</th><th style={{ width: '36%' }}>What it is actually for</th></tr></thead>
+          <tbody>
+            {MATERIALS.map((m2) => (
+              <tr key={m2.id} style={m2.id === 'si' ? { background: 'var(--panel2)' } : undefined}>
+                <td><b>{m2.name}</b></td>
+                <td className="num">{m2.eg} eV</td>
+                <td className="small" style={{ color: m2.gap === 'direct' ? 'var(--accent)' : 'var(--muted)' }}>{m2.gap}</td>
+                <td className="num">{fmt.n(m2.muE)}</td>
+                <td className="num">{m2.ebd} MV/cm</td>
+                <td className="num">{m2.kth} W/m·K</td>
+                <td className="small">{m2.note}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="grid g2" style={{ marginTop: 12 }}>
+        <div className="card">
+          <div className="eyebrow">The indirect gap</div>
+          <p style={{ marginTop: 8 }}>
+            Silicon's conduction band minimum sits at a different crystal momentum from its valence
+            band maximum. An electron cannot fall across that gap by emitting a photon alone — it
+            would violate momentum conservation — so it needs a phonon at the same instant, and
+            three-body coincidences are rare.
+          </p>
+          <p style={{ marginTop: 8 }}>
+            That single fact is why silicon does not make a laser, why every optical link is built
+            from a III–V material, and why silicon photonics still bonds an indium phosphide die on
+            top to produce the light it then guides so elegantly.
+          </p>
+        </div>
+        <div className="card">
+          <div className="eyebrow">And why it won regardless</div>
+          <p style={{ marginTop: 8 }}>
+            Silicon grows its own oxide, and the SiO₂–silicon interface is the best in the business —
+            defect densities orders of magnitude below anything achievable on germanium or gallium
+            arsenide. Germanium's oxide dissolves in water; that argument was over quickly.
+          </p>
+          <p style={{ marginTop: 8 }}>
+            Add abundance, mechanical strength that survives a 300 mm wafer being handled ten thousand
+            times, and thermal conductivity three times gallium arsenide's. A semiconductor is not
+            chosen on mobility. It is chosen on whether you can build a factory around it.
+          </p>
+        </div>
+      </div>
+
+      {/* ------------------------------------------ 8. carrier transport */}
+      <h2 className="sec">8 · Why doping fights itself</h2>
+      <div className="grid" style={{ gridTemplateColumns: 'minmax(0,1.2fr) minmax(280px,1fr)' }}>
+        <div className="card">
+          <div className="eyebrow">Mobility against doping and temperature</div>
+          <div className="tbl-wrap" style={{ marginTop: 10 }}>
+            <table className="tbl">
+              <thead><tr><th>Scattering mechanism</th><th>Mobility alone</th><th>Behaviour</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><b>Lattice (phonon)</b></td>
+                  <td className="num">{fmt.n(mob.lattice, 0)} cm²/V·s</td>
+                  <td className="small">Worsens as T rises — more phonons to scatter off. Goes as roughly T⁻².⁴.</td>
+                </tr>
+                <tr>
+                  <td><b>Ionised impurity</b></td>
+                  <td className="num">{fmt.n(mob.impurity, 0)} cm²/V·s</td>
+                  <td className="small">Improves as T rises — faster carriers spend less time near each ion. Goes as T¹·⁵.</td>
+                </tr>
+                <tr style={{ background: 'var(--panel2)' }}>
+                  <td><b>Combined</b></td>
+                  <td className="num" style={{ color: 'var(--accent)' }}>{fmt.n(mob.total, 0)} cm²/V·s</td>
+                  <td className="small">Matthiessen's rule: rates add, so mobilities combine reciprocally and the worst mechanism dominates.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="small" style={{ marginTop: 10 }}>
+            The self-defeating part: the dopant atoms that supply carriers are the ionised impurities
+            those carriers scatter off. Above about 10¹⁷ cm⁻³ you are adding carriers and slowing them
+            down at the same time, which is one reason modern channels are undoped and the current is
+            supplied electrostatically instead.
+          </p>
+        </div>
+        <div className="card" style={{ alignSelf: 'start' }}>
+          <Slider label="Doping" value={Math.log10(doping)} set={(v) => setDoping(Math.pow(10, v))}
+            min={14} max={20} step={0.1} fmtV={(v) => `10^${v.toFixed(1)} cm⁻³`}
+            hint={`Electrons ${fmt.n(mobilityVsDoping(doping), 0)}, holes ${fmt.n(mobilityVsDoping(doping, 'p'), 0)} cm²/V·s. Holes are always slower — the valence band is heavier.`} />
+          <div className="grid g2" style={{ marginTop: 4 }}>
+            <div className="stat hi">
+              <div className="k">Saturation knee</div>
+              <div className="v" style={{ fontSize: 21 }}>{sci(saturationField(mob.total), 2)}</div>
+              <div className="sub">V/cm — half of v_sat</div>
+            </div>
+            <div className="stat">
+              <div className="k">v at 10⁵ V/cm</div>
+              <div className="v" style={{ fontSize: 21 }}>{sci(driftVelocity(1e5, mob.total), 2)}</div>
+              <div className="sub">cm/s, against {sci(SILICON.vSat, 1)} ceiling</div>
+            </div>
+          </div>
+          <p className="small" style={{ marginTop: 10 }}>
+            Carriers stop accelerating once they shed energy to optical phonons as fast as the field
+            supplies it. A 20 nm channel at 0.7 V sees over 10⁵ V/cm, so it is already saturated —
+            which is why drive current stopped scaling as 1/L and why mobility improvements buy less
+            than the number suggests.
+          </p>
+        </div>
+      </div>
+
+      {/* -------------------------------------- 9. short-channel effects */}
+      <h2 className="sec">9 · How far the drain reaches into the channel</h2>
+      <div className="grid" style={{ gridTemplateColumns: 'minmax(0,1.2fr) minmax(280px,1fr)' }}>
+        <div>
+          <div className="card">
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 17, color: 'var(--accent)', textAlign: 'center', padding: '4px 0 12px' }}>
+              λ = √(ε_si/ε_ox · t_ox · t_body)
+            </div>
+            <div className="grid g3">
+              <div className="stat hi">
+                <div className="k">Natural length λ</div>
+                <div className="v" style={{ fontSize: 24 }}>{lam.toFixed(2)}<span style={{ fontSize: 15 }}> nm</span></div>
+                <div className="sub">how far the drain field penetrates</div>
+              </div>
+              <div className={`stat ${sc.controlled ? 'ok' : 'bad'}`}>
+                <div className="k">Channel in natural lengths</div>
+                <div className="v" style={{ fontSize: 24 }}>{sc.ratio.toFixed(1)}λ</div>
+                <div className="sub">{sc.controlled ? 'the gate is in charge' : 'the drain is taking over'}</div>
+              </div>
+              <div className={`stat ${sc.diblMvV < 100 ? '' : 'bad'}`}>
+                <div className="k">DIBL</div>
+                <div className="v" style={{ fontSize: 24 }}>{sc.diblMvV < 1 ? sc.diblMvV.toFixed(2) : fmt.n(sc.diblMvV, 0)}</div>
+                <div className="sub">mV of V_th lost per volt of V_DS</div>
+              </div>
+            </div>
+            <p style={{ marginTop: 12 }}>
+              Both threshold roll-off and DIBL fall as exp(−L/2λ) — the drain's influence on the
+              channel barrier decays exponentially with channel length measured in natural lengths.
+              Real designs sit at roughly seven to ten λ, where DIBL lands in the tens of mV/V.
+            </p>
+          </div>
+          <div className="tbl-wrap" style={{ marginTop: 12 }}>
+            <table className="tbl">
+              <thead><tr><th>Architecture</th><th>Gated faces</th><th>λ at these dimensions</th><th>Shortest workable channel</th></tr></thead>
+              <tbody>
+                {[['Planar', 1], ['FinFET', 3], ['Gate-all-around', 4]].map(([n2, g]) => {
+                  const l2 = naturalLength({ toxNm: eotNm, tbodyNm: tbody, gates: g })
+                  return (
+                    <tr key={n2} style={g === gates ? { background: 'var(--panel2)' } : undefined}>
+                      <td><b>{n2}</b></td>
+                      <td className="num">{g}</td>
+                      <td className="num">{l2.toFixed(2)} nm</td>
+                      <td className="num" style={{ color: 'var(--accent)' }}>{(l2 * 7).toFixed(0)} nm</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="small" style={{ marginTop: 10, maxWidth: '68ch' }}>
+            This is the whole roadmap in one column. Every architecture change on the 3D tab — thinner
+            body, more gated faces — exists to shrink λ so that L can shrink with it. Wrapping the
+            gate is not elegance; it is the only way to keep the drain out of the channel.
+          </p>
+        </div>
+        <div className="card" style={{ alignSelf: 'start' }}>
+          <Slider label="Channel length" value={chanL} set={setChanL} min={5} max={80} step={1} unit=" nm" />
+          <Slider label="Body thickness" value={tbody} set={setTbody} min={2} max={30} step={0.5} unit=" nm"
+            hint="A thinner body gives the drain less silicon to reach through. It also confines carriers enough that mobility starts to suffer, which is the trade." />
+          <div className="ctl">
+            <label><span>Gate geometry</span></label>
+            <div className="row" style={{ gap: 6 }}>
+              {[[1, 'Planar'], [3, 'FinFET'], [4, 'GAA']].map(([g, n2]) => (
+                <button key={g} className={`btn sm ${gates === g ? 'active' : ''}`} onClick={() => setGates(g)}>{n2}</button>
+              ))}
+            </div>
+            <div className="hint">Gate oxide is the {eotNm.toFixed(2)} nm EOT set in section 1, so changing the dielectric there moves λ here too.</div>
+          </div>
+        </div>
+      </div>
+
+      {/* -------------------------------------------- 10. the wire wall */}
+      <h2 className="sec">10 · The wires stopped cooperating</h2>
+      <div className="grid" style={{ gridTemplateColumns: 'minmax(0,1.2fr) minmax(280px,1fr)' }}>
+        <div>
+          <div className="grid g3">
+            <div className="stat bad">
+              <div className="k">Effective resistivity</div>
+              <div className="v" style={{ fontSize: 24 }}>{cu.rhoWithBarrier.toFixed(1)}</div>
+              <div className="sub">µΩ·cm, against {CU.rho0} for bulk copper</div>
+            </div>
+            <div className="stat">
+              <div className="k">Times bulk</div>
+              <div className="v" style={{ fontSize: 24 }}>{cu.ratioToBulk.toFixed(1)}×</div>
+              <div className="sub">surface + grain + barrier</div>
+            </div>
+            <div className="stat hi">
+              <div className="k">RC delay</div>
+              <div className="v" style={{ fontSize: 24 }}>
+                {rc.delayPs > 1000 ? `${(rc.delayPs / 1000).toFixed(1)} ns` : `${rc.delayPs.toFixed(1)} ps`}
+              </div>
+              <div className="sub">over {wireL} µm, unrepeated</div>
+            </div>
+          </div>
+          <div className="tbl-wrap" style={{ marginTop: 12 }}>
+            <table className="tbl">
+              <thead><tr><th>Wire width</th><th>Surface (FS)</th><th>Grain (MS)</th><th>Barrier</th><th>Total vs bulk</th><th>ρ effective</th></tr></thead>
+              <tbody>
+                {[100, 60, 40, 30, 20, 15, 12].map((w) => {
+                  const c2 = copperResistivity({ widthNm: w })
+                  return (
+                    <tr key={w} style={w === wireW ? { background: 'var(--panel2)' } : undefined}
+                      onClick={() => setWireW(w)} title={`Set ${w} nm`}>
+                      <td className="num"><b>{w} nm</b></td>
+                      <td className="num">{c2.fs.toFixed(2)}×</td>
+                      <td className="num">{c2.ms.toFixed(2)}×</td>
+                      <td className="num">{c2.barrierPenalty.toFixed(2)}×</td>
+                      <td className="num" style={{ color: c2.ratioToBulk > 4 ? 'var(--bad)' : 'var(--warn)' }}>{c2.ratioToBulk.toFixed(1)}×</td>
+                      <td className="num" style={{ color: 'var(--accent)' }}>{c2.rhoWithBarrier.toFixed(1)}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="small" style={{ marginTop: 10, maxWidth: '68ch' }}>
+            Three mechanisms, all worsening together. Electrons scatter off the wire's surfaces once
+            it narrows toward copper's {CU.mfpNm} nm mean free path; they scatter off grain
+            boundaries, and grains cannot be larger than the wire containing them; and the diffusion
+            barrier that stops copper poisoning the silicon takes a fixed thickness off every side
+            while carrying almost no current. Transistors kept shrinking. Their wires did not
+            cooperate, and that is why backside power delivery and alternative metals are on the
+            roadmap.
+          </p>
+        </div>
+        <div className="card" style={{ alignSelf: 'start' }}>
+          <Slider label="Wire width" value={wireW} set={setWireW} min={8} max={200} step={1} unit=" nm" />
+          <Slider label="Wire length" value={wireL} set={setWireL} min={10} max={2000} step={10} unit=" µm"
+            hint="Elmore delay goes as the square of length — double the wire and you quadruple the delay. That square is why long routes are broken up with repeaters and why floorplanning is a timing activity." />
+          <div className="grid g2" style={{ marginTop: 4 }}>
+            <div className="stat">
+              <div className="k">Resistance</div>
+              <div className="v" style={{ fontSize: 20 }}>{fmt.n(rc.resistanceOhm, 0)} Ω</div>
+              <div className="sub">{fmt.n(rc.rPerMm, 0)} Ω per mm</div>
+            </div>
+            <div className="stat ok">
+              <div className="k">Five times wider</div>
+              <div className="v" style={{ fontSize: 20 }}>
+                {rcFat.delayPs > 1000 ? `${(rcFat.delayPs / 1000).toFixed(1)} ns` : `${rcFat.delayPs.toFixed(1)} ps`}
+              </div>
+              <div className="sub">{(rc.delayPs / rcFat.delayPs).toFixed(0)}× faster</div>
+            </div>
+          </div>
+          <p className="small" style={{ marginTop: 10 }}>
+            This is why a metal stack is not uniform: local levels are tight and slow because they run
+            microns, upper levels are fat and fast because they carry clock and power across
+            millimetres. Fifteen levels, each a different compromise.
+          </p>
+        </div>
+      </div>
+
+      {/* -------------------------------------------- 11. how it wears out */}
+      <h2 className="sec">11 · Nothing here lasts forever</h2>
+      <div className="tbl-wrap">
+        <table className="tbl">
+          <thead><tr><th>Mechanism</th><th>Scaling law</th><th style={{ width: '36%' }}>What physically happens</th><th style={{ width: '30%' }}>What is done about it</th></tr></thead>
+          <tbody>
+            {WEAROUT.map((w) => (
+              <tr key={w.id}>
+                <td><b>{w.name}</b></td>
+                <td className="num" style={{ color: 'var(--accent)', fontSize: 'var(--fs-label)' }}>{w.law}</td>
+                <td className="small">{w.what}</td>
+                <td className="small">{w.fix}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="grid" style={{ gridTemplateColumns: 'minmax(0,1fr) minmax(280px,340px)', marginTop: 14 }}>
+        <div className="card">
+          <div className="eyebrow">Electromigration — Black's equation</div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 17, color: 'var(--accent)', textAlign: 'center', padding: '8px 0 12px' }}>
+            MTTF = A · J⁻² · exp(E_a / kT)
+          </div>
+          <p>
+            Electron momentum physically transports metal atoms along a wire. A void opens upstream of
+            a flux divergence and the line goes open; a hillock grows downstream and shorts to its
+            neighbour. The exponent on current density is two, so <b>halving the current density
+            multiplies lifetime by four</b> — which is why current-density limits appear in every
+            design rule deck, and why they tighten as wires narrow.
+          </p>
+          <p className="small" style={{ marginTop: 10 }}>
+            Doubling J from your setting takes the same wire from {fmt.n(blackMttf({ currentDensityAcm2: jDens, T: tJunc + 273 }) / blackMttf({ currentDensityAcm2: jDens * 2, T: tJunc + 273 }), 0)}× the
+            lifetime to one. Raising junction temperature from 100 °C to 125 °C costs a further
+            factor of {(blackMttf({ currentDensityAcm2: jDens, T: 373 }) / blackMttf({ currentDensityAcm2: jDens, T: 398 })).toFixed(1)}.
+          </p>
+        </div>
+        <div className="card" style={{ alignSelf: 'start' }}>
+          <Slider label="Current density" value={Math.log10(jDens)} set={(v) => setJDens(Math.pow(10, v))}
+            min={4} max={7} step={0.05} fmtV={(v) => `10^${v.toFixed(2)} A/cm²`} />
+          <Slider label="Junction temperature" value={tJunc} set={setTJunc} min={25} max={175} step={5} unit=" °C" />
+          <div className="stat hi" style={{ marginTop: 6 }}>
+            <div className="k">Acceleration factor</div>
+            <div className="v" style={{ fontSize: 22 }}>{af > 1 ? `${fmt.n(af, 0)}×` : `${af.toFixed(2)}×`}</div>
+            <div className="sub">stress at {tJunc} °C vs use at 55 °C, E_a = 0.7 eV</div>
+          </div>
+          <p className="small" style={{ marginTop: 10 }}>
+            This is what makes qualification possible at all. A part meant to last ten years cannot be
+            tested for ten years, so it is run hot and the Arrhenius factor converts weeks of stress
+            into years of use. The whole method rests on the activation energy being right — get it
+            wrong and the qualification proves nothing, confidently.
+          </p>
         </div>
       </div>
 

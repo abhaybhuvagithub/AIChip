@@ -183,6 +183,7 @@ group('Content')
   ok('quiz covers the material chain', QUIZ.some((q) => /purity|distill|polysilicon|particle/i.test(q.q)))
   ok('quiz covers real silicon', QUIZ.some((q) => /Cerebras|MI300X|wafer-scale/i.test(q.q)))
   ok('quiz covers the value chain', QUIZ.some((q) => /Arm|EUV scanners|Terafab/i.test(q.q)))
+  ok('quiz covers transport and interconnect', QUIZ.some((q) => /mobility|copper wire|indirect|Electromigration/i.test(q.q)))
   ok('quiz covers discipline', QUIZ.some((q) => /per-step|flawless|700 steps/i.test(q.q)))
   ok('quiz covers the business case', QUIZ.some((q) => /NRE|amortis|cash|node above which/i.test(q.q)))
   ok('quiz covers speed binning', QUIZ.some((q) => /bin|slow dies|blended/i.test(q.q)))
@@ -193,7 +194,7 @@ group('Content')
     QUIZ.some((q) => /X-factor|cycle time|bottleneck|scanners/i.test(q.q)))
   ok('quiz covers 3D transistors and the thermal wall',
     QUIZ.some((q) => /CFET|backside power/i.test(q.q)) && QUIZ.some((q) => /3D memory|3D logic/i.test(q.q)))
-  ok('quiz covers compute and quantum', QUIZ.length >= 47 &&
+  ok('quiz covers compute and quantum', QUIZ.length >= 51 &&
     QUIZ.some((q) => /FP4|sparsity|precision/i.test(q.q)) &&
     QUIZ.some((q) => /qubit|surface code|threshold/i.test(q.q)))
 }
@@ -971,6 +972,124 @@ group('Physics')
   ok('higher-k dielectrics have lower barriers — the real trade',
     P.DIELECTRICS.find((d) => d.id === 'hfo2').barrier <
     P.DIELECTRICS.find((d) => d.id === 'sio2').barrier)
+  // ---- materials ----
+  ok('material table is populated and complete', P.MATERIALS.length >= 6 && P.MATERIALS.every((m) =>
+    m.name && m.eg > 0 && m.muE > 0 && m.ebd > 0 && m.kth > 0 && m.note.length > 60))
+  ok('silicon is correctly indirect and GaAs direct',
+    !P.isDirect('si') && P.isDirect('gaas') && P.isDirect('inp') && !P.isDirect('ge'))
+  ok('wide-bandgap materials block far higher fields', (() => {
+    const si = P.MATERIALS.find((m) => m.id === 'si')
+    return ['sic', 'gan'].every((id) => P.MATERIALS.find((m) => m.id === id).ebd >= 10 * si.ebd)
+  })())
+  ok('germanium and GaAs really are faster than silicon', (() => {
+    const si = P.MATERIALS.find((m) => m.id === 'si').muE
+    return P.MATERIALS.find((m) => m.id === 'ge').muE > si && P.MATERIALS.find((m) => m.id === 'gaas').muE > 5 * si
+  })())
+
+  // ---- transport ----
+  ok('lightly doped silicon has near-textbook mobility',
+    near(P.mobilityVsDoping(1e14), 1410, 15), P.mobilityVsDoping(1e14).toFixed(0))
+  ok('heavy doping collapses mobility', P.mobilityVsDoping(1e19) < 200)
+  ok('mobility falls monotonically with doping', (() => {
+    let last = Infinity
+    for (const n of [1e14, 1e15, 1e16, 1e17, 1e18, 1e19, 1e20]) {
+      const m = P.mobilityVsDoping(n); if (m > last) return false; last = m
+    }
+    return true
+  })())
+  ok('holes are always slower than electrons',
+    [1e15, 1e17, 1e19].every((n) => P.mobilityVsDoping(n, 'p') < P.mobilityVsDoping(n, 'n')))
+  // Matthiessen: the combined mobility must be worse than either component.
+  ok('combined mobility is worse than any single mechanism', (() => {
+    const c = P.mobilityComponents({ dopingCm3: 1e17, T: 300 })
+    return c.total < c.lattice && c.total < c.impurity
+  })())
+  ok('phonon and impurity scattering move oppositely with temperature', (() => {
+    const cold = P.mobilityComponents({ dopingCm3: 1e17, T: 200 })
+    const hot = P.mobilityComponents({ dopingCm3: 1e17, T: 400 })
+    return hot.lattice < cold.lattice && hot.impurity > cold.impurity
+  })())
+  ok('drift velocity saturates rather than growing without bound',
+    P.driftVelocity(1e7) < P.SILICON.vSat * 1.001 && P.driftVelocity(1e6) > 0.9 * P.SILICON.vSat)
+  ok('low field is ohmic', near(P.driftVelocity(100, 1400), 1400 * 100, 1400 * 100 * 0.01))
+  ok('the saturation knee is a few kV/cm',
+    P.saturationField() > 5e3 && P.saturationField() < 1e4, P.saturationField().toFixed(0))
+
+  // ---- short channel ----
+  ok('natural length is a few nanometres at modern dimensions',
+    near(P.naturalLength({ toxNm: 1, tbodyNm: 5 }), 3.87, 0.05))
+  ok('gate-all-around halves the natural length',
+    near(P.naturalLength({ toxNm: 1, tbodyNm: 5, gates: 4 }) / P.naturalLength({ toxNm: 1, tbodyNm: 5 }), 0.5, 1e-9))
+  ok('a thinner body shortens the natural length',
+    P.naturalLength({ toxNm: 1, tbodyNm: 3 }) < P.naturalLength({ toxNm: 1, tbodyNm: 10 }))
+  ok('DIBL falls exponentially with channel length', (() => {
+    const a = P.shortChannel({ lengthNm: 20, lambdaNm: 2 }).diblMvV
+    const b = P.shortChannel({ lengthNm: 24, lambdaNm: 2 }).diblMvV
+    return near(a / b, Math.E, 0.01)
+  })())
+  ok('a long channel has essentially no DIBL',
+    P.shortChannel({ lengthNm: 100, lambdaNm: 2 }).diblMvV < 0.01)
+  // Five natural lengths is the textbook rule and is not actually enough.
+  ok('the control threshold is set where DIBL is genuinely acceptable', (() => {
+    const marginal = P.shortChannel({ lengthNm: 5 * 2, lambdaNm: 2 })
+    const good = P.shortChannel({ lengthNm: 8 * 2, lambdaNm: 2 })
+    return !marginal.controlled && good.controlled && good.diblMvV < 100
+  })())
+
+  // ---- interconnect ----
+  ok('copper resistivity rises as the wire narrows', (() => {
+    let last = 0
+    for (const w of [200, 100, 50, 30, 20, 12]) {
+      const r = P.copperResistivity({ widthNm: w }).rhoWithBarrier
+      if (r < last) return false; last = r
+    }
+    return true
+  })())
+  ok('a wide wire is close to bulk copper',
+    P.copperResistivity({ widthNm: 500 }).ratioToBulk < 1.4)
+  ok('a 20 nm wire is several times bulk', (() => {
+    const r = P.copperResistivity({ widthNm: 20 }).ratioToBulk
+    return r > 3 && r < 10
+  })(), P.copperResistivity({ widthNm: 20 }).ratioToBulk.toFixed(1))
+  ok('all three mechanisms contribute at 20 nm', (() => {
+    const c = P.copperResistivity({ widthNm: 20 })
+    return c.fs > 1.2 && c.ms > 2 && c.barrierPenalty > 1.1
+  })())
+  ok('the barrier penalty grows as the wire narrows',
+    P.copperResistivity({ widthNm: 12 }).barrierPenalty > P.copperResistivity({ widthNm: 60 }).barrierPenalty)
+  // The unit bug that shipped first time: 1 µΩ·cm = 10 Ω·nm, not 0.01.
+  ok('a 1 mm minimum-width wire is nanoseconds, not picoseconds', (() => {
+    const d = P.rcDelay({ widthNm: 20, lengthUm: 1000 })
+    return d.delayPs > 1000 && d.delayPs < 1e5
+  })(), P.rcDelay({ widthNm: 20, lengthUm: 1000 }).delayPs.toFixed(0) + ' ps')
+  ok('a 1 mm fat global wire is a hundred picoseconds or so', (() => {
+    const d = P.rcDelay({ widthNm: 100, lengthUm: 1000 })
+    return d.delayPs > 30 && d.delayPs < 400
+  })(), P.rcDelay({ widthNm: 100, lengthUm: 1000 }).delayPs.toFixed(0) + ' ps')
+  ok('Elmore delay goes as the square of length', (() => {
+    const a = P.rcDelay({ widthNm: 20, lengthUm: 100 }).delayPs
+    const b = P.rcDelay({ widthNm: 20, lengthUm: 200 }).delayPs
+    return near(b / a, 4, 0.01)
+  })())
+  ok('a wider wire is faster', P.rcDelay({ widthNm: 100, lengthUm: 500 }).delayPs <
+    P.rcDelay({ widthNm: 20, lengthUm: 500 }).delayPs)
+
+  // ---- reliability ----
+  ok('Black: halving current density quadruples lifetime',
+    near(P.blackMttf({ currentDensityAcm2: 5e5 }) / P.blackMttf({ currentDensityAcm2: 1e6 }), 4, 0.01))
+  ok('Black: hotter is shorter-lived',
+    P.blackMttf({ currentDensityAcm2: 1e6, T: 398 }) < P.blackMttf({ currentDensityAcm2: 1e6, T: 348 }))
+  ok('acceleration factor is meaningful for qualification', (() => {
+    const af2 = P.accelerationFactor({ tUse: 328, tStress: 398, eaEv: 0.7 })
+    return af2 > 20 && af2 < 200
+  })(), P.accelerationFactor({ tUse: 328, tStress: 398 }).toFixed(0) + 'x')
+  ok('no acceleration when stress equals use',
+    near(P.accelerationFactor({ tUse: 350, tStress: 350 }), 1, 1e-12))
+  ok('four wearout mechanisms, each with a law and a mitigation',
+    P.WEAROUT.length === 4 && P.WEAROUT.every((w) => w.name && w.law && w.what.length > 80 && w.fix.length > 50))
+  ok('hot carrier injection is flagged as worsening when cold',
+    /worse as temperature falls/i.test(P.WEAROUT.find((w) => w.id === 'hci').fix))
+
   ok('the litho generations are chronological and improving',
     P.LITHO.every((l, i) => i === 0 || l.year > P.LITHO[i - 1].year))
 }

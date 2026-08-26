@@ -235,3 +235,227 @@ export function dopantFluctuation({ wNm, lNm, dopingCm3 = 1e18, depletionNm = 20
   const count = dopingCm3 * volumeCm3
   return { count, sigmaRel: count > 0 ? 1 / Math.sqrt(count) : Infinity }
 }
+
+// ===================================================== MATERIALS ==========
+//
+// Why silicon, when several semiconductors are better at the thing a
+// semiconductor is nominally for. The answer is not mobility and never was.
+
+export const MATERIALS = [
+  { id: 'si', name: 'Silicon', eg: 1.12, gap: 'indirect', muE: 1400, muH: 450,
+    ebd: 0.3, kth: 150, note: 'Grows a native oxide with a near-perfect interface, is abundant, machines well and conducts heat. It wins on everything except the electrical figures.' },
+  { id: 'ge', name: 'Germanium', eg: 0.66, gap: 'indirect', muE: 3900, muH: 1900,
+    ebd: 0.1, kth: 60, note: 'The first transistor material and nearly three times silicon\'s electron mobility. Its oxide is water-soluble, which ended the argument. Now returning as a strained channel layer.' },
+  { id: 'gaas', name: 'Gallium arsenide', eg: 1.42, gap: 'direct', muE: 8500, muH: 400,
+    ebd: 0.4, kth: 55, note: 'Six times silicon\'s electron mobility and a direct gap, so it emits light. No usable native oxide, poor thermal conductivity, and hole mobility too low for complementary logic.' },
+  { id: 'inp', name: 'Indium phosphide', eg: 1.34, gap: 'direct', muE: 5400, muH: 200,
+    ebd: 0.5, kth: 68, note: 'Where terahertz transistors come from. Superb for high-frequency amplifiers and photonics, hopeless for billions of logic gates.' },
+  { id: 'sic', name: 'Silicon carbide (4H)', eg: 3.26, gap: 'indirect', muE: 900, muH: 120,
+    ebd: 3.0, kth: 490, note: 'Ten times silicon\'s breakdown field and three times its thermal conductivity. Mobility is irrelevant when the job is blocking 1,200 volts.' },
+  { id: 'gan', name: 'Gallium nitride', eg: 3.4, gap: 'direct', muE: 1000, muH: 200,
+    ebd: 3.3, kth: 130, note: 'A two-dimensional electron gas at the AlGaN interface reaches mobilities silicon cannot. Fast switching at high voltage, and it emits blue light.' },
+]
+
+/**
+ * Silicon has an INDIRECT gap: the conduction band minimum sits at a different
+ * crystal momentum from the valence band maximum, so an electron cannot fall
+ * across it by emitting a photon alone — it needs a phonon at the same instant
+ * to conserve momentum, and three-body events are rare.
+ *
+ * That is why silicon does not make a laser, why every optical link is built
+ * from a III-V material, and why silicon photonics still needs a bonded
+ * indium phosphide die to produce the light it then guides.
+ */
+export const isDirect = (id) => MATERIALS.find((m) => m.id === id)?.gap === 'direct'
+
+// ================================================ CARRIER TRANSPORT =======
+
+/**
+ * Caughey–Thomas mobility against doping, with the standard silicon fit.
+ * Above about 10^17 cm^-3 the carriers you added start scattering off the
+ * dopant ions that supplied them — the material fights its own doping.
+ */
+const CT = {
+  n: { min: 68.5, max: 1414, ref: 9.2e16, alpha: 0.711 },
+  p: { min: 44.9, max: 470.5, ref: 2.23e17, alpha: 0.719 },
+}
+export function mobilityVsDoping(dopingCm3, type = 'n') {
+  const c = CT[type]
+  return c.min + (c.max - c.min) / (1 + Math.pow(dopingCm3 / c.ref, c.alpha))
+}
+
+/**
+ * Matthiessen's rule: scattering rates add, so mobilities combine as
+ * reciprocals and the WORST mechanism dominates. Lattice (phonon) scattering
+ * worsens with temperature; ionised-impurity scattering improves with it.
+ */
+export function mobilityComponents({ dopingCm3, T = 300, surfaceMu = 0 }) {
+  const lattice = 1414 * Math.pow(T / 300, -2.4)
+  const doped = mobilityVsDoping(dopingCm3, 'n')
+  // Back out the impurity term from the room-temperature fit, then scale it.
+  const impurity300 = 1 / Math.max(1e-9, 1 / doped - 1 / 1414)
+  const impurity = impurity300 * Math.pow(T / 300, 1.5)
+  let inv = 1 / lattice + 1 / impurity
+  if (surfaceMu > 0) inv += 1 / surfaceMu
+  return { lattice, impurity, surface: surfaceMu || Infinity, total: 1 / inv }
+}
+
+/**
+ * Drift velocity against field, with saturation.
+ *   v = µE / (1 + (µE/v_sat)^β)^(1/β),  β = 2 for electrons in silicon
+ *
+ * Carriers stop accelerating once they can shed energy to optical phonons as
+ * fast as the field supplies it. A short channel sits in this regime at normal
+ * supply voltages, which is why drive current stopped scaling as 1/L.
+ */
+export function driftVelocity(fieldVcm, mu = 1400, vSat = SILICON.vSat, beta = 2) {
+  const low = mu * fieldVcm
+  return low / Math.pow(1 + Math.pow(low / vSat, beta), 1 / beta)
+}
+/** Field at which velocity reaches half of saturation — the knee. */
+export const saturationField = (mu = 1400, vSat = SILICON.vSat) => vSat / mu
+
+// ============================================ SHORT-CHANNEL EFFECTS =======
+
+/**
+ * Natural length: how far the drain's field reaches into the channel.
+ *
+ *   λ = √(ε_si/ε_ox · t_ox · t_body)
+ *
+ * The gate keeps control while the channel is long compared with λ. The
+ * industry rule of thumb is L ≳ 5–6λ, and every architecture change on the 3D
+ * tab — thinner body, more gated faces — is a way of shrinking λ so L can
+ * shrink with it. Multi-gate geometries divide it further; a double-gate
+ * device sees roughly λ/√2 and gate-all-around better still.
+ */
+export function naturalLength({ toxNm, tbodyNm, gates = 1 }) {
+  const base = Math.sqrt((SILICON.epsR / 3.9) * toxNm * tbodyNm)
+  const divisor = gates >= 4 ? 2 : gates >= 2 ? Math.SQRT2 : 1
+  return base / divisor
+}
+
+/**
+ * Threshold roll-off and drain-induced barrier lowering.
+ *
+ * Both scale as exp(−L/2λ): the drain's influence on the channel barrier
+ * decays exponentially with channel length measured in natural lengths. The
+ * prefactors are conventional fitted values, so read the trend rather than the
+ * millivolts — but the trend is the entire reason short channels leak.
+ */
+export function shortChannel({ lengthNm, lambdaNm, vds = 0.7, vbi = 0.9 }) {
+  const x = Math.exp(-lengthNm / (2 * lambdaNm))
+  return {
+    ratio: lengthNm / lambdaNm,
+    rollOffV: 3 * (vbi + vds) * x,          // Vth loss vs a long channel
+    diblMvV: 1000 * 3 * x,                  // mV of Vth shift per volt of Vds
+    // Five natural lengths is the textbook rule of thumb, but at five this
+    // model still gives a couple of hundred mV/V of DIBL, which no product
+    // would ship. Real designs sit nearer seven to ten, where DIBL lands in
+    // the tens of mV/V — so that is the threshold used here.
+    controlled: lengthNm / lambdaNm >= 7,
+  }
+}
+
+// ============================================== INTERCONNECT ==============
+
+export const CU = { rho0: 1.68, mfpNm: 39, R: 0.43, p: 0.5 }  // µΩ·cm, nm
+
+/**
+ * Copper's resistivity size effect — the reason wires stopped scaling.
+ *
+ * Two mechanisms, both kicking in when the wire narrows toward the electron
+ * mean free path (39 nm in copper at room temperature):
+ *
+ *   Fuchs–Sondheimer   electrons scatter off the wire's surfaces
+ *   Mayadas–Shatzkes   electrons scatter off grain boundaries, and grains
+ *                      cannot be larger than the wire containing them
+ *
+ * On top of both, the diffusion barrier that stops copper poisoning the
+ * silicon takes a fixed thickness off every side and carries almost no
+ * current — so the conducting cross-section shrinks faster than the drawn one.
+ * At 20 nm the barrier alone can take a third of the wire.
+ */
+export function copperResistivity({ widthNm, heightNm = null, barrierNm = 1.5 }) {
+  const w = widthNm, h = heightNm || widthNm * 2
+  const { rho0, mfpNm, R, p } = CU
+
+  // Fuchs–Sondheimer, thin-film limit, applied to both confined dimensions.
+  const fs = 1 + (3 / 8) * (1 - p) * mfpNm * (1 / w + 1 / h)
+
+  // Mayadas–Shatzkes, with grain size taken equal to the wire width.
+  const a = (mfpNm / w) * (R / (1 - R))
+  const ms = 1 / (3 * (1 / 3 - a / 2 + a * a - a * a * a * Math.log(1 + 1 / a)))
+
+  const rhoEff = rho0 * fs * ms
+
+  // Barrier steals conducting area without carrying current.
+  const wEff = Math.max(0.1, w - 2 * barrierNm)
+  const hEff = Math.max(0.1, h - 2 * barrierNm)
+  const areaRatio = (w * h) / (wEff * hEff)
+
+  return {
+    fs, ms, rhoEff, rhoWithBarrier: rhoEff * areaRatio,
+    ratioToBulk: (rhoEff * areaRatio) / rho0,
+    barrierPenalty: areaRatio,
+  }
+}
+
+/**
+ * Elmore delay for a distributed RC line: τ = 0.38·r·c·L².
+ * The square is what matters — doubling a wire quadruples its delay, which is
+ * why long routes are broken up with repeaters and why floorplanning is a
+ * timing activity rather than a tidiness one.
+ */
+export function rcDelay({ widthNm, heightNm = null, lengthUm, capPerMmPf = 0.2, barrierNm = 1.5 }) {
+  const h = heightNm || widthNm * 2
+  const { rhoWithBarrier } = copperResistivity({ widthNm, heightNm: h, barrierNm })
+  // Unit conversion, and it is the one that bit first time round:
+  //   1 µΩ·cm = 1e-6 Ω · 1 cm = 1e-6 Ω · 1e7 nm = 10 Ω·nm
+  // An earlier version used 1e-2 here and reported delays a thousand times
+  // too small — which looked plausible, because picoseconds are what you
+  // expect to see next to a wire.
+  const rPerNm = (rhoWithBarrier * 10) / (widthNm * h)     // Ω/nm
+  const rPerMm = rPerNm * 1e6                              // Ω/mm
+  const cPerMm = capPerMmPf * 1e-12                        // F/mm
+  const lMm = lengthUm / 1000
+  return {
+    rPerMm, resistanceOhm: rPerMm * lMm,
+    delayS: 0.38 * rPerMm * cPerMm * lMm * lMm,
+    delayPs: 0.38 * rPerMm * cPerMm * lMm * lMm * 1e12,
+  }
+}
+
+// ================================================ RELIABILITY =============
+
+/**
+ * Black's equation for electromigration:
+ *   MTTF = A · J^(−n) · exp(Ea/kT),  n ≈ 2 for copper
+ *
+ * Momentum from the electron wind physically moves metal atoms. A void opens
+ * upstream, a hillock grows downstream, and the wire either opens or shorts to
+ * its neighbour. It is why current density limits appear in every design rule
+ * deck, and why they tighten as wires narrow.
+ */
+export function blackMttf({ currentDensityAcm2, T = 373, eaEv = 0.9, n = 2, A = 1e-14 }) {
+  return A * Math.pow(currentDensityAcm2, -n) * Math.exp(eaEv / (K.kB_eV * T))
+}
+
+/** Arrhenius acceleration between a stress condition and a use condition. */
+export function accelerationFactor({ tUse, tStress, eaEv = 0.7 }) {
+  return Math.exp((eaEv / K.kB_eV) * (1 / tUse - 1 / tStress))
+}
+
+export const WEAROUT = [
+  { id: 'em', name: 'Electromigration', law: 'MTTF ∝ J⁻ⁿ·exp(Ea/kT)', ea: 0.9,
+    what: 'Electron momentum physically transports metal atoms. A void opens upstream of a flux divergence and the wire goes open, or a hillock grows and shorts to a neighbour.',
+    fix: 'Current-density design rules, copper over aluminium, alloying and better liners. Nothing removes it — the rules simply keep it beyond the product lifetime.' },
+  { id: 'tddb', name: 'Dielectric breakdown', law: 'MTTF ∝ exp(−γE)', ea: 0.7,
+    what: 'Traps accumulate in the gate dielectric under field until enough line up to form a conducting path. The gate then shorts to the channel, permanently.',
+    fix: 'Thicker equivalent oxide via high-k, lower operating field, and screening the early-life tail with burn-in.' },
+  { id: 'nbti', name: 'Bias temperature instability', law: 'ΔVth ∝ t^n·exp(−Ea/kT)', ea: 0.5,
+    what: 'Threshold voltage drifts under bias and temperature as interface states are generated. The circuit slows down over years rather than failing outright.',
+    fix: 'Guard-band the timing at design, and in some designs measure the drift on-chip and raise the supply to compensate.' },
+  { id: 'hci', name: 'Hot carrier injection', law: 'Worst at high field, low T', ea: -0.1,
+    what: 'Carriers accelerated by the drain field gain enough energy to be injected into the gate dielectric, damaging the interface near the drain.',
+    fix: 'Lightly doped drain extensions to spread the field, and lower supply voltage. Notably it gets WORSE as temperature falls, which makes it the odd one out.' },
+]

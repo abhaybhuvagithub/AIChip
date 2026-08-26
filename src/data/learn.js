@@ -28,6 +28,9 @@ export const TOUR = [
   { id: 't8c1', tab: 'clock', title: 'Find the gap', body: 'A single transistor passed a terahertz in 2007. Processors still clock at five or six gigahertz. Click along the ladder and watch the colours — device f_max, radio carriers and processor clocks are three different quantities, and almost every terahertz chip claim swaps one for another.' },
   { id: 't8c2', tab: 'clock', title: 'Turn the clock up and watch it break', body: 'Drag the target clock past twenty gigahertz. Power goes as the cube of frequency once voltage has to scale with it, so ten times the clock is a thousand times the power — and the signal stops being able to cross your own die within one cycle.' },
   { id: 't8s1', tab: 'science', title: 'Find the floor', body: 'Drag the temperature slider on the subthreshold section. The 60 mV/decade limit is not engineering — it is the Boltzmann tail of the carrier distribution, and it is why supply voltage stopped scaling and you got multiple cores instead of faster ones.' },
+  { id: 't8s1b', tab: 'science', title: 'Learn why silicon actually won', body: 'Germanium is three times faster, gallium arsenide six. Silicon won on its native oxide, its abundance and its thermal conductivity — none of them electrical. A semiconductor is chosen on whether you can build a factory around it.' },
+  { id: 't8s1c', tab: 'science', title: 'Watch the drain take over', body: 'Drag the channel length down in section 9. Below about seven natural lengths the drain starts controlling the barrier instead of the gate, and DIBL climbs into the hundreds of millivolts per volt. Switch to gate-all-around and the same channel becomes workable — that is the entire roadmap in one control.' },
+  { id: 't8s1d', tab: 'science', title: 'Find the wall the transistors did not hit', body: 'Narrow the wire in section 10. Surface scattering, grain boundaries and the diffusion barrier all worsen together, and a 20 nm copper line is several times bulk resistivity. Transistors kept shrinking; their wires did not cooperate.' },
   { id: 't8s2', tab: 'science', title: 'Count the photons', body: 'An EUV photon carries fourteen times the energy of an ArF one, so the same dose delivers fourteen times fewer of them. Drop the dose and watch the shot noise climb — that is where stochastic defects come from, and no amount of cleanliness prevents them.' },
   { id: 't8s3', tab: 'science', title: 'Count the dopants', body: 'A 20 nm channel holds about eight dopant atoms. Where they land shifts the threshold voltage by tens of percent, and no process control fixes it — which is why modern channels are undoped.' },
   { id: 't8b', tab: 'silicon', title: 'See what all of this is actually about', body: 'Every part is drawn at true relative area on one 300 mm wafer. An A17 Pro is the small square near the middle; the Cerebras WSE-3 is the wafer. Both are called a chip.' },
@@ -43,7 +46,7 @@ export const TOUR = [
   { id: 't10', tab: 'compute', title: 'Climb to the trillions and past them', body: 'Move the scale selector from one die to a cluster. Note the power column keeping pace: past a rack, what you can build is set by the substation, not the fab.' },
   { id: 't11', tab: 'quantum', title: 'Meet the other exchange rate', body: 'Pick Shor on RSA-2048, then drag the physical error rate. Between 0.8% and 1.2% the qubit count goes vertical and then to infinity — that cliff is the surface code threshold.' },
   { id: 't12', tab: 'quantum', title: 'See what a fab cannot fix', body: 'Read the comparison table. A logic fab is a statistical discipline that expects failures and designs around them. A quantum chip has no binning and no redundancy, so the same tools do not buy the same safety.' },
-  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Forty-seven questions. Everything needed to answer them is on the other thirteen tabs.' },
+  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Fifty-one questions. Everything needed to answer them is on the other thirteen tabs.' },
 ]
 
 export const QUIZ = [
@@ -274,6 +277,30 @@ export const QUIZ = [
     opts: ['Memory dies are smaller', 'Most of a memory stack is idle at any moment, so power density stays manageable', 'Memory needs fewer through-silicon vias', 'Memory tolerates higher temperatures'],
     a: 1,
     why: 'Stacking multiplies power per unit footprint while the surface available to remove heat stays fixed. Memory gets away with it because simultaneous activity is low. Logic does not have that escape.',
+  },
+  {
+    q: 'Silicon has lower carrier mobility than germanium and far lower than gallium arsenide. Why did it win?',
+    opts: ['It is cheaper to purify', 'It grows a native oxide with a near-perfect interface', 'It has a direct bandgap', 'It has the highest breakdown field'],
+    a: 1,
+    why: 'The SiO₂–silicon interface has defect densities orders of magnitude below anything achievable on the alternatives. Germanium\'s oxide dissolves in water. Add abundance, mechanical strength and thermal conductivity — a semiconductor is chosen on whether you can build a factory around it, not on mobility.',
+  },
+  {
+    q: 'Why can silicon not be made into a laser?',
+    opts: ['Its bandgap is too small', 'Its bandgap is indirect — recombination needs a phonon as well as a photon', 'It absorbs its own emission', 'Its refractive index is too high'],
+    a: 1,
+    why: 'The conduction band minimum sits at a different crystal momentum from the valence band maximum, so an electron cannot fall across by emitting a photon alone without violating momentum conservation. Three-body events are rare. This is why silicon photonics still bonds an indium phosphide die on top to make the light.',
+  },
+  {
+    q: 'A 20 nm copper wire has several times the resistivity of bulk copper. What causes it?',
+    opts: ['Copper purity falls at small dimensions', 'Surface scattering, grain-boundary scattering and the diffusion barrier stealing cross-section', 'Higher operating temperature', 'Electromigration damage'],
+    a: 1,
+    why: 'Copper\'s electron mean free path is 39 nm, so a narrower wire scatters electrons off its own surfaces; grains cannot be bigger than the wire containing them; and the barrier that stops copper poisoning the silicon takes a fixed thickness off every side while carrying almost no current. All three worsen together.',
+  },
+  {
+    q: 'Electromigration lifetime goes as J⁻². What does halving current density do?',
+    opts: ['Doubles lifetime', 'Quadruples lifetime', 'Leaves it unchanged', 'Increases it tenfold'],
+    a: 1,
+    why: 'The exponent on current density in Black\'s equation is two, so lifetime scales as the inverse square. That is why current-density limits appear in every design rule deck, and why they tighten as wires narrow and carry the same current through less metal.',
   },
   {
     q: 'Why are 2D materials like MoS₂ being considered for the channel at all?',

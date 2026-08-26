@@ -755,3 +755,36 @@ grouping them was the actual improvement.
   longer exists. I rewrote them against the new structure rather than deleting
   them — a check that fails because the thing it guarded moved is doing exactly
   its job, and deleting it would throw away the coverage.
+
+---
+
+## Twenty-third pass: more science
+
+The science tab covered the transistor and stopped. Four things a
+semiconductor engineer would notice missing: why silicon at all, how carriers
+actually move, what goes wrong when channels get short, and the wire problem.
+
+- **Why silicon is the best question on the tab.** Germanium is three times
+  faster, gallium arsenide six, silicon carbide blocks ten times the field —
+  and silicon won on its native oxide, its abundance and its thermal
+  conductivity. None of them electrical. It also carries the indirect-bandgap
+  explanation, which is why silicon cannot lase and why silicon photonics
+  still bonds an indium phosphide die on top to make the light it then guides.
+- **Two bugs, both caught by checking against reality before building the UI.**
+  The RC delay used `1e-2` where the µΩ·cm → Ω·nm conversion needs `10`, so
+  every wire delay came out a thousand times too small — and picoseconds next
+  to a wire look entirely plausible, which is what made it dangerous. And the
+  "gate is in control" threshold used the textbook five natural lengths, at
+  which this model still gives 200 mV/V of DIBL; real designs sit at seven to
+  ten. Both are now pinned by checks, and I reintroduced the unit bug to
+  confirm the new ones name it.
+- **Section 9 is the roadmap in one control.** Drag the channel below seven
+  natural lengths and the drain takes over; switch to gate-all-around and the
+  same channel becomes workable. Every architecture change on the 3D tab exists
+  to shrink λ so L can shrink with it, and here that is a slider rather than a
+  claim.
+- **Check the physics as invariants, not just as values.** Combined mobility
+  must be worse than either mechanism alone (Matthiessen), phonon and impurity
+  scattering must move oppositely with temperature, DIBL must fall by exactly
+  e per two natural lengths, Elmore delay must go exactly as length squared.
+  Those catch a wrong model that happens to produce a right-looking number.

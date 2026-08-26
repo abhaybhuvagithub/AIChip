@@ -15,7 +15,7 @@ Five tabs:
 | **Fab line** | The 17 modules a wafer passes through, from crystal growth to final test. Each opens up into physics, tools, failure modes and duration. A "run a lot" button walks the line. |
 | **Yield lab** | A live 300 mm wafer map drawn to scale, colourable by defects **or by speed bin**. Drag die size, defect density, edge exclusion or scribe width and watch gross dies, yield and good dies move together. Four real yield models side by side on the same wafer, plus per-die maximum clock from process variation, a speed-bin distribution and blended selling price. |
 | **Economics** | Cost per good die, silicon utilisation and gross margin, with eight real product shapes — mobile SoC through SiC power device — computed through the same model. |
-| **The science** | The physics underneath everything else, computed live: an interactive MOSFET I–V family, the subthreshold floor with a temperature slider, gate tunnelling and why hafnium replaced silicon dioxide, Rayleigh optics, EUV photon shot noise, random dopant fluctuation, and why Dennard scaling ended. |
+| **The science** | Eleven sections of physics, computed live: the MOSFET I–V family, the subthreshold floor with a temperature slider, gate tunnelling and why hafnium replaced silicon dioxide, Rayleigh optics, EUV photon shot noise, dopant fluctuation, why Dennard scaling ended — then why silicon won despite losing on mobility, carrier transport and Matthiessen's rule, short-channel effects and the natural length, the copper resistivity wall, and the four ways silicon wears out. |
 | **Clock** | Why frequency stopped in 2005 and the transistors had nothing to do with it. A log ladder from the 740 kHz Intel 4004 to 1.5 THz device f_max, with processor clocks, radio carriers and single-device figures kept visually distinct. Turn the clock up and watch power, heat and signal reach fail in that order. |
 | **Nodes** | 180 nm to 2 nm, with the transistor architecture that made each generation possible, and a drawn cross-section showing how many sides of the channel the gate controls. |
 | **Compute** | Turns the die you configured into operations per second, and climbs from one die to a 100,000-die cluster. Shows why headline throughput outran Moore's law: precision and sparsity, not density. |
@@ -25,7 +25,7 @@ Five tabs:
 | **Discipline** | Why "flawless" is the wrong target, and what the right one is. The arithmetic that makes discipline compulsory — 700 steps at 99.9986% each — plus nine engineering disciplines, the rule of ten on escape cost, test-coverage escapes against real DPPM targets, and eight domains where the ethical judgement is genuine. |
 | **0 → market** | The business case: seven phases from concept to ramp, an NRE build-up by node, and the one calculation that decides whether a chip exists — break-even units = NRE ÷ margin. Plus a lifetime cash-flow chart showing the four-year hole before the climb. Unit cost comes from the die you configured in the yield lab. |
 | **Value chain** | The seven layers that actually produce a chip, and how few suppliers each has. Arm's licensing model and its 2026 move into shipping its own silicon. Three business models — IDM, fabless plus foundry, and the vertical re-integration Terafab is betting on. A fab-scale calculator that turns wafer starts per month into chips, silicon and compute per year. |
-| **Quiz** | Forty-seven questions, self-explaining. |
+| **Quiz** | Fifty-one questions, self-explaining. |
 
 ## What is actually modelled
 
@@ -61,6 +61,16 @@ Five tabs:
 - **Clock physics** — signal velocity c/√ε and reach per cycle, clock period,
   and power against frequency both at fixed voltage (linear) and with voltage
   scaling (cubic).
+- **Carrier transport** — Caughey–Thomas mobility against doping, Matthiessen's
+  rule combining phonon and ionised-impurity scattering, and drift velocity
+  with saturation.
+- **Short-channel effects** — natural length λ = √(ε_si/ε_ox·t_ox·t_body) with
+  a multi-gate divisor, and threshold roll-off and DIBL falling as exp(−L/2λ).
+- **Interconnect** — copper resistivity from Fuchs–Sondheimer surface
+  scattering, Mayadas–Shatzkes grain-boundary scattering and the barrier's
+  area penalty, then Elmore RC delay.
+- **Reliability** — Black's equation for electromigration and the Arrhenius
+  acceleration factor that makes qualification possible.
 - **Optics** — Rayleigh resolution and depth of focus, photon energy, and
   Poisson photon statistics per feature.
 - **Cell footprint** — relative standard-cell area per architecture at
@@ -266,7 +276,7 @@ that fails fastest:
 | --- | --- |
 | `npm run lint` | Dead imports, unused props, hook misuse. Found three real bugs the first time it ran. |
 | `npm run build` | Anything that does not compile. |
-| `npm run verify` | 609 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
+| `npm run verify` | 644 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
 | `npm run smoke` | Renders all sixteen tabs across five configurations, including an unmakeable die and a zero-yield process. Catches components that throw on first render, and output that leaks `NaN` or `undefined` — which reads as broken while passing every other check. |
 | `npm run budget` | Bundle size against a gzipped budget. This bundle grew 206 kB → 331 kB across six feature passes with nothing watching. |
 
@@ -286,7 +296,7 @@ publish means the push succeeded, not that the bytes are being served — a
 sister repo shipped the previous build for weeks with green checks the whole
 time, because nothing closed that loop.
 
-`npm run verify` runs 609 checks across wafer geometry, yield model
+`npm run verify` runs 644 checks across wafer geometry, yield model
 correctness (pinned against hand-computed values), economics invariants,
 defect scatter determinism, a named type scale with a 14px floor and a pinned
 prose tier, WCAG contrast across all ten themes, architecture and thermal-wall arithmetic, material
