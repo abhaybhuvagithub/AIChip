@@ -177,12 +177,13 @@ group('Content')
   ok('quiz answers all point at a real option', QUIZ.every((q) => q.opts[q.a] !== undefined))
   ok('every quiz question explains itself', QUIZ.every((q) => q.why && q.why.length > 40))
   ok('quiz options are distinct', QUIZ.every((q) => new Set(q.opts).size === q.opts.length))
-  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science', 'clock', 'business', 'ethics'].includes(t.tab)))
+  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science', 'clock', 'business', 'ethics', 'unsolved'].includes(t.tab)))
   ok('the tour visits every tab', ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz']
     .every((t) => TOUR.some((s) => s.tab === t)))
   ok('quiz covers the material chain', QUIZ.some((q) => /purity|distill|polysilicon|particle/i.test(q.q)))
   ok('quiz covers real silicon', QUIZ.some((q) => /Cerebras|MI300X|wafer-scale/i.test(q.q)))
   ok('quiz covers the value chain', QUIZ.some((q) => /Arm|EUV scanners|Terafab/i.test(q.q)))
+  ok('quiz covers open problems', QUIZ.some((q) => /Tunnel FET|SRAM bit cell/i.test(q.q)))
   ok('quiz covers transport and interconnect', QUIZ.some((q) => /mobility|copper wire|indirect|Electromigration/i.test(q.q)))
   ok('quiz covers discipline', QUIZ.some((q) => /per-step|flawless|700 steps/i.test(q.q)))
   ok('quiz covers the business case', QUIZ.some((q) => /NRE|amortis|cash|node above which/i.test(q.q)))
@@ -194,7 +195,7 @@ group('Content')
     QUIZ.some((q) => /X-factor|cycle time|bottleneck|scanners/i.test(q.q)))
   ok('quiz covers 3D transistors and the thermal wall',
     QUIZ.some((q) => /CFET|backside power/i.test(q.q)) && QUIZ.some((q) => /3D memory|3D logic/i.test(q.q)))
-  ok('quiz covers compute and quantum', QUIZ.length >= 51 &&
+  ok('quiz covers compute and quantum', QUIZ.length >= 53 &&
     QUIZ.some((q) => /FP4|sparsity|precision/i.test(q.q)) &&
     QUIZ.some((q) => /qubit|surface code|threshold/i.test(q.q)))
 }
@@ -1206,6 +1207,71 @@ group('Icons')
   })())
 }
 
+/* ---------- open problems ---------- */
+group('Open problems')
+{
+  const U = await import(join(root, 'src/data/unsolved.js'))
+  const NOW = 2026
+
+  ok('the list is substantial and unique',
+    U.PROBLEMS.length >= 18 && new Set(U.PROBLEMS.map((p) => p.id)).size === U.PROBLEMS.length)
+  ok('every problem is fully argued', U.PROBLEMS.every((p) =>
+    p.name && p.icon && p.since && U.DOMAINS[p.domain] && U.STATUS[p.status] &&
+    p.what.length > 120 && p.tried.length > 60 && p.hard.length > 80 &&
+    p.solved.length > 40 && p.costs.length > 40))
+  ok('every domain is represented',
+    Object.keys(U.DOMAINS).every((d) => U.PROBLEMS.some((p) => p.domain === d)))
+  ok('every status is used',
+    Object.keys(U.STATUS).every((st) => U.PROBLEMS.some((p) => p.status === st)))
+
+  // The dates are the argument. If they drift into the future or bunch up
+  // recently, the tab stops making the point it exists to make.
+  ok('dates are plausible and in the past',
+    U.PROBLEMS.every((p) => p.since >= 1990 && p.since <= NOW))
+  ok('several problems have been open twenty years or more',
+    U.PROBLEMS.filter((p) => NOW - p.since >= 20).length >= 4,
+    String(U.PROBLEMS.filter((p) => NOW - p.since >= 20).length))
+  ok('the median problem has been open for over a decade', (() => {
+    const v = U.PROBLEMS.map((p) => NOW - p.since).sort((a, b) => a - b)
+    return v[Math.floor(v.length / 2)] >= 10
+  })())
+
+  // The status vocabulary has to mean something. A "stalled" entry that is
+  // five years old, or a "contained" one nobody pays for, would be misuse.
+  ok('stalled problems really are long-standing',
+    U.PROBLEMS.filter((p) => p.status === 'stalled').every((p) => NOW - p.since >= 15))
+  ok('every problem states what it costs while unsolved',
+    U.PROBLEMS.every((p) => p.costs && !/^n\/a/i.test(p.costs)))
+  ok('every problem states a falsifiable success condition',
+    U.PROBLEMS.every((p) => /\b(a|an|the|enough|below|removing|control|genuine|bandwidth|contact|fault)\b/i.test(p.solved)))
+
+  // Specific claims the rest of the site depends on being consistent.
+  ok('the 60 mV/decade problem is present and long-stalled', (() => {
+    const x = U.PROBLEMS.find((p) => p.id === 'steep')
+    return x && x.status === 'stalled' && NOW - x.since >= 20
+  })())
+  ok('the memory wall is dated to the paper that named it',
+    U.PROBLEMS.find((p) => p.id === 'memwall').since === 1994)
+  ok('the copper interconnect wall is listed as genuinely open',
+    U.PROBLEMS.find((p) => p.id === 'wires').status === 'open')
+  ok('quantum problems cover threshold, wiring and magic states',
+    ['qthreshold', 'qwiring', 'magic'].every((id) => U.PROBLEMS.some((p) => p.id === id)))
+  ok('structural problems are included, not only technical ones',
+    U.PROBLEMS.filter((p) => p.domain === 'structural').length >= 2)
+
+  // The tab must not claim to know which of these will fall. That caveat is
+  // the difference between an honest list and a forecast.
+  ok('the caveat admits some of these will be solved',
+    /will be solved/i.test(U.CAVEAT) && /obvious in hindsight/i.test(U.CAVEAT))
+  ok('the caveat refuses to predict which',
+    /nobody can reliably say/i.test(U.CAVEAT))
+  ok('every icon referenced exists', (() => {
+    const iconFile = readFileSync(join(root, 'src/ui/Icon.jsx'), 'utf8')
+    const have = [...iconFile.matchAll(/^ {2}([a-z][a-zA-Z0-9]*): \(<>/gm)].map((m) => m[1])
+    return U.PROBLEMS.every((p) => have.includes(p.icon))
+  })())
+}
+
 /* ---------- rigour and ethics ---------- */
 group('Discipline and ethics')
 {
@@ -1898,6 +1964,8 @@ group('Build output')
       ok('the provenance note shipped', bundle.includes('Anthropic') && bundle.includes('publicly available'))
       ok('the no-confidential-data statement shipped', /confidential/i.test(bundle))
       ok('the icon set shipped', bundle.includes('waferscale') && bundle.includes('iplicense'))
+      ok('the open problems tab shipped', bundle.includes('Open problems') || bundle.includes('nobody has solved'))
+      ok('the open problems caveat shipped', /obvious in hindsight/i.test(bundle))
       ok('the discipline tab shipped', bundle.includes('per-step yield') || bundle.includes('stop-the-line'))
       ok('the discipline tab keeps the case qualification', /did not concede/i.test(bundle))
       ok('the business tab shipped', bundle.includes('break-even') || bundle.includes('Total NRE'))

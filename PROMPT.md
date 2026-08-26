@@ -788,3 +788,36 @@ actually move, what goes wrong when channels get short, and the wire problem.
   scattering must move oppositely with temperature, DIBL must fall by exactly
   e per two natural lengths, Elmore delay must go exactly as length squared.
   Those catch a wrong model that happens to produce a right-looking number.
+
+---
+
+## Twenty-fourth pass: open problems
+
+Every tab here explained something that works, which gives a misleading
+impression of a field with a roadmap. A great deal of it is a list of walls
+people have been running at for decades.
+
+- **The dates are the argument.** Each entry carries the year it became a
+  recognised open problem, and the chart sorts by it. Tunnel FETs since 2004,
+  carbon nanotube logic since 1998, the memory wall since the 1994 paper that
+  named it. Descriptions can be written optimistically; a thirty-two-year bar
+  cannot.
+- **A status vocabulary used strictly.** Open, partial, *contained* — managed
+  rather than solved, with the cost paid every generation forever — and
+  *stalled*, demonstrated long ago and never made practical. A check asserts
+  nothing recent is labelled stalled, because that word has to keep meaning
+  something.
+- **Every entry states what would count as solved.** Without that, a list of
+  open problems is a mood rather than an argument, and there is no way to tell
+  progress from activity.
+- **The caveat is the load-bearing part.** Some of these will fall and look
+  obvious in hindsight — high-k metal gate looked impossible for years and then
+  simply happened. Others have been ten years away for twenty. Nobody can
+  reliably say which in advance, this page included, and a check asserts that
+  admission cannot be edited into a forecast. I reworded it to confirm the
+  check fired.
+- **My headline was ahead of my list.** I wrote "eighteen things" and had
+  seventeen. The check caught it, and rather than change the headline I added
+  the entry I had genuinely left out — SRAM scaling, which has nearly stopped
+  while logic continues, and which drags the density of every modern product
+  down with it.

@@ -46,7 +46,9 @@ export const TOUR = [
   { id: 't10', tab: 'compute', title: 'Climb to the trillions and past them', body: 'Move the scale selector from one die to a cluster. Note the power column keeping pace: past a rack, what you can build is set by the substation, not the fab.' },
   { id: 't11', tab: 'quantum', title: 'Meet the other exchange rate', body: 'Pick Shor on RSA-2048, then drag the physical error rate. Between 0.8% and 1.2% the qubit count goes vertical and then to infinity — that cliff is the surface code threshold.' },
   { id: 't12', tab: 'quantum', title: 'See what a fab cannot fix', body: 'Read the comparison table. A logic fab is a statistical discipline that expects failures and designs around them. A quantum chip has no binning and no redundancy, so the same tools do not buy the same safety.' },
-  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Fifty-one questions. Everything needed to answer them is on the other thirteen tabs.' },
+  { id: 't12b', tab: 'unsolved', title: 'Read the dates, not the descriptions', body: 'Several of these bars are longer than the careers of the people working on them. Tunnel FETs have delivered steep slope and useless on-current since 2004; the memory wall was named in 1994 and has widened every year since.' },
+  { id: 't12c', tab: 'unsolved', title: 'Note what "contained" means', body: 'Some problems are not solved, they are paid for — every generation, forever, unless something changes. EUV stochastics cost dose on the most expensive tool in the building, on every wafer, and no amount of cleanliness helps.' },
+  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Fifty-three questions. Everything needed to answer them is on the other thirteen tabs.' },
 ]
 
 export const QUIZ = [
@@ -229,6 +231,18 @@ export const QUIZ = [
     opts: ['About 99%', 'About 99.9986% — roughly 14 defects per million, per step', 'About 99.9%', 'It depends only on the final test'],
     a: 1,
     why: 'Yield multiplies across steps, so the per-step requirement is the line target raised to the power of one over the step count. No amount of care delivers fourteen parts per million by attention alone — which is the whole argument for documented procedure, statistical control and automation.',
+  },
+  {
+    q: 'Tunnel FETs have been pursued since around 2004 to beat the 60 mV/decade limit. Why has none shipped?',
+    opts: ['They require exotic materials', 'Steep slope and useful on-current have traded against each other in every material system tried', 'They are too expensive to fabricate', 'The physics turned out to be wrong'],
+    a: 1,
+    why: 'Steep subthreshold slope has been demonstrated repeatedly. On-current has been consistently too low to be useful, for over twenty years, across many material systems — which is what distinguishes a stalled problem from a merely unsolved one.',
+  },
+  {
+    q: 'SRAM bit cells have nearly stopped scaling while logic keeps shrinking. Why does that matter so much?',
+    opts: ['SRAM is the most expensive part to test', 'Cache is a large fraction of a modern die, so it drags the whole product\'s density down', 'SRAM consumes most of the power', 'It prevents the use of EUV'],
+    a: 1,
+    why: 'A cell is six transistors that must be small, stable and fast at low voltage — requirements that pull against each other, and random dopant fluctuation hits the smallest devices hardest. Every generation, cache occupies a larger share of the die, so part of the density gain from a new node is spent on memory that did not shrink.',
   },
   {
     q: 'Why is "flawless" the wrong target for a fab culture?',

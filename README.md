@@ -25,7 +25,8 @@ Five tabs:
 | **Discipline** | Why "flawless" is the wrong target, and what the right one is. The arithmetic that makes discipline compulsory — 700 steps at 99.9986% each — plus nine engineering disciplines, the rule of ten on escape cost, test-coverage escapes against real DPPM targets, and eight domains where the ethical judgement is genuine. |
 | **0 → market** | The business case: seven phases from concept to ramp, an NRE build-up by node, and the one calculation that decides whether a chip exists — break-even units = NRE ÷ margin. Plus a lifetime cash-flow chart showing the four-year hole before the climb. Unit cost comes from the die you configured in the yield lab. |
 | **Value chain** | The seven layers that actually produce a chip, and how few suppliers each has. Arm's licensing model and its 2026 move into shipping its own silicon. Three business models — IDM, fabless plus foundry, and the vertical re-integration Terafab is betting on. A fab-scale calculator that turns wafer starts per month into chips, silicon and compute per year. |
-| **Quiz** | Fifty-one questions, self-explaining. |
+| **Open problems** | Eighteen things nobody has solved, each with what has been tried, why it is still open, what would count as a solution, and — the honest part — how long it has been open. Several bars on the chart are longer than the careers of the people working on them. |
+| **Quiz** | Fifty-three questions, self-explaining. |
 
 ## What is actually modelled
 
@@ -142,6 +143,13 @@ ratio between generations. Cooling capability bands are order-of-magnitude
 only; real limits depend on hot-spot distribution rather than average density.
 Verify checks assert that only the three shipping architectures are marked
 production and that no beyond-CMOS option is.
+
+The Open problems tab dates each entry to when it became a recognised open
+problem in the literature rather than to a first mention, and states plainly
+that some of these will be solved and look obvious in hindsight while others
+have been ten years away for twenty — and that nobody, this page included, can
+reliably say which is which in advance. A verify check asserts that caveat
+cannot be edited into a forecast.
 
 The Discipline tab names one real occupational-health case. It is presented
 with dates, the company's own quoted statements and the causal question left
@@ -276,7 +284,7 @@ that fails fastest:
 | --- | --- |
 | `npm run lint` | Dead imports, unused props, hook misuse. Found three real bugs the first time it ran. |
 | `npm run build` | Anything that does not compile. |
-| `npm run verify` | 644 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
+| `npm run verify` | 664 checks — the maths pinned against hand-computed values, content completeness, sourcing discipline, and the shipped bundle. |
 | `npm run smoke` | Renders all sixteen tabs across five configurations, including an unmakeable die and a zero-yield process. Catches components that throw on first render, and output that leaks `NaN` or `undefined` — which reads as broken while passing every other check. |
 | `npm run budget` | Bundle size against a gzipped budget. This bundle grew 206 kB → 331 kB across six feature passes with nothing watching. |
 
@@ -296,7 +304,7 @@ publish means the push succeeded, not that the bytes are being served — a
 sister repo shipped the previous build for weeks with green checks the whole
 time, because nothing closed that loop.
 
-`npm run verify` runs 644 checks across wafer geometry, yield model
+`npm run verify` runs 664 checks across wafer geometry, yield model
 correctness (pinned against hand-computed values), economics invariants,
 defect scatter determinism, a named type scale with a 14px floor and a pinned
 prose tier, WCAG contrast across all ten themes, architecture and thermal-wall arithmetic, material

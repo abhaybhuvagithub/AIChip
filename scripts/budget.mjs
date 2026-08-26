@@ -35,12 +35,15 @@ const dist = join(root, 'dist')
 //           glyphs, rolled out across every tab, ~5 kB)
 //   176 kB  the discipline tab and the glass sidebar (rigour maths, grouped
 //           navigation, nine more nav icons, ~9 kB)
+//   192 kB  five more science sections and the open-problems tab (transport,
+//           short-channel, interconnect and wearout models, plus eighteen
+//           documented problems, ~15 kB)
 // Each rise is a feature that bought the bytes, named in the commit.
 const BUDGET = {
-  'js.gzip': 176 * 1024,
+  'js.gzip': 192 * 1024,
   'css.gzip': 7 * 1024,
   'html.raw': 6 * 1024,
-  'total.gzip': 184 * 1024,
+  'total.gzip': 200 * 1024,
 }
 
 let fail = 0
