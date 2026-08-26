@@ -851,3 +851,32 @@ cause was not the section — it was the map above it.
   onClick exists would have passed throughout the bug. Asserting the sort
   order tests the property that actually makes clicking work; removing the
   sort fails it.
+
+---
+
+## Twenty-sixth pass: the acronym glossary
+
+Semiconductors may be the most abbreviation-dense field in engineering, and the
+site had accumulated well over a hundred without ever expanding them.
+
+- **The expansion is the least useful part.** Knowing DIBL stands for
+  "drain-induced barrier lowering" tells you nothing. Knowing it is the drain
+  stealing control of the channel from the gate, and that it is why short
+  channels leak, is the thing you wanted. So every one of the 172 entries
+  carries a written meaning as well, and a check asserts none is under forty
+  characters or merely the expansion restated.
+- **Search the meaning, not just the key.** Searching covers the acronym, the
+  expansion and the description, so plain English works — "short channels leak"
+  returns DIBL. Results rank exact and prefix matches on the acronym first, so
+  searching "IP" does not bury the entry under everything containing those
+  letters.
+- **Cross-references must not be dead ends.** 130 entries link to the tab that
+  explains the thing properly, and a check resolves every one against the real
+  tab list. It immediately caught `OPC → design`, a tab that does not exist —
+  I had written the category name from muscle memory.
+- **A compact tuple format, mapped once.** 172 object literals would be
+  unreadable and unmaintainable; `[acronym, expansion, meaning, category, tab]`
+  stays scannable and the mapping happens in one line.
+- **Say what it is not.** The tab states plainly that the list is not
+  exhaustive, because a genuinely complete semiconductor glossary would run to
+  thousands of entries and be useless. A check asserts that admission stays.

@@ -48,6 +48,7 @@ export const TOUR = [
   { id: 't12', tab: 'quantum', title: 'See what a fab cannot fix', body: 'Read the comparison table. A logic fab is a statistical discipline that expects failures and designs around them. A quantum chip has no binning and no redundancy, so the same tools do not buy the same safety.' },
   { id: 't12b', tab: 'unsolved', title: 'Read the dates, not the descriptions', body: 'Several of these bars are longer than the careers of the people working on them. Tunnel FETs have delivered steep slope and useless on-current since 2004; the memory wall was named in 1994 and has widened every year since.' },
   { id: 't12c', tab: 'unsolved', title: 'Note what "contained" means', body: 'Some problems are not solved, they are paid for — every generation, forever, unless something changes. EUV stochastics cost dose on the most expensive tool in the building, on every wafer, and no amount of cleanliness helps.' },
+  { id: 't12d', tab: 'acronyms', title: 'Look anything up', body: 'Search covers the acronym, its expansion and its description — so a plain-English phrase works. Type "short channels leak" and it finds DIBL. Most entries link to the tab that explains the thing properly rather than in a sentence.' },
   { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Fifty-three questions. Everything needed to answer them is on the other thirteen tabs.' },
 ]
 

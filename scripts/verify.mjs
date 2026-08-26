@@ -177,7 +177,7 @@ group('Content')
   ok('quiz answers all point at a real option', QUIZ.every((q) => q.opts[q.a] !== undefined))
   ok('every quiz question explains itself', QUIZ.every((q) => q.why && q.why.length > 40))
   ok('quiz options are distinct', QUIZ.every((q) => new Set(q.opts).size === q.opts.length))
-  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science', 'clock', 'business', 'ethics', 'unsolved'].includes(t.tab)))
+  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science', 'clock', 'business', 'ethics', 'unsolved', 'acronyms'].includes(t.tab)))
   ok('the tour visits every tab', ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz']
     .every((t) => TOUR.some((s) => s.tab === t)))
   ok('quiz covers the material chain', QUIZ.some((q) => /purity|distill|polysilicon|particle/i.test(q.q)))
@@ -1224,6 +1224,75 @@ group('Icons')
   })())
 }
 
+/* ---------- acronyms ---------- */
+group('Acronym glossary')
+{
+  const A = await import(join(root, 'src/data/acronyms.js'))
+
+  ok('the glossary is substantial', A.ACRONYMS.length >= 150, String(A.ACRONYMS.length))
+  ok('no duplicate acronyms',
+    new Set(A.ACRONYMS.map((a) => a.acronym)).size === A.ACRONYMS.length,
+    A.ACRONYMS.map((a) => a.acronym).filter((x, i, arr) => arr.indexOf(x) !== i).join(', '))
+  ok('every entry has an acronym, expansion and category', A.ACRONYMS.every((a) =>
+    a.acronym && a.expansion && A.CATEGORIES[a.category]))
+
+  // The point of the tab: an expansion alone is the least useful part. Every
+  // entry must say what the thing actually is.
+  ok('every entry explains the meaning, not just the expansion',
+    A.ACRONYMS.every((a) => a.meaning && a.meaning.length > 40),
+    A.ACRONYMS.filter((a) => !a.meaning || a.meaning.length <= 40).map((a) => a.acronym).join(', '))
+  ok('the meaning is not merely the expansion restated', A.ACRONYMS.every((a) =>
+    a.meaning.toLowerCase().trim() !== a.expansion.toLowerCase().trim()))
+  ok('every category is populated',
+    Object.keys(A.CATEGORIES).every((k) => A.ACRONYMS.some((a) => a.category === k)))
+  ok('every category has an icon and a colour',
+    Object.values(A.CATEGORIES).every((c) => c.label && c.hue && c.icon))
+  ok('category icons all exist in the icon set', (() => {
+    const iconFile = readFileSync(join(root, 'src/ui/Icon.jsx'), 'utf8')
+    const have = [...iconFile.matchAll(/^ {2}([a-z][a-zA-Z0-9]*): \(<>/gm)].map((m) => m[1])
+    return Object.values(A.CATEGORIES).every((c) => have.includes(c.icon))
+  })())
+
+  // Cross-references must point at tabs that exist, or they are dead ends.
+  const TABS = ['god', 'sand', 'line', 'run', 'wafer', 'science', 'clock', '3d', 'nodes',
+    'quantum', 'silicon', 'chain', 'compute', 'economics', 'business', 'ethics', 'unsolved',
+    'acronyms', 'quiz']
+  ok('every cross-reference points at a real tab',
+    A.ACRONYMS.filter((a) => a.tab).every((a) => TABS.includes(a.tab)),
+    A.ACRONYMS.filter((a) => a.tab && !TABS.includes(a.tab)).map((a) => `${a.acronym}:${a.tab}`).join(', '))
+  ok('most entries cross-reference somewhere',
+    A.ACRONYMS.filter((a) => a.tab).length >= A.ACRONYMS.length * 0.5)
+
+  // Search behaviour.
+  ok('search is case-insensitive', A.searchAcronyms('dibl').length === A.searchAcronyms('DIBL').length)
+  ok('search finds an exact acronym', A.searchAcronyms('DIBL').some((a) => a.acronym === 'DIBL'))
+  ok('search ignores punctuation in the acronym',
+    A.searchAcronyms('secsgem').some((a) => a.acronym.startsWith('SECS')))
+  ok('search covers descriptions, not only acronyms',
+    A.searchAcronyms('short channels leak').length > 0)
+  ok('an empty query returns everything', A.searchAcronyms('').length === A.ACRONYMS.length)
+  ok('a nonsense query returns nothing', A.searchAcronyms('xyzzyqwrt').length === 0)
+
+  // The terms this site leans on hardest must all be here.
+  ok('the acronyms this site uses most are all present', (() => {
+    const need = ['EUV', 'DUV', 'CMP', 'FinFET', 'GAA', 'CFET', 'DIBL', 'SS', 'EOT', 'HKMG',
+      'HBM', 'SRAM', 'DRAM', 'TSV', 'NRE', 'ASP', 'IDM', 'OSAT', 'DPPM', 'MAC', 'TOPS',
+      'FLOPS', 'SoC', 'TPU', 'QEC', 'RSFQ', 'TLS', 'FOUP', 'SPC', 'RTL', 'EDA', 'PDK', 'KGD']
+    const have = new Set(A.ACRONYMS.map((a) => a.acronym))
+    return need.every((n) => have.has(n))
+  })(), (() => {
+    const need = ['EUV', 'DUV', 'CMP', 'FinFET', 'GAA', 'CFET', 'DIBL', 'SS', 'EOT', 'HKMG',
+      'HBM', 'SRAM', 'DRAM', 'TSV', 'NRE', 'ASP', 'IDM', 'OSAT', 'DPPM', 'MAC', 'TOPS',
+      'FLOPS', 'SoC', 'TPU', 'QEC', 'RSFQ', 'TLS', 'FOUP', 'SPC', 'RTL', 'EDA', 'PDK', 'KGD']
+    const have = new Set(A.ACRONYMS.map((a) => a.acronym))
+    return need.filter((n) => !have.has(n)).join(', ') || 'all present'
+  })())
+  ok('the glossary admits it is not exhaustive', (() => {
+    const ui = readFileSync(join(root, 'src/ui/Acronyms.jsx'), 'utf8')
+    return /not exhaustive/i.test(ui)
+  })())
+}
+
 /* ---------- open problems ---------- */
 group('Open problems')
 {
@@ -1981,6 +2050,7 @@ group('Build output')
       ok('the provenance note shipped', bundle.includes('Anthropic') && bundle.includes('publicly available'))
       ok('the no-confidential-data statement shipped', /confidential/i.test(bundle))
       ok('the icon set shipped', bundle.includes('waferscale') && bundle.includes('iplicense'))
+      ok('the acronym glossary shipped', bundle.includes('acronyms') || bundle.includes('DIBL'))
       ok('the open problems tab shipped', bundle.includes('Open problems') || bundle.includes('nobody has solved'))
       ok('the open problems caveat shipped', /obvious in hindsight/i.test(bundle))
       ok('the discipline tab shipped', bundle.includes('per-step yield') || bundle.includes('stop-the-line'))

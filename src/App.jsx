@@ -15,6 +15,7 @@ import ValueChain from './ui/ValueChain.jsx'
 import Business from './ui/Business.jsx'
 import Ethics from './ui/Ethics.jsx'
 import Unsolved from './ui/Unsolved.jsx'
+import Acronyms from './ui/Acronyms.jsx'
 import SandToSilicon from './ui/SandToSilicon.jsx'
 import Compute from './ui/Compute.jsx'
 import Quantum from './ui/Quantum.jsx'
@@ -46,6 +47,7 @@ const TABS = [
   { id: 'ethics', label: 'Discipline', icon: 'shield', group: 'The business' },
 
   { id: 'unsolved', label: 'Open problems', icon: 'route', group: 'Check' },
+  { id: 'acronyms', label: 'Acronyms', icon: 'iplicense', group: 'Check' },
   { id: 'quiz', label: 'Quiz', icon: 'quiz', group: 'Check' },
 ]
 
@@ -246,6 +248,7 @@ export default function App() {
         {tab === 'business' && <Business cfg={cfg} goTab={setTab} />}
         {tab === 'ethics' && <Ethics />}
         {tab === 'unsolved' && <Unsolved />}
+        {tab === 'acronyms' && <Acronyms goTab={setTab} />}
         {tab === 'compute' && <Compute cfg={cfg} patch={patch} />}
         {tab === 'quantum' && <Quantum />}
         {tab === 'quiz' && <Quiz />}

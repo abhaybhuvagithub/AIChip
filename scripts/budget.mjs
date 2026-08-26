@@ -38,12 +38,14 @@ const dist = join(root, 'dist')
 //   192 kB  five more science sections and the open-problems tab (transport,
 //           short-channel, interconnect and wearout models, plus eighteen
 //           documented problems, ~15 kB)
+//   206 kB  the acronym glossary (172 entries, each with an expansion, a
+//           written meaning and a cross-reference, ~7 kB)
 // Each rise is a feature that bought the bytes, named in the commit.
 const BUDGET = {
-  'js.gzip': 192 * 1024,
+  'js.gzip': 206 * 1024,
   'css.gzip': 7 * 1024,
   'html.raw': 6 * 1024,
-  'total.gzip': 200 * 1024,
+  'total.gzip': 214 * 1024,
 }
 
 let fail = 0

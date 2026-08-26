@@ -592,3 +592,23 @@ p.lede { color: var(--muted); font-size: var(--fs-lede); line-height: 1.6; max-w
 .iconrow { display: inline-flex; align-items: center; gap: 8px; }
 .btn.iconrow { display: inline-flex; }
 h3.iconrow { display: flex; gap: 10px; }
+
+/* ---------- Acronym glossary ---------- */
+.acro-search { display: flex; gap: 8px; align-items: center; margin-top: 20px; }
+.acro-search input {
+  flex: 1; min-width: 0; background: var(--panel2); border: 1px solid var(--border);
+  color: var(--text); border-radius: var(--r-btn); padding: 11px 18px;
+  font-size: var(--fs-prose); font-family: inherit;
+}
+.acro-search input:focus { border-color: var(--accent); outline: none; }
+.acro-search input::placeholder { color: var(--muted); }
+
+.acro-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); }
+.acro {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: var(--r-card); padding: 14px 15px;
+}
+.acro-head { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
+.acro-key { font-family: var(--font-mono); font-size: 19px; letter-spacing: -.01em; }
+.acro-exp { font-size: var(--fs-data); color: var(--muted); }
+.acro-mean { font-size: var(--fs-note); line-height: 1.6; margin-top: 7px; }

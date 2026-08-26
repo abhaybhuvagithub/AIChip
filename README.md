@@ -26,6 +26,7 @@ Five tabs:
 | **0 → market** | The business case: seven phases from concept to ramp, an NRE build-up by node, and the one calculation that decides whether a chip exists — break-even units = NRE ÷ margin. Plus a lifetime cash-flow chart showing the four-year hole before the climb. Unit cost comes from the die you configured in the yield lab. |
 | **Value chain** | The seven layers that actually produce a chip, and how few suppliers each has. Arm's licensing model and its 2026 move into shipping its own silicon. Three business models — IDM, fabless plus foundry, and the vertical re-integration Terafab is betting on. A fab-scale calculator that turns wafer starts per month into chips, silicon and compute per year. |
 | **Open problems** | Eighteen things nobody has solved, each with what has been tried, why it is still open, what would count as a solution, and — the honest part — how long it has been open. Several bars on the chart are longer than the careers of the people working on them. |
+| **Acronyms** | 172 acronyms with expansion, a written meaning, and a link to the tab that explains it properly. Search covers all three fields, so "short channels leak" finds DIBL. |
 | **Quiz** | Fifty-three questions, self-explaining. |
 
 ## What is actually modelled
