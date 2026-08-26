@@ -821,3 +821,33 @@ people have been running at for decades.
   the entry I had genuinely left out — SRAM scaling, which has nearly stopped
   while logic continues, and which drags the density of every modern product
   down with it.
+
+---
+
+## Twenty-fifth pass: the map that would not respond
+
+Reported as "this section is not getting changed" on the Silicon tab, and the
+cause was not the section — it was the map above it.
+
+- **Concentric shapes plus document order is a trap.** Every die is drawn as a
+  square centred on the origin, which is the right way to compare areas. But
+  SVG paints in document order, so whatever came last in the data sat on top
+  of everything smaller and swallowed every click regardless of where you
+  aimed. Clicking a phone SoC selected whatever happened to be last in the
+  file.
+- **The fix follows from the geometry.** Painting largest first puts the
+  smallest on top, and since the shapes are strictly nested, each part's
+  visible ring becomes exactly its own hit area. Every entry is reachable, and
+  nothing about the visual changes.
+- **Fix the neighbouring bug you find on the way.** Filtering by maker left the
+  detail card showing a part no longer in the table above it. Corrected where
+  the filter is set rather than in an effect reacting to it — the lint caught
+  my first attempt doing the latter, and it was right to.
+- **Then make it discoverable.** Hover highlighting and a label naming whatever
+  is under the cursor, because a stack of anonymous nested squares gives no
+  hint that it is interactive at all. Keyboard focus and Enter as well, since
+  the previous version was mouse-only even when it worked.
+- **The check is on the ordering, not on the handler.** A check that an
+  onClick exists would have passed throughout the bug. Asserting the sort
+  order tests the property that actually makes clicking work; removing the
+  sort fails it.

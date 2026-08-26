@@ -16,29 +16,66 @@ const totalArea = (s) => s.areaMm2 * (s.dies || 1)
  */
 function ToScale({ parts, sel, onPick }) {
   const R = 150
-  const known = parts.filter((p) => p.areaKnown !== false && p.areaMm2 > 0)
+  const [hover, setHover] = useState(null)
+
+  // Every die is drawn concentric at the origin, which is the correct way to
+  // compare areas — and a trap. SVG paints in document order, so whatever came
+  // last in the data sat on top and swallowed every click regardless of where
+  // you aimed. Painting LARGEST FIRST makes each part's visible ring its own
+  // hit area and every part reachable, which is what the nesting implies.
+  const known = parts
+    .filter((p) => p.areaKnown !== false && p.areaMm2 > 0)
+    .sort((a, b) => totalArea(b) - totalArea(a))
+
+  const active = hover || sel
+  const activePart = known.find((p) => p.id === active)
+
   return (
-    <svg viewBox="-170 -170 340 340" width="100%" height="auto" style={{ maxHeight: '58vh' }}
+    <svg viewBox="-170 -178 340 356" width="100%" height="auto" style={{ maxHeight: '58vh' }}
       role="img" aria-label="Die sizes drawn to scale on a 300 mm wafer">
       <circle cx="0" cy="0" r={R} fill="var(--panel)" fillOpacity=".45" stroke="var(--border)" strokeWidth="1.2" />
       <rect x={-RETICLE.x / 2} y={-RETICLE.y / 2} width={RETICLE.x} height={RETICLE.y}
         fill="none" stroke="var(--muted)" strokeOpacity=".5" strokeWidth=".6" strokeDasharray="2 2" />
+
       {known.map((p) => {
         // Square of the same total area — width and height are almost never
         // published, and area is what governs dies per wafer anyway.
         const side = Math.sqrt(totalArea(p))
         const on = sel === p.id
+        const hot = hover === p.id
         return (
-          <g key={p.id} onClick={() => onPick(p.id)} style={{ cursor: 'pointer' }}>
+          <g
+            key={p.id}
+            onClick={() => onPick(p.id)}
+            onMouseEnter={() => setHover(p.id)}
+            onMouseLeave={() => setHover((h) => (h === p.id ? null : h))}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPick(p.id) } }}
+            tabIndex={0}
+            role="button"
+            aria-label={`${p.name}, ${fmt.n(totalArea(p))} square millimetres`}
+            style={{ cursor: 'pointer', outline: 'none' }}
+          >
             <rect x={-side / 2} y={-side / 2} width={side} height={side} rx={side > 40 ? 3 : 1}
-              fill={MAKERS[p.maker].hue} fillOpacity={on ? 0.34 : 0.07}
-              stroke={MAKERS[p.maker].hue} strokeOpacity={on ? 1 : 0.4} strokeWidth={on ? 1.6 : 0.6} />
+              fill={MAKERS[p.maker].hue}
+              fillOpacity={on ? 0.36 : hot ? 0.2 : 0.07}
+              stroke={MAKERS[p.maker].hue}
+              strokeOpacity={on ? 1 : hot ? 0.85 : 0.4}
+              strokeWidth={on ? 1.8 : hot ? 1.2 : 0.6} />
           </g>
         )
       })}
+
+      {/* Name whatever is under the cursor, so the nesting is readable rather
+          than a stack of anonymous squares. */}
+      {activePart && (
+        <text x="0" y={-R - 8} textAnchor="middle" fill={MAKERS[activePart.maker].hue}
+          style={{ fontSize: 9.5, fontFamily: 'var(--font-mono)' }}>
+          {activePart.name} · {fmt.n(totalArea(activePart))} mm²
+        </text>
+      )}
       <text x="0" y={-RETICLE.y / 2 - 4} textAnchor="middle" fill="var(--muted)"
         style={{ fontSize: 7.5, fontFamily: 'var(--font-mono)' }}>reticle field</text>
-      <text x="0" y={R + 12} textAnchor="middle" fill="var(--muted)"
+      <text x="0" y={R + 14} textAnchor="middle" fill="var(--muted)"
         style={{ fontSize: 8.5, fontFamily: 'var(--font-mono)' }}>300 mm wafer</text>
     </svg>
   )
@@ -52,7 +89,17 @@ export default function Silicon({ cfg, patch, goTab }) {
     () => SILICON.filter((s) => maker === 'all' || s.maker === maker),
     [maker]
   )
-  const s = SILICON.find((x) => x.id === sel) || SILICON[0]
+  const s = parts.find((x) => x.id === sel) || parts[0] || SILICON[0]
+
+  // Keep the selection inside the current filter, and do it where the filter
+  // changes rather than in an effect reacting to it. Choosing "Apple" while an
+  // NVIDIA part was selected used to leave the detail card contradicting the
+  // table above it.
+  const pickMaker = (k) => {
+    setMaker(k)
+    const next = SILICON.filter((x) => k === 'all' || x.maker === k)
+    if (next.length && !next.some((x) => x.id === sel)) setSel(next[0].id)
+  }
   const area = totalArea(s)
   const d = density(s)
   const canLoad = s.areaKnown !== false && s.areaMm2 > 0
@@ -84,9 +131,9 @@ export default function Silicon({ cfg, patch, goTab }) {
       </p>
 
       <div className="row" style={{ margin: '18px 0 14px' }}>
-        <button className={`btn ${maker === 'all' ? 'active' : ''}`} onClick={() => setMaker('all')}>All</button>
+        <button className={`btn ${maker === 'all' ? 'active' : ''}`} onClick={() => pickMaker('all')}>All</button>
         {Object.entries(MAKERS).map(([k, m]) => (
-          <button key={k} className={`btn ${maker === k ? 'active' : ''}`} onClick={() => setMaker(k)}>{m.name}</button>
+          <button key={k} className={`btn ${maker === k ? 'active' : ''}`} onClick={() => pickMaker(k)}>{m.name}</button>
         ))}
       </div>
 

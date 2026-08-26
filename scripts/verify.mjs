@@ -1201,6 +1201,23 @@ group('Icons')
     const layers = (t.match(/^ {4}id: '[a-z]+', icon: '/gm) || []).length
     return layers >= 7
   })())
+  // Concentric shapes painted in data order meant the last one drawn covered
+  // everything and swallowed every click. Painting largest first makes each
+  // part's visible ring its own hit area.
+  const sil = readFileSync(join(root, 'src/ui/Silicon.jsx'), 'utf8')
+  ok('the to-scale map paints largest die first so all are clickable',
+    /\.sort\(\(a, b\) => totalArea\(b\) - totalArea\(a\)\)/.test(sil))
+  ok('each die in the map is a click target', /onClick=\{\(\) => onPick\(p\.id\)\}/.test(sil))
+  ok('the map responds to hover as well as click',
+    /onMouseEnter=\{\(\) => setHover\(p\.id\)\}/.test(sil))
+  ok('the map is keyboard operable',
+    /tabIndex=\{0\}/.test(sil) && /e\.key === 'Enter'/.test(sil))
+  ok('the map names whatever is under the cursor', /activePart && \(/.test(sil))
+  ok('changing the maker filter keeps the selection inside it',
+    /const pickMaker = \(k\) =>/.test(sil) && /!next\.some\(\(x\) => x\.id === sel\)/.test(sil))
+  ok('the detail card reads from the filtered list, not the whole catalogue',
+    /const s = parts\.find\(\(x\) => x\.id === sel\)/.test(sil))
+
   ok('wafer-scale parts use the wafer-scale icon', (() => {
     const t = readFileSync(join(root, 'src/data/silicon.js'), 'utf8')
     return /id: 'wse3', icon: 'waferscale'/.test(t)
