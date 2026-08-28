@@ -41,6 +41,8 @@ export const TOUR = [
   { id: 't8e', tab: 'chain', title: 'Find the layer that owns nothing', body: 'Arm has never owned a fab and until 2026 never sold a chip, yet its cores are in nearly every phone on Earth. Selling the design rather than the object is what made the fabless world possible.' },
   { id: 't8f', tab: 'chain', title: 'Watch the argument reopen', body: 'The industry settled on specialisation decades ago. Terafab is a bet that specialisation became a liability once capacity itself turned scarce. Note the two tables: what is committed, and what is so far only stated.' },
   { id: 't8z1', tab: 'business', title: 'See what it costs to start', body: 'Four years and hundreds of millions before a single part ships, and over 80% of it spent before anyone knows whether the silicon works. Click through the phases and watch where the money goes.' },
+  { id: 't8t1', tab: 'teams', title: 'See who actually builds it', body: 'Verification is the largest discipline on almost every programme — the people who prove the chip works outnumber the people who make it work. That ratio is why respins are rare rather than routine.' },
+  { id: 't8t2', tab: 'teams', title: 'Switch to the AI accelerator', body: 'Watch software climb to second place, rivalling design. A compiler team that cannot extract the performance the architecture promised leaves you with a benchmark nobody can reproduce.' },
   { id: 't8z2', tab: 'business', title: 'Find the node that kills the product', body: 'Pick the IoT SoC market, then walk down the node table. There is a node above which the programme never pays back — not because the chip is worse, but because the NRE cannot be amortised over the units the market will absorb.' },
   { id: 't8y1', tab: 'ethics', title: 'See why care is not enough', body: 'Seven hundred steps and yield multiplies: every step must succeed 99.9986% of the time to finish 99 wafers in 100. That is fourteen parts per million, per step. No amount of attention delivers that, which is the entire case for procedure over heroics.' },
   { id: 't8y2', tab: 'ethics', title: 'Follow a missed defect downstream', body: 'The rule of ten: each stage a defect escapes to multiplies the cost of fixing it by roughly ten. Every gate someone is tempted to skip is orders of magnitude cheaper than the one after it.' },
@@ -51,7 +53,7 @@ export const TOUR = [
   { id: 't12b', tab: 'unsolved', title: 'Read the dates, not the descriptions', body: 'Several of these bars are longer than the careers of the people working on them. Tunnel FETs have delivered steep slope and useless on-current since 2004; the memory wall was named in 1994 and has widened every year since.' },
   { id: 't12c', tab: 'unsolved', title: 'Note what "contained" means', body: 'Some problems are not solved, they are paid for — every generation, forever, unless something changes. EUV stochastics cost dose on the most expensive tool in the building, on every wafer, and no amount of cleanliness helps.' },
   { id: 't12d', tab: 'acronyms', title: 'Look anything up', body: 'Search covers the acronym, its expansion and its description — so a plain-English phrase works. Type "short channels leak" and it finds DIBL. Most entries link to the tab that explains the thing properly rather than in a sentence.' },
-  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Fifty-three questions. Everything needed to answer them is on the other thirteen tabs.' },
+  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Fifty-five questions. Everything needed to answer them is on the other thirteen tabs.' },
 ]
 
 export const QUIZ = [
@@ -216,6 +218,18 @@ export const QUIZ = [
     opts: ['Older fabs are already paid for', 'NRE at the leading edge cannot be amortised over the volume most markets absorb', 'Older nodes yield better', 'Leading-edge capacity is unavailable'],
     a: 1,
     why: 'Moving from 28 nm to 3 nm multiplies mask cost more than tenfold and engineering cost more than tenfold again. For a low-price part there is a node above which the programme never pays back — the older node genuinely makes the better product.',
+  },
+  {
+    q: 'Which discipline is the largest on a typical chip programme?',
+    opts: ['RTL design', 'Verification', 'Physical implementation', 'Software'],
+    a: 1,
+    why: 'Verification routinely runs two to three times the size of the design team — the people who prove the chip works outnumber the people who make it work. That ratio is exactly why respins are the exception rather than the rule, and it looks absurd right up until you price a respin.',
+  },
+  {
+    q: 'On an AI accelerator, which team can rival the RTL team in size?',
+    opts: ['Physical design', 'The compiler team', 'Analog design', 'Test engineering'],
+    a: 1,
+    why: 'The hardware only delivers the performance the architecture promised if a compiler can map real workloads onto it. Silicon without that is a benchmark nobody can reproduce, which is why software is a first-class hardware cost rather than something that follows.',
   },
   {
     q: 'At what point in a chip programme has most of the money already been spent?',

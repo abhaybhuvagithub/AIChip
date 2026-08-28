@@ -952,3 +952,36 @@ wrong.
   visible. I regressed it to the old pattern to confirm three checks fired.
 - **Two older checks failed, correctly**, because navigation and the drawer
   override had both moved. Repointed rather than deleted.
+
+---
+
+## Twenty-ninth pass: teams and roles
+
+The business tab priced a programme in engineer-years, which is an abstraction
+that hides the actual answer: a few hundred named people with very different
+training, engaged in a specific order.
+
+- **Derive the headcount, do not type it.** Team size comes from the same
+  engineer-year figures the NRE model uses, so changing the node on one tab
+  changes the team on the other. A check asserts every project archetype uses a
+  node the cost model actually knows.
+- **A missing key silently became zero.** The automotive MCU archetype is a
+  40 nm part, and 40 nm was not in the node cost table — so it came out with a
+  team of nobody. Zero is worse than an error here because it looks like an
+  answer. The lookup now returns null, the table gained the missing node, and
+  two checks would catch it recurring. I renamed a node to confirm both fired.
+- **Two facts drive the whole tab and both surprise people.** Verification is
+  the largest discipline, routinely two to three times the design team — the
+  people who prove the chip works outnumber the people who make it work, which
+  is exactly why respins are rare. And on an accelerator the compiler team
+  rivals the RTL team, because hardware whose performance no compiler can
+  extract is a benchmark nobody can reproduce.
+- **Archetype tilts must actually distinguish.** An analog power IC and an AI
+  accelerator are not the same team wearing different badges, so shares are
+  tilted per project and renormalised — otherwise a tilt quietly adds or
+  removes people. Checks assert the accelerator really is software-heavy and
+  the analog IC really is analog-dominated, rather than merely that the tilts
+  exist.
+- **Peak is not average.** A programme ramps, peaks in physical design and
+  verification closure, then sheds. Quoting the average as the team you need to
+  hire understates the peak by about half, so both are shown.

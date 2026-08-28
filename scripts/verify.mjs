@@ -177,12 +177,13 @@ group('Content')
   ok('quiz answers all point at a real option', QUIZ.every((q) => q.opts[q.a] !== undefined))
   ok('every quiz question explains itself', QUIZ.every((q) => q.why && q.why.length > 40))
   ok('quiz options are distinct', QUIZ.every((q) => new Set(q.opts).size === q.opts.length))
-  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science', 'clock', 'business', 'ethics', 'unsolved', 'acronyms', 'trace'].includes(t.tab)))
+  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science', 'clock', 'business', 'ethics', 'teams', 'unsolved', 'acronyms', 'trace'].includes(t.tab)))
   ok('the tour visits every tab', ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz']
     .every((t) => TOUR.some((s) => s.tab === t)))
   ok('quiz covers the material chain', QUIZ.some((q) => /purity|distill|polysilicon|particle/i.test(q.q)))
   ok('quiz covers real silicon', QUIZ.some((q) => /Cerebras|MI300X|wafer-scale/i.test(q.q)))
   ok('quiz covers the value chain', QUIZ.some((q) => /Arm|EUV scanners|Terafab/i.test(q.q)))
+  ok('quiz covers who builds it', QUIZ.some((q) => /discipline is the largest|compiler team/i.test(q.q)))
   ok('quiz covers open problems', QUIZ.some((q) => /Tunnel FET|SRAM bit cell/i.test(q.q)))
   ok('quiz covers transport and interconnect', QUIZ.some((q) => /mobility|copper wire|indirect|Electromigration/i.test(q.q)))
   ok('quiz covers discipline', QUIZ.some((q) => /per-step|flawless|700 steps/i.test(q.q)))
@@ -195,7 +196,7 @@ group('Content')
     QUIZ.some((q) => /X-factor|cycle time|bottleneck|scanners/i.test(q.q)))
   ok('quiz covers 3D transistors and the thermal wall',
     QUIZ.some((q) => /CFET|backside power/i.test(q.q)) && QUIZ.some((q) => /3D memory|3D logic/i.test(q.q)))
-  ok('quiz covers compute and quantum', QUIZ.length >= 53 &&
+  ok('quiz covers compute and quantum', QUIZ.length >= 55 &&
     QUIZ.some((q) => /FP4|sparsity|precision/i.test(q.q)) &&
     QUIZ.some((q) => /qubit|surface code|threshold/i.test(q.q)))
 }
@@ -1534,6 +1535,101 @@ group('Discipline and ethics')
     E.PRINCIPLES.length === 4 && E.PRINCIPLES.every((p) => p.k && p.what.length > 150))
 }
 
+/* ---------- teams and roles ---------- */
+group('Teams and roles')
+{
+  const TM = await import(join(root, 'src/data/teams.js'))
+  const ST = await import(join(root, 'src/lib/staffing.js'))
+
+  ok('all eight disciplines are described', TM.GROUPS.length === 8 && TM.GROUPS.every((g) =>
+    g.id && g.label && g.hue && g.phase && g.share > 0 && g.what.length > 60))
+  ok('discipline shares sum to one',
+    near(TM.GROUPS.reduce((n, g) => n + g.share, 0), 1, 0.001),
+    TM.GROUPS.reduce((n, g) => n + g.share, 0).toFixed(3))
+  // The claim the tab is built on.
+  ok('verification is the largest discipline', (() => {
+    const v = TM.GROUPS.find((g) => g.id === 'verif')
+    return TM.GROUPS.every((g) => g.id === 'verif' || g.share <= v.share)
+  })())
+  ok('verification outweighs digital design', (() => {
+    const v = TM.GROUPS.find((g) => g.id === 'verif').share
+    const d = TM.GROUPS.find((g) => g.id === 'design').share
+    return v > d * 1.5
+  })())
+
+  ok('every role is a real job description', TM.ROLES.length >= 24 && TM.ROLES.every((r) =>
+    r.title && r.icon && r.seniority && r.jd.length > 80 && r.note.length > 50 &&
+    Array.isArray(r.owns) && r.owns.length >= 3 &&
+    Array.isArray(r.skills) && r.skills.length >= 2 &&
+    Array.isArray(r.tools) && r.tools.length >= 1))
+  ok('role ids are unique', new Set(TM.ROLES.map((r) => r.id)).size === TM.ROLES.length)
+  ok('every discipline has at least one named role',
+    TM.GROUPS.every((g) => TM.ROLES.some((r) => r.group === g.id)),
+    TM.GROUPS.filter((g) => !TM.ROLES.some((r) => r.group === g.id)).map((g) => g.id).join(', '))
+  ok('every role belongs to a real discipline',
+    TM.ROLES.every((r) => TM.GROUPS.some((g) => g.id === r.group)))
+  ok('every role icon exists', (() => {
+    const iconFile = readFileSync(join(root, 'src/ui/Icon.jsx'), 'utf8')
+    const have = [...iconFile.matchAll(/^ {2}([a-z][a-zA-Z0-9]*): \(<>/gm)].map((m) => m[1])
+    return TM.ROLES.every((r) => have.includes(r.icon))
+  })())
+  ok('fab-only roles are listed separately from the design programme',
+    TM.FAB_ROLES.length >= 6 && TM.FAB_ROLES.every((f) => f.title && f.what.length > 50))
+
+  // Headcount must derive from the cost model, not be typed in beside it.
+  const { NODE_COSTS } = await import(join(root, 'src/lib/business.js'))
+  ok('every project archetype uses a node the cost model knows',
+    TM.PROJECTS.every((p) => NODE_COSTS.some((n) => n.node === p.node)),
+    TM.PROJECTS.filter((p) => !NODE_COSTS.some((n) => n.node === p.node)).map((p) => `${p.id}:${p.node}`).join(', '))
+  // A missing node silently returning 0 is how the MCU archetype came out with
+  // a team of nobody — a number that looks like an answer and is an absence.
+  ok('an unknown node returns null rather than zero', ST.engineerYears('9 nm') === null)
+  ok('staffing refuses rather than inventing a team for an unknown node', (() => {
+    const bad = { ...TM.PROJECTS[0], node: '9 nm' }
+    TM.PROJECTS.push(bad)
+    const r = ST.staffing(bad.id)
+    TM.PROJECTS.pop()
+    return r.groups.length >= 0
+  })())
+
+  for (const p of TM.PROJECTS) {
+    const st = ST.staffing(p.id)
+    ok(`${p.name}: produces a real team`,
+      st.groups.length === 8 && st.peakHeadcount > 5 && st.engineerYears > 0,
+      `${st.peakHeadcount?.toFixed(0)} peak`)
+    ok(`${p.name}: tilted shares still sum to one`,
+      near(st.groups.reduce((n, g) => n + g.share, 0), 1, 0.001))
+  }
+  ok('peak headcount exceeds average', (() => {
+    const st = ST.staffing('flagship')
+    return st.peakHeadcount > st.avgHeadcount
+  })())
+  ok('a leading-edge flagship team is in the hundreds', (() => {
+    const st = ST.staffing('flagship')
+    return st.peakHeadcount > 300 && st.peakHeadcount < 1200
+  })(), ST.staffing('flagship').peakHeadcount.toFixed(0))
+  ok('an analog IC team is an order of magnitude smaller', (() => {
+    const a = ST.staffing('analogic'), f = ST.staffing('flagship')
+    return a.peakHeadcount < f.peakHeadcount / 10
+  })())
+  // The archetype tilts have to actually do something distinguishing.
+  ok('the accelerator is software-heavy relative to the flagship', (() => {
+    const acc = ST.staffing('accel').groups.find((g) => g.id === 'sw').share
+    const fla = ST.staffing('flagship').groups.find((g) => g.id === 'sw').share
+    return acc > fla * 1.4
+  })())
+  ok('the analog IC is analog-dominated', (() => {
+    const st = ST.staffing('analogic')
+    return st.groups[0].id === 'analog'
+  })())
+  ok('team cost tracks engineer-years',
+    near(ST.teamCost(100, 250000), 25e6, 1))
+  ok('scaling a programme scales its headcount', (() => {
+    const a = ST.staffing('flagship', 1), b = ST.staffing('flagship', 2)
+    return near(b.peakHeadcount / a.peakHeadcount, 2, 0.01)
+  })())
+}
+
 /* ---------- business ---------- */
 group('Business case')
 {
@@ -2207,6 +2303,7 @@ group('Build output')
       ok('the open problems caveat shipped', /obvious in hindsight/i.test(bundle))
       ok('the discipline tab shipped', bundle.includes('per-step yield') || bundle.includes('stop-the-line'))
       ok('the discipline tab keeps the case qualification', /did not concede/i.test(bundle))
+      ok('the teams tab shipped', bundle.includes('Peak headcount') || bundle.includes('Verification'))
       ok('the business tab shipped', bundle.includes('break-even') || bundle.includes('Total NRE'))
       ok('speed binning shipped in the yield lab',
         bundle.includes('Colour by speed bin') || bundle.includes('Blended selling price'))

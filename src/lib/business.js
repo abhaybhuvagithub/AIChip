@@ -24,6 +24,7 @@ export const NODE_COSTS = [
   { node: '180 nm', maskUsd: 0.12e6, designUsd: 5e6, engineerYears: 25, waferUsd: 800 },
   { node: '90 nm', maskUsd: 0.8e6, designUsd: 20e6, engineerYears: 80, waferUsd: 1600 },
   { node: '65 nm', maskUsd: 1.5e6, designUsd: 30e6, engineerYears: 120, waferUsd: 2000 },
+  { node: '40 nm', maskUsd: 2.0e6, designUsd: 40e6, engineerYears: 155, waferUsd: 2500 },
   { node: '28 nm', maskUsd: 2.5e6, designUsd: 50e6, engineerYears: 190, waferUsd: 3000 },
   { node: '16 nm', maskUsd: 6e6, designUsd: 100e6, engineerYears: 360, waferUsd: 6000 },
   { node: '7 nm', maskUsd: 12e6, designUsd: 300e6, engineerYears: 900, waferUsd: 10000 },

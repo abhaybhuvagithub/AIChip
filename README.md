@@ -24,11 +24,12 @@ Five tabs:
 | **3D & beyond** | The architecture ladder with drawn cross-sections — planar, FinFET, nanosheet, forksheet, CFET, 2D-material channel — plus backside power delivery, four levels of circuit stacking, and an interactive thermal-wall calculator. Every entry carries a status badge, because "demonstrated at IEDM" and "in a product" are five to ten years apart. |
 | **Silicon** | Twenty real parts — Apple A-series and M-series, Google TPU v1 through the eighth generation, NVIDIA H100/Blackwell/Rubin, AMD MI300X, Cerebras WSE-3 — drawn at true relative area on one 300 mm wafer. Load any of them into the yield lab. |
 | **Discipline** | Why "flawless" is the wrong target, and what the right one is. The arithmetic that makes discipline compulsory — 700 steps at 99.9986% each — plus nine engineering disciplines, the rule of ten on escape cost, test-coverage escapes against real DPPM targets, and eight domains where the ethical judgement is genuine. |
+| **Teams & roles** | Who actually builds a chip — eight disciplines, 25 named roles with responsibilities, skills and tools, and a headcount model derived from the same engineer-year figures the NRE uses. Verification is the largest discipline; on an accelerator, software rivals design. |
 | **0 → market** | The business case: seven phases from concept to ramp, an NRE build-up by node, and the one calculation that decides whether a chip exists — break-even units = NRE ÷ margin. Plus a lifetime cash-flow chart showing the four-year hole before the climb. Unit cost comes from the die you configured in the yield lab. |
 | **Value chain** | The seven layers that actually produce a chip, and how few suppliers each has. Arm's licensing model and its 2026 move into shipping its own silicon. Three business models — IDM, fabless plus foundry, and the vertical re-integration Terafab is betting on. A fab-scale calculator that turns wafer starts per month into chips, silicon and compute per year. |
 | **Open problems** | Eighteen things nobody has solved, each with what has been tried, why it is still open, what would count as a solution, and — the honest part — how long it has been open. Several bars on the chart are longer than the careers of the people working on them. |
 | **Acronyms** | 172 acronyms with expansion, a written meaning, and a link to the tab that explains it properly. Search covers all three fields, so "short channels leak" finds DIBL. |
-| **Quiz** | Fifty-three questions, self-explaining. |
+| **Quiz** | Fifty-five questions, self-explaining. |
 
 ## What is actually modelled
 
@@ -56,6 +57,9 @@ Five tabs:
 - **Rigour** — per-step yield required for a target line yield over N steps,
   the DPMO-to-sigma conversion on the standard 1.5σ-shift convention, and test
   escapes against market DPPM targets.
+- **Staffing** — headcount per discipline from the node's engineer-year figure,
+  tilted per project archetype and renormalised, with peak distinguished from
+  average.
 - **Business case** — NRE built up from mask set, engineer-years, EDA and IP
   by node; break-even volume; an S-curve ramp with annual price erosion and
   yield learning; and quarter-by-quarter cumulative cash flow to a payback

@@ -14,6 +14,7 @@ import Clock from './ui/Clock.jsx'
 import ValueChain from './ui/ValueChain.jsx'
 import Business from './ui/Business.jsx'
 import Ethics from './ui/Ethics.jsx'
+import Teams from './ui/Teams.jsx'
 import Unsolved from './ui/Unsolved.jsx'
 import Acronyms from './ui/Acronyms.jsx'
 import Trace from './ui/Trace.jsx'
@@ -47,6 +48,7 @@ const TABS = [
 
   { id: 'economics', label: 'Economics', icon: 'money', group: 'The business' },
   { id: 'business', label: '0 → market', icon: 'iplicense', group: 'The business' },
+  { id: 'teams', label: 'Teams & roles', icon: 'ipnoc', group: 'The business' },
   { id: 'ethics', label: 'Discipline', icon: 'shield', group: 'The business' },
 
   { id: 'unsolved', label: 'Open problems', icon: 'route', group: 'Check' },
@@ -259,6 +261,7 @@ export default function App() {
         {tab === 'silicon' && <Silicon cfg={cfg} patch={patch} goTab={go} />}
         {tab === 'chain' && <ValueChain cfg={cfg} />}
         {tab === 'business' && <Business cfg={cfg} goTab={go} />}
+        {tab === 'teams' && <Teams goTab={go} />}
         {tab === 'ethics' && <Ethics />}
         {tab === 'unsolved' && <Unsolved />}
         {tab === 'acronyms' && <Acronyms goTab={go} />}
