@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { newCompany, runToEnd, MARKETS, POLICY } from '../lib/javy.js'
+import { newCompany, runToEnd, MARKETS, POLICY } from '../lib/operate.js'
 import { fmt } from '../lib/fab.js'
 import Icon from './Icon.jsx'
 
@@ -36,13 +36,13 @@ function Trace({ log }) {
       <text x={PL - 8} y={y(0) + 4} textAnchor="end" fill="var(--muted)"
         style={{ fontSize: 9.5, fontFamily: 'var(--font-mono)' }}>0</text>
       <text x={W / 2} y={H - 6} textAnchor="middle" fill="var(--muted)" style={{ fontSize: 9.5 }}>
-        Quarters — shaded where Javy held shipment
+        Quarters — shaded where the operator held shipment
       </text>
     </svg>
   )
 }
 
-export default function Javy({ goTab }) {
+export default function Operate({ goTab }) {
   const [market, setMarket] = useState('automotive')
   const [capital, setCapital] = useState(340)
   const [override, setOverride] = useState(false)
@@ -67,27 +67,29 @@ export default function Javy({ goTab }) {
 
   return (
     <div>
-      <div className="eyebrow">Javy</div>
+      <div className="eyebrow">Run &amp; operate</div>
       <h1 className="title">An operator you can read.</h1>
       <p className="lede">
-        Javy runs a chip company. Each quarter it observes the state, applies a stated policy, and
+        Run &amp; Operate runs a chip company. Each quarter it observes the state, applies a stated policy, and
         acts — releasing wafers, booking capacity, pricing, buying yield and test coverage, and
         deciding whether the parts are good enough to ship at all. Then you can override it and see
         what that costs.
       </p>
 
       <div className="card" style={{ borderColor: 'var(--accent)', marginTop: 16 }}>
-        <div className="eyebrow">What Javy is, plainly</div>
+        <div className="eyebrow">What this is, plainly</div>
         <p style={{ marginTop: 8, fontSize: 'var(--fs-prose)', lineHeight: 1.62 }}>
-          Javy is <b>not a language model</b>, and there is none behind it. This site is static —
-          no server, no API key, nothing to call, and a build check that asserts as much. Javy is a
-          deterministic policy engine: it observes, applies the six rules below, and acts.
+          This is <b>not a language model</b>, and there is none behind it. The site is static —
+          no server, no API key, nothing to call, and a build check that asserts as much. Run &amp;
+          Operate is a deterministic policy engine: it observes, applies the six rules below, and
+          acts.
         </p>
         <p style={{ marginTop: 10, fontSize: 'var(--fs-prose)', lineHeight: 1.62 }}>
           That is a smaller claim than the marketing version and a better property. Every rule is
           written out, in order, and the same state always produces the same decision with the same
           stated reason. You cannot say that of a language model — and for something running a
-          factory, legibility beats eloquence. Javy can also fail, and does. Those runs are left in.
+          factory, legibility beats eloquence. The operator can also fail, and does. Those runs are
+          left in.
         </p>
       </div>
 
@@ -216,7 +218,7 @@ export default function Javy({ goTab }) {
       <div className="tbl-wrap">
         <table className="tbl">
           <thead>
-            <tr><th>Q</th><th>Cash</th><th>D₀</th><th>Coverage</th><th>DPPM</th><th>Sold</th><th>Price</th><th style={{ width: '38%' }}>What Javy did, and why</th></tr>
+            <tr><th>Q</th><th>Cash</th><th>D₀</th><th>Coverage</th><th>DPPM</th><th>Sold</th><th>Price</th><th style={{ width: '38%' }}>What it did, and why</th></tr>
           </thead>
           <tbody>
             {result.log.map((l) => (

@@ -1059,14 +1059,14 @@ that quantitatively.
 
 ---
 
-## Thirty-second pass: Javy
+## Thirty-second pass: Run & Operate
 
 Asked for a Jarvis-like system that not only builds the business but runs it.
 The honest constraint came first: this site is static, there is no server and
-no key, and a check asserts as much. So Javy could not be a language model —
+no key, and a check asserts as much. So it could not be a language model —
 and saying so plainly turned out to be the strongest thing about it.
 
-- **State the limitation, then make it the feature.** Javy is a deterministic
+- **State the limitation, then make it the feature.** It is a deterministic
   policy engine whose six rules are written out and shown before you run it.
   Same state, same decision, same stated reason, every time. That is a smaller
   claim than the marketing version and a better property for something running
@@ -1093,3 +1093,25 @@ and saying so plainly turned out to be the strongest thing about it.
 - **Leave the failures in.** Thin capital kills the company while it holds the
   gate. There is a capital cliff, not a slope. An operator that always wins
   teaches nothing about operating.
+
+---
+
+## Thirty-third pass: the rename
+
+Javy became Run & Operate. Worth recording only for the part that is easy to
+get wrong.
+
+- **A rename is a refactor, not a find-and-replace.** Module, component, tab id,
+  smoke harness, check group, check paths, tour steps, and the prose inside the
+  tab — which needed rewording rather than substituting, because a name that
+  works as a heading reads badly mid-sentence. "Run & Operate" is the thing;
+  "the operator" is how it is referred to in a paragraph.
+- **Renaming a tab renames its URL.** An old `#tab=javy` link would have fallen
+  through the validity check and landed silently on a different tab, which reads
+  as the link being broken rather than moved. An alias map fixes it in a line,
+  and two checks now assert both that the alias exists and that it resolves
+  *before* the tab is validated — the order being the part that would silently
+  stop working.
+- **The suite's own meta-check paid off immediately.** Because every module
+  under `src/lib` must be exercised, a rename that left the checks pointing at
+  `javy.js` would have failed rather than quietly testing nothing.

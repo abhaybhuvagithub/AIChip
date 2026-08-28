@@ -1,18 +1,18 @@
-// Javy — an autonomous operator for a chip company.
+// Run & Operate — an autonomous operator for a chip company.
 //
-// WHAT THIS IS, PLAINLY. Javy is not a language model and there is none behind
-// it. This site is static: no server, no API key, nothing to call. Javy is a
-// deterministic policy engine that observes the company's state each quarter,
-// applies a stated set of rules, and acts.
+// WHAT THIS IS, PLAINLY. This is not a language model and there is none behind
+// it. The site is static: no server, no API key, nothing to call. Run &
+// Operate is a deterministic policy engine that observes the company's state
+// each quarter, applies a stated set of rules, and acts.
 //
 // That is a weaker claim than the marketing version and a stronger property.
-// Every rule Javy follows is in POLICY below and is legible, auditable and
+// Every rule the operator follows is in POLICY below and is legible, auditable and
 // reproducible — the same state always produces the same decision, with the
 // same stated reason. You cannot say that of a language model, and for
 // something running a factory that matters more than eloquence.
 //
-// Javy can also fail. It runs out of cash, it over-books capacity, it holds
-// price too long. Those outcomes are left in rather than tuned away, because
+// The operator can also fail. It runs out of cash, it over-books capacity, it
+// holds price too long. Those outcomes are left in rather than tuned away, because
 // an operator that always wins teaches nothing about operating.
 
 import { computeRun } from './fab.js'
@@ -23,7 +23,7 @@ import { escapes as escapeModel } from './rigor.js'
  * Markets, and what a defect costs in each.
  *
  * This exists because the quality gate was dead code without it. At a consumer
- * DPPM target the escape rate never breaches, so Javy's most important rule
+ * DPPM target the escape rate never breaches, so the operator's most important rule
  * never fired and could not be tested or learned from. In automotive the gate
  * binds hard and early — which is the real story of that market, and the point
  * at which holding the line becomes visibly expensive.
@@ -37,7 +37,7 @@ export const MARKETS = [
     note: 'A failure stops a machine someone is paid to keep running, and they remember which supplier it was.' },
   { id: 'automotive', name: 'Automotive', dppmTarget: 1, escapeUsd: 40000, asp: 95,
     tolerance: 60, cash: 340e6,
-    note: 'The stated ambition is zero defects. Javy will hold shipment for quarters rather than breach it — and a supplier that ships escapes here does not get a second programme.' },
+    note: 'The stated ambition is zero defects. The operator will hold shipment for quarters rather than breach it — and a supplier that ships escapes here does not get a second programme.' },
 ]
 
 /** The starting position. A funded fabless startup with one product. */
@@ -63,7 +63,7 @@ export function newCompany({
     // Test coverage is the second lever on escape rate, and the one that makes
     // an automotive target reachable at all. An earlier version derived DPPM
     // from defect density alone, which made the 1 DPPM gate unreachable no
-    // matter how long Javy held shipment — the gate could never open, so
+    // matter how long the operator held shipment — the gate could never open, so
     // holding it was always fatal. That was a broken model, not a hard lesson.
     testCoverage: 0.98, testSpend: 0,
     yieldSpend: 0, alive: true, endedWhy: null,

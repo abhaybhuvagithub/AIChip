@@ -177,7 +177,7 @@ group('Content')
   ok('quiz answers all point at a real option', QUIZ.every((q) => q.opts[q.a] !== undefined))
   ok('every quiz question explains itself', QUIZ.every((q) => q.why && q.why.length > 40))
   ok('quiz options are distinct', QUIZ.every((q) => new Set(q.opts).size === q.opts.length))
-  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science', 'clock', 'business', 'ethics', 'teams', 'unsolved', 'acronyms', 'trace', 'ai', 'javy'].includes(t.tab)))
+  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science', 'clock', 'business', 'ethics', 'teams', 'unsolved', 'acronyms', 'trace', 'ai', 'operate'].includes(t.tab)))
   ok('the tour visits every tab', ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz']
     .every((t) => TOUR.some((s) => s.tab === t)))
   ok('quiz covers the material chain', QUIZ.some((q) => /purity|distill|polysilicon|particle/i.test(q.q)))
@@ -256,9 +256,9 @@ group('3D and beyond')
     BEYOND_CMOS.every((b) => b.status === 'research'))
 }
 
-group('Javy')
+group('Run & Operate')
 {
-  const J = await import(join(root, 'src/lib/javy.js'))
+  const J = await import(join(root, 'src/lib/operate.js'))
 
   ok('the policy is written out and ordered',
     J.POLICY.length >= 6 && J.POLICY.every((p) => p.id && p.name && p.icon &&
@@ -361,13 +361,13 @@ group('Javy')
   })())
 
   // The claim on the tab itself.
-  ok('the tab states plainly that Javy is not a language model', (() => {
-    const ui = readFileSync(join(root, 'src/ui/Javy.jsx'), 'utf8')
+  ok('the tab states plainly that it is not a language model', (() => {
+    const ui = readFileSync(join(root, 'src/ui/Operate.jsx'), 'utf8')
     return /not a language model/i.test(ui) && /no server, no API key/i.test(ui)
   })())
-  ok('no model endpoint or key is introduced anywhere in Javy', (() => {
-    const lib = readFileSync(join(root, 'src/lib/javy.js'), 'utf8')
-    const ui = readFileSync(join(root, 'src/ui/Javy.jsx'), 'utf8')
+  ok('no model endpoint or key is introduced by the operator', (() => {
+    const lib = readFileSync(join(root, 'src/lib/operate.js'), 'utf8')
+    const ui = readFileSync(join(root, 'src/ui/Operate.jsx'), 'utf8')
     return !/api[._-]?key|fetch\(|openai|anthropic\.com/i.test(lib + ui)
   })())
 }
@@ -2384,6 +2384,15 @@ group('Themes and contrast')
   // follows it rather than pinning the old direct setter.
   ok('the drawer closes after a destination is chosen',
     /go\(t\.id\); setNavOpen\(false\)/.test(app2))
+  // Renaming a tab renames its URL, and an old link would otherwise land
+  // silently on a different tab.
+  ok('a renamed tab keeps an alias so old links still resolve',
+    /TAB_ALIASES/.test(app2) && /javy: 'operate'/.test(app2))
+  ok('aliases resolve before the tab is validated', (() => {
+    const i = app2.indexOf('TAB_ALIASES[hash?.tab]')
+    const j = app2.indexOf('TABS.some((t) => t.id === wanted)')
+    return i > -1 && j > i
+  })())
   ok('the current section is marked for assistive technology',
     /aria-current=\{tab === t\.id \? 'page' : undefined\}/.test(app2))
   // The per-element override was folded into the single authoritative
@@ -2687,8 +2696,8 @@ group('Build output')
       ok('no API key or endpoint is baked into the bundle',
         !/sk-ant|api\.anthropic\.com|Bearer /.test(bundle))
       ok('the fab simulation shipped', bundle.includes('X-factor') || bundle.includes('bottleneck'))
-      ok('the Javy operator shipped', bundle.includes('Quality gate first') || bundle.includes('Designed out'))
-      ok('Javy ships no API key or endpoint',
+          ok('the operator tab shipped', bundle.includes('Quality gate first') || bundle.includes('Designed out'))
+      ok('the operator ships no API key or endpoint',
         !/api[._-]?key|api\.openai|api\.anthropic/i.test(bundle))
       ok('the AI chips tab shipped', bundle.includes('roofline') || bundle.includes('Ridge point'))
       ok('the 3D integration maths shipped',
