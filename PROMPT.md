@@ -1018,3 +1018,41 @@ bonding changed what a stacked part can be — was asserted rather than shown.
   one at a time, which is the wrong way to present a progression. Side by side,
   the gated-face count reads as a sequence and the last two visibly stop being
   about the transistor at all.
+
+---
+
+## Thirty-first pass: AI chips, and a hole in the suite
+
+The site listed real accelerators and counted their operations, and never said
+what is architecturally different about them. The answer is not "more
+multipliers" — it is how they are fed, and the roofline model is how you say
+that quantitatively.
+
+- **One chart carries the tab.** Arithmetic intensity against attainable
+  throughput, with real kernels plotted. The ridge point of an H100-class part
+  is about 295 operations per byte, and single-batch decode has an intensity of
+  one — so it uses roughly a three-hundredth of the arithmetic on the chip. The
+  multipliers are not slow, they are idle, and no amount of extra arithmetic
+  helps. Every optimisation in the field is an attempt to move right along that
+  axis.
+- **Then the constraint people actually hit.** The KV cache exceeds the model
+  itself at long context and high concurrency, and serving capacity turns out
+  to be a memory-capacity question. Single-stream decode throughput is
+  bandwidth divided by model size — the datasheet FLOPS figure does not enter
+  the calculation at all.
+- **The real finding of this pass was in the test suite.** I regressed the
+  roofline from `min` to `max` — an inversion of the entire model — and the
+  suite passed. The cause: an editing anchor from the previous pass did not
+  match, `str.replace` silently did nothing, and thirty checks I believed
+  existed were never inserted. **Absent checks pass by definition**, which
+  makes this the most dangerous failure mode a suite has.
+- **So the suite now checks itself.** Every module under `src/lib` and
+  `src/data` must be exercised somewhere. It found `speech.js` on its first
+  run — shipped a dozen passes ago with no coverage at all — and I added
+  checks for it. I also dropped in a scratch module to confirm it names the
+  offender.
+- **Two textual checks that were wrong.** Both attempts at "no unguarded window
+  access" flagged perfectly safe code, because a lazily-evaluated arrow body
+  reads identically to a top-level statement in a regex. Replaced with a
+  behavioural check: call every export outside a browser and assert none
+  throws. Test the property, not the prose.

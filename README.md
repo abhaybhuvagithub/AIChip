@@ -19,6 +19,7 @@ Five tabs:
 | **The science** | Eleven sections of physics, computed live: the MOSFET I–V family, the subthreshold floor with a temperature slider, gate tunnelling and why hafnium replaced silicon dioxide, Rayleigh optics, EUV photon shot noise, dopant fluctuation, why Dennard scaling ended — then why silicon won despite losing on mobility, carrier transport and Matthiessen's rule, short-channel effects and the natural length, the copper resistivity wall, and the four ways silicon wears out. |
 | **Clock** | Why frequency stopped in 2005 and the transistors had nothing to do with it. A log ladder from the 740 kHz Intel 4004 to 1.5 THz device f_max, with processor clocks, radio carriers and single-device figures kept visually distinct. Turn the clock up and watch power, heat and signal reach fail in that order. |
 | **Nodes** | 180 nm to 2 nm, with the transistor architecture that made each generation possible, and a drawn cross-section showing how many sides of the channel the gate controls. |
+| **AI chips** | What makes an accelerator an accelerator, built around the roofline model. Arithmetic intensity against attainable throughput with real kernels plotted, KV cache and weight footprint maths, the energy cost of moving a byte versus computing on it, five architectural bets, and three workloads that want three different chips. |
 | **Compute** | Turns the die you configured into operations per second, and climbs from one die to a 100,000-die cluster. Shows why headline throughput outran Moore's law: precision and sparsity, not density. |
 | **Quantum** | A surface code resource calculator — drag the physical error rate and watch the qubit count go vertical at threshold — plus five hardware modalities and a side-by-side of classical against quantum fabrication. |
 | **3D & beyond** | The architecture ladder with all six cross-sections side by side, then the arithmetic: bonding pitch against connection density and where the constraint flips from pins to power, wafer-to-wafer versus die-to-wafer stack yield, what backside power delivery buys in millivolts of droop, and the thermal wall. Every entry carries a status badge, because "demonstrated at IEDM" and "in a product" are five to ten years apart. |
@@ -29,7 +30,7 @@ Five tabs:
 | **Value chain** | The seven layers that actually produce a chip, and how few suppliers each has. Arm's licensing model and its 2026 move into shipping its own silicon. Three business models — IDM, fabless plus foundry, and the vertical re-integration Terafab is betting on. A fab-scale calculator that turns wafer starts per month into chips, silicon and compute per year. |
 | **Open problems** | Eighteen things nobody has solved, each with what has been tried, why it is still open, what would count as a solution, and — the honest part — how long it has been open. Several bars on the chart are longer than the careers of the people working on them. |
 | **Acronyms** | 172 acronyms with expansion, a written meaning, and a link to the tab that explains it properly. Search covers all three fields, so "short channels leak" finds DIBL. |
-| **Quiz** | Fifty-eight questions, self-explaining. |
+| **Quiz** | Sixty-one questions, self-explaining. |
 
 ## What is actually modelled
 
@@ -86,6 +87,9 @@ Five tabs:
   Poisson photon statistics per feature.
 - **Cell footprint** — relative standard-cell area per architecture at
   iso-node, planar as baseline, from vendor and imec publications.
+- **Roofline** — ridge point, attainable throughput as the minimum of the
+  compute and memory limits, GEMM arithmetic intensity, KV cache sizing,
+  memory-bound decode throughput and transformer FLOP rules of thumb.
 - **3D integration** — connection density as the inverse square of bonding
   pitch, interface bandwidth under both the pin limit and the power limit,
   wafer-to-wafer versus die-to-wafer stack yield, standard-cell area from track

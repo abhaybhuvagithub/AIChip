@@ -177,12 +177,13 @@ group('Content')
   ok('quiz answers all point at a real option', QUIZ.every((q) => q.opts[q.a] !== undefined))
   ok('every quiz question explains itself', QUIZ.every((q) => q.why && q.why.length > 40))
   ok('quiz options are distinct', QUIZ.every((q) => new Set(q.opts).size === q.opts.length))
-  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science', 'clock', 'business', 'ethics', 'teams', 'unsolved', 'acronyms', 'trace'].includes(t.tab)))
+  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science', 'clock', 'business', 'ethics', 'teams', 'unsolved', 'acronyms', 'trace', 'ai'].includes(t.tab)))
   ok('the tour visits every tab', ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz']
     .every((t) => TOUR.some((s) => s.tab === t)))
   ok('quiz covers the material chain', QUIZ.some((q) => /purity|distill|polysilicon|particle/i.test(q.q)))
   ok('quiz covers real silicon', QUIZ.some((q) => /Cerebras|MI300X|wafer-scale/i.test(q.q)))
   ok('quiz covers the value chain', QUIZ.some((q) => /Arm|EUV scanners|Terafab/i.test(q.q)))
+  ok('quiz covers AI accelerators', QUIZ.some((q) => /arithmetic intensity|single token|bytes per weight/i.test(q.q)))
   ok('quiz covers 3D integration', QUIZ.some((q) => /hybrid bond|wafer-to-wafer/i.test(q.q)))
   ok('quiz covers who builds it', QUIZ.some((q) => /discipline is the largest|compiler team/i.test(q.q)))
   ok('quiz covers open problems', QUIZ.some((q) => /Tunnel FET|SRAM bit cell/i.test(q.q)))
@@ -197,7 +198,7 @@ group('Content')
     QUIZ.some((q) => /X-factor|cycle time|bottleneck|scanners/i.test(q.q)))
   ok('quiz covers 3D transistors and the thermal wall',
     QUIZ.some((q) => /CFET|backside power/i.test(q.q)) && QUIZ.some((q) => /3D memory|3D logic/i.test(q.q)))
-  ok('quiz covers compute and quantum', QUIZ.length >= 58 &&
+  ok('quiz covers compute and quantum', QUIZ.length >= 61 &&
     QUIZ.some((q) => /FP4|sparsity|precision/i.test(q.q)) &&
     QUIZ.some((q) => /qubit|surface code|threshold/i.test(q.q)))
 }
@@ -253,6 +254,116 @@ group('3D and beyond')
     BEYOND_CMOS.length >= 4 && BEYOND_CMOS.every((b) => b.name && b.idea && b.why && b.honest.length > 40))
   ok('no beyond-CMOS option is claimed as production',
     BEYOND_CMOS.every((b) => b.status === 'research'))
+}
+
+group('AI chips')
+{
+  const RF = await import(join(root, 'src/lib/roofline.js'))
+  const AC = await import(join(root, 'src/data/aichips.js'))
+  const H100 = { peakFlops: 989e12, bandwidthBps: 3.35e12 }
+
+  ok('the ridge point is peak divided by bandwidth',
+    near(RF.ridgePoint(H100), 989 / 3.35, 0.01), RF.ridgePoint(H100).toFixed(0))
+  ok('a modern accelerator needs hundreds of ops per byte to saturate',
+    RF.ridgePoint(H100) > 200 && RF.ridgePoint(H100) < 400)
+  ok('zero bandwidth gives an infinite ridge rather than a crash',
+    RF.ridgePoint({ peakFlops: 1e12, bandwidthBps: 0 }) === Infinity)
+
+  // The roofline is a MIN of the two limits. Writing max here inverts the
+  // whole model while still returning plausible-looking teraflops.
+  ok('roofline takes the lesser of the two limits',
+    near(RF.roofline({ ...H100, intensity: 10 }).attainable, 10 * 3.35e12, 1e6))
+  ok('above the ridge you are compute-bound and capped at peak', (() => {
+    const r = RF.roofline({ ...H100, intensity: 5000 })
+    return r.bound === 'compute' && near(r.attainable, 989e12, 1e6)
+  })())
+  ok('below the ridge you are memory-bound and below peak', (() => {
+    const r = RF.roofline({ ...H100, intensity: 5 })
+    return r.bound === 'memory' && r.attainable < 989e12 * 0.05
+  })())
+  ok('utilisation never exceeds one',
+    [0.1, 1, 10, 100, 1000, 1e5].every((i) => RF.roofline({ ...H100, intensity: i }).utilisation <= 1))
+  ok('at exactly the ridge, both limits agree',
+    near(RF.roofline({ ...H100, intensity: RF.ridgePoint(H100) }).utilisation, 1, 1e-9))
+
+  ok('single-batch decode uses well under one percent of the chip',
+    RF.roofline({ ...H100, intensity: 1 }).utilisation < 0.01,
+    (RF.roofline({ ...H100, intensity: 1 }).utilisation * 100).toFixed(2) + '%')
+  ok('a large GEMM is the only common kernel above the ridge', (() => {
+    const above = RF.KERNELS.filter((k) => k.intensity >= RF.ridgePoint(H100))
+    return above.length === 1 && above[0].id === 'gemm4k'
+  })(), RF.KERNELS.filter((k) => k.intensity >= RF.ridgePoint(H100)).map((k) => k.id).join(', '))
+  ok('batching moves decode substantially up the roofline', (() => {
+    const one = RF.KERNELS.find((k) => k.id === 'decode').intensity
+    const many = RF.KERNELS.find((k) => k.id === 'batchdecode').intensity
+    return many > one * 20
+  })())
+  ok('every kernel is described and ordered by intensity',
+    RF.KERNELS.length >= 6 && RF.KERNELS.every((k) => k.name && k.icon && k.note.length > 40) &&
+    RF.KERNELS.every((k, i) => i === 0 || k.intensity <= RF.KERNELS[i - 1].intensity))
+
+  ok('GEMM intensity grows with matrix size',
+    RF.gemmIntensity(4096) > RF.gemmIntensity(512) * 4)
+  ok('a 4096-cube GEMM reaches the intensity claimed',
+    near(RF.gemmIntensity(4096), 1365, 5), RF.gemmIntensity(4096).toFixed(0))
+  ok('a zero-size GEMM returns zero rather than NaN', RF.gemmIntensity(0) === 0)
+
+  ok('70B at half precision is 140 GB of weights', near(RF.weightBytes(70, 2), 140e9, 1e6))
+  ok('quantising halves the footprint',
+    near(RF.weightBytes(70, 1) / RF.weightBytes(70, 2), 0.5, 1e-9))
+  ok('KV cache scales with length and with batch', (() => {
+    const base = RF.kvCacheBytes({ layers: 80, kvHeads: 8, headDim: 128, seqLen: 1000, batch: 1 }).totalBytes
+    const dbl = RF.kvCacheBytes({ layers: 80, kvHeads: 8, headDim: 128, seqLen: 2000, batch: 1 }).totalBytes
+    const bat = RF.kvCacheBytes({ layers: 80, kvHeads: 8, headDim: 128, seqLen: 1000, batch: 2 }).totalBytes
+    return near(dbl / base, 2, 1e-9) && near(bat / base, 2, 1e-9)
+  })())
+  ok('grouped-query attention cuts the cache proportionally', (() => {
+    const many = RF.kvCacheBytes({ layers: 80, kvHeads: 64, headDim: 128, seqLen: 4096 }).totalBytes
+    const few = RF.kvCacheBytes({ layers: 80, kvHeads: 8, headDim: 128, seqLen: 4096 }).totalBytes
+    return near(many / few, 8, 1e-9)
+  })())
+  ok('at long context and high batch the KV cache exceeds one accelerator',
+    RF.kvCacheBytes({ layers: 80, kvHeads: 8, headDim: 128, seqLen: 8192, batch: 32 }).totalBytes > 80e9,
+    (RF.kvCacheBytes({ layers: 80, kvHeads: 8, headDim: 128, seqLen: 8192, batch: 32 }).totalBytes / 1e9).toFixed(0) + ' GB')
+
+  ok('decode throughput is bandwidth divided by model size',
+    near(RF.decodeTokensPerSecond({ paramsB: 70, bandwidthBps: 3.35e12, efficiency: 1 }), 3.35e12 / 140e9, 0.01))
+  ok('halving the bytes per weight doubles decode throughput', (() => {
+    const a = RF.decodeTokensPerSecond({ paramsB: 70, bytesPerParam: 2, bandwidthBps: 3.35e12 })
+    const b = RF.decodeTokensPerSecond({ paramsB: 70, bytesPerParam: 1, bandwidthBps: 3.35e12 })
+    return near(b / a, 2, 1e-9)
+  })())
+  ok('training costs three times a forward pass per token',
+    near(RF.trainFlops(70, 0.001) / RF.inferFlops(70, 1e6), 3, 1e-6))
+
+  ok('reading from DRAM costs hundreds of times an FP16 multiply-add', (() => {
+    const mac = RF.ENERGY_PJ.find((e) => e.id === 'fp16').pj
+    return RF.ENERGY_PJ.find((e) => e.id === 'ddr').pj / mac > 500
+  })())
+  ok('the energy table is ordered and complete',
+    RF.ENERGY_PJ.length >= 7 && RF.ENERGY_PJ.every((e, i) => i === 0 || e.pj >= RF.ENERGY_PJ[i - 1].pj))
+  ok('on-chip memory is far cheaper than off-chip',
+    RF.ENERGY_PJ.find((e) => e.id === 'hbm').pj / RF.ENERGY_PJ.find((e) => e.id === 'sram8').pj > 20)
+
+  ok('five architectures, each with a genuine trade stated',
+    AC.ARCHITECTURES.length === 5 && AC.ARCHITECTURES.every((x) =>
+      x.name && x.icon && x.example && x.one && x.how.length > 100 &&
+      x.good.length > 60 && x.bad.length > 60 && x.verdict))
+  ok('in-memory computing is described honestly as not yet a product',
+    /not a product/i.test(AC.ARCHITECTURES.find((x) => x.id === 'inmem').verdict))
+  ok('three workloads, each with what binds it',
+    AC.WORKLOADS.length === 3 && AC.WORKLOADS.every((x) =>
+      x.shape.length > 60 && x.binds.length > 80 && x.memory && x.wants))
+  ok('decode is identified as bandwidth-bound',
+    /bandwidth/i.test(AC.WORKLOADS.find((x) => x.id === 'decode').binds))
+  ok('six levers, each explained', AC.LEVERS.length >= 6 && AC.LEVERS.every((l) => l.k && l.what.length > 80))
+  ok('every icon used exists', (() => {
+    const iconFile = readFileSync(join(root, 'src/ui/Icon.jsx'), 'utf8')
+    const have = [...iconFile.matchAll(/^ {2}([a-z][a-zA-Z0-9]*): \(<>/gm)].map((m) => m[1])
+    return AC.ARCHITECTURES.every((x) => have.includes(x.icon)) &&
+      AC.WORKLOADS.every((x) => have.includes(x.icon)) &&
+      RF.KERNELS.every((x) => have.includes(x.icon))
+  })())
 }
 
 group('3D integration')
@@ -2311,6 +2422,62 @@ group('Legibility')
   })())
 }
 
+/* ---------- speech ---------- */
+group('Speech')
+{
+  // Untested until the meta-check below noticed it had shipped for a dozen
+  // passes with no coverage at all. Everything here must degrade silently in a
+  // browser without the Web Speech API, and must never run during a build.
+  const SP = await import(join(root, 'src/lib/speech.js'))
+  const src = readFileSync(join(root, 'src/lib/speech.js'), 'utf8')
+
+  ok('capability detection does not assume a browser',
+    SP.canSpeak() === false && SP.canListen() === false)
+  ok('speaking with no support is a silent no-op rather than a throw', (() => {
+    try { SP.speak('test'); SP.stopSpeaking(); return true } catch { return false }
+  })())
+  ok('listening with no support returns null rather than throwing', (() => {
+    try { return SP.listenOnce({}) === null || SP.listenOnce({}) === undefined } catch { return false }
+  })())
+  ok('isSpeaking is false without support', SP.isSpeaking() === false)
+  ok('every entry point guards on capability first',
+    /canSpeak\(\)/.test(src) && /canListen\(\)/.test(src))
+  // Test the property, not the prose. Two textual attempts at "no unguarded
+  // window access" both flagged perfectly safe code — a lazily-evaluated arrow
+  // body reads identically to a top-level statement in a regex. What actually
+  // matters is behavioural: the module imports outside a browser, and every
+  // exported function can be called there without throwing.
+  ok('every export survives being called outside a browser', (() => {
+    for (const [name, fn] of Object.entries(SP)) {
+      if (typeof fn !== 'function') continue
+      try { fn(name === 'speak' ? 'x' : {}) } catch { return false }
+    }
+    return true
+  })(), Object.keys(SP).join(', '))
+  ok('the module imports cleanly outside a browser', typeof SP.speak === 'function')
+}
+
+/* ---------- meta ---------- */
+group('The suite itself')
+{
+  // A module can be added, shipped and used while its checks quietly do not
+  // exist — that happened to the roofline model, where an editing anchor
+  // failed to match and thirty checks were never inserted. Nothing caught it
+  // because absent checks pass by definition. This does.
+  const libs = readdirSync(join(root, 'src/lib')).filter((f) => f.endsWith('.js'))
+  const self = readFileSync(join(root, 'scripts/verify.mjs'), 'utf8')
+  const untested = libs.filter((f) => !self.includes(`src/lib/${f}`))
+  ok('every library module is exercised by this suite',
+    untested.length === 0, untested.join(', ') || 'all covered')
+
+  const datas = readdirSync(join(root, 'src/data')).filter((f) => f.endsWith('.js'))
+  const unchecked = datas.filter((f) => !self.includes(`src/data/${f}`))
+  ok('every data module is exercised by this suite',
+    unchecked.length === 0, unchecked.join(', ') || 'all covered')
+
+  ok('the suite is substantial enough to be worth trusting', pass + fail >= 750, String(pass + fail))
+}
+
 /* ---------- pipeline ---------- */
 group('Pipeline')
 {
@@ -2404,6 +2571,7 @@ group('Build output')
       ok('no API key or endpoint is baked into the bundle',
         !/sk-ant|api\.anthropic\.com|Bearer /.test(bundle))
       ok('the fab simulation shipped', bundle.includes('X-factor') || bundle.includes('bottleneck'))
+      ok('the AI chips tab shipped', bundle.includes('roofline') || bundle.includes('Ridge point'))
       ok('the 3D integration maths shipped',
         bundle.includes('Hybrid bond') && (bundle.includes('power-limited') || bundle.includes('limitedBy')))
       ok('the 3D architecture ladder shipped', bundle.includes('CFET') && bundle.includes('Forksheet'))

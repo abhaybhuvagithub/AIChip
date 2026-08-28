@@ -48,6 +48,8 @@ export const TOUR = [
   { id: 't8z2', tab: 'business', title: 'Find the node that kills the product', body: 'Pick the IoT SoC market, then walk down the node table. There is a node above which the programme never pays back — not because the chip is worse, but because the NRE cannot be amortised over the units the market will absorb.' },
   { id: 't8y1', tab: 'ethics', title: 'See why care is not enough', body: 'Seven hundred steps and yield multiplies: every step must succeed 99.9986% of the time to finish 99 wafers in 100. That is fourteen parts per million, per step. No amount of attention delivers that, which is the entire case for procedure over heroics.' },
   { id: 't8y2', tab: 'ethics', title: 'Follow a missed defect downstream', body: 'The rule of ten: each stage a defect escapes to multiplies the cost of fixing it by roughly ten. Every gate someone is tempted to skip is orders of magnitude cheaper than the one after it.' },
+  { id: 't8ai1', tab: 'ai', title: 'Find the three percent', body: 'The roofline explains why a thousand-teraflop chip delivers a fraction of it. Click the bottom point: generating one token has an arithmetic intensity of about one, against a ridge point near three hundred. The multipliers are not slow — they are idle, waiting for weights.' },
+  { id: 't8ai2', tab: 'ai', title: 'Watch memory decide everything', body: 'Raise context length and concurrent requests. The KV cache passes the model itself and then passes what one accelerator can hold. Serving capacity is a memory question, not a compute one.' },
   { id: 't9', tab: 'compute', title: 'Turn silicon into operations', body: 'The die you configured now becomes a throughput number. Watch the top-left figure as you change nothing but the precision dropdown — the silicon is identical and the number moves by 64x.' },
   { id: 't10', tab: 'compute', title: 'Climb to the trillions and past them', body: 'Move the scale selector from one die to a cluster. Note the power column keeping pace: past a rack, what you can build is set by the substation, not the fab.' },
   { id: 't11', tab: 'quantum', title: 'Meet the other exchange rate', body: 'Pick Shor on RSA-2048, then drag the physical error rate. Between 0.8% and 1.2% the qubit count goes vertical and then to infinity — that cliff is the surface code threshold.' },
@@ -55,7 +57,7 @@ export const TOUR = [
   { id: 't12b', tab: 'unsolved', title: 'Read the dates, not the descriptions', body: 'Several of these bars are longer than the careers of the people working on them. Tunnel FETs have delivered steep slope and useless on-current since 2004; the memory wall was named in 1994 and has widened every year since.' },
   { id: 't12c', tab: 'unsolved', title: 'Note what "contained" means', body: 'Some problems are not solved, they are paid for — every generation, forever, unless something changes. EUV stochastics cost dose on the most expensive tool in the building, on every wafer, and no amount of cleanliness helps.' },
   { id: 't12d', tab: 'acronyms', title: 'Look anything up', body: 'Search covers the acronym, its expansion and its description — so a plain-English phrase works. Type "short channels leak" and it finds DIBL. Most entries link to the tab that explains the thing properly rather than in a sentence.' },
-  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Fifty-eight questions. Everything needed to answer them is on the other thirteen tabs.' },
+  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Sixty-one questions. Everything needed to answer them is on the other thirteen tabs.' },
 ]
 
 export const QUIZ = [
@@ -304,6 +306,24 @@ export const QUIZ = [
     opts: ['Die area on the back of the wafer', 'Front-side metal routing tracks, which power rails were competing with signal for', 'Thermal headroom', 'Mask layers'],
     a: 1,
     why: 'For sixty years signal and power came down through the same metal stack. Moving power to a grid on the reverse of a thinned wafer relieves front-side congestion, cuts IR drop, and lets standard cells shrink in track count — scaling without a new transistor.',
+  },
+  {
+    q: 'A 989 TFLOPS accelerator with 3.35 TB/s of memory. What arithmetic intensity does a kernel need to saturate it?',
+    opts: ['About 3 operations per byte', 'About 295 operations per byte', 'About 30 operations per byte', 'Intensity does not affect throughput'],
+    a: 1,
+    why: 'The ridge point is peak throughput divided by memory bandwidth. Below it the chip waits for memory; above it the arithmetic binds. Almost every real kernel sits below, which is why headline FLOPS and delivered performance diverge so badly.',
+  },
+  {
+    q: 'Why does generating a single token use under one percent of an AI accelerator?',
+    opts: ['The model is too small', 'Every weight is read from memory to produce one token, so arithmetic intensity is about one', 'The clock throttles', 'Precision conversion overhead'],
+    a: 1,
+    why: 'Batch-one decode reads the entire model from memory per token and does roughly one operation per byte read. Against a ridge point in the hundreds, that leaves the multipliers almost entirely idle — and no amount of additional arithmetic helps. Batching, quantising and speculating all work by raising that intensity.',
+  },
+  {
+    q: 'On a memory-bound decode, what does halving the bytes per weight do to throughput?',
+    opts: ['Nothing — arithmetic is the limit', 'Roughly doubles it', 'Roughly quadruples it', 'Halves it'],
+    a: 1,
+    why: 'Throughput is bandwidth divided by model size, so halving the bytes per weight halves the bytes to read and doubles the tokens per second. This is why quantisation is an inference technique before it is a compute one — the arithmetic was never the constraint.',
   },
   {
     q: 'Hybrid bonding at 1 µm pitch versus a 40 µm micro-bump. How much denser?',

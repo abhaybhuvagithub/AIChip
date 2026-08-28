@@ -20,6 +20,7 @@ import Acronyms from './ui/Acronyms.jsx'
 import Trace from './ui/Trace.jsx'
 import SandToSilicon from './ui/SandToSilicon.jsx'
 import Compute from './ui/Compute.jsx'
+import AIChips from './ui/AIChips.jsx'
 import Quantum from './ui/Quantum.jsx'
 import Quiz from './ui/Quiz.jsx'
 import { TOUR } from './data/learn.js'
@@ -45,6 +46,7 @@ const TABS = [
   { id: 'silicon', label: 'Silicon', icon: 'soc', group: 'The real world' },
   { id: 'chain', label: 'Value chain', icon: 'route', group: 'The real world' },
   { id: 'compute', label: 'Compute', icon: 'chart', group: 'The real world' },
+  { id: 'ai', label: 'AI chips', icon: 'npu', group: 'The real world' },
 
   { id: 'economics', label: 'Economics', icon: 'money', group: 'The business' },
   { id: 'business', label: '0 → market', icon: 'iplicense', group: 'The business' },
@@ -266,6 +268,7 @@ export default function App() {
         {tab === 'unsolved' && <Unsolved />}
         {tab === 'acronyms' && <Acronyms goTab={go} />}
         {tab === 'compute' && <Compute cfg={cfg} patch={patch} />}
+        {tab === 'ai' && <AIChips />}
         {tab === 'quantum' && <Quantum />}
         {tab === 'quiz' && <Quiz />}
       </main>
