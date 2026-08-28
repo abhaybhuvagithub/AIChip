@@ -24,6 +24,7 @@ import Quiz from './ui/Quiz.jsx'
 import { TOUR } from './data/learn.js'
 import { PRODUCTS } from './data/nodes.js'
 import { buildJourney } from './lib/journey.js'
+import { navigate } from './lib/motion.js'
 
 const TABS = [
   { id: 'god', label: 'God view ✨', icon: 'spark', group: 'Start' },
@@ -165,11 +166,20 @@ export default function App() {
 
   const patch = (d) => setCfg((c) => ({ ...c, ...d }))
 
+  // Every route change on the site goes through here, so the cross-fade and
+  // the scroll reset happen once rather than being remembered at a dozen call
+  // sites. Selecting the tab you are already on does nothing, which stops an
+  // accidental flash when someone clicks the current item in the sidebar.
+  const go = (id) => {
+    if (id === tab) return
+    navigate(() => setTab(id))
+  }
+
   const tourNext = () => {
     const n = tourStep + 1
     if (n >= TOUR.length) { setTourStep(-1); return }
     setTourStep(n)
-    setTab(TOUR[n].tab)
+    go(TOUR[n].tab)
   }
 
   const share = async () => {
@@ -194,7 +204,7 @@ export default function App() {
                 <button
                   key={t.id}
                   className={`side-tab ${tab === t.id ? 'on' : ''}`}
-                  onClick={() => { setTab(t.id); setNavOpen(false) }}
+                  onClick={() => { go(t.id); setNavOpen(false) }}
                   aria-current={tab === t.id ? 'page' : undefined}
                 >
                   <Icon name={t.icon} size={20} />
@@ -234,11 +244,11 @@ export default function App() {
           </div>
         </header>
 
-      <main className="page">
+      <main className="page" key={tab}>
         {tab === 'sand' && <SandToSilicon cfg={cfg} />}
         {tab === 'line' && <FabLine />}
-        {tab === 'god' && <GodView cfg={cfg} snap={snap} goTab={setTab} />}
-        {tab === 'trace' && <Trace goTab={setTab} />}
+        {tab === 'god' && <GodView cfg={cfg} snap={snap} goTab={go} />}
+        {tab === 'trace' && <Trace goTab={go} />}
         {tab === 'run' && <FabRun cfg={cfg} onSnapshot={setSnap} />}
         {tab === 'wafer' && <YieldLab cfg={cfg} patch={patch} />}
         {tab === 'economics' && <Economics cfg={cfg} patch={patch} />}
@@ -246,12 +256,12 @@ export default function App() {
         {tab === 'clock' && <Clock cfg={cfg} />}
         {tab === 'nodes' && <NodesView />}
         {tab === '3d' && <Beyond3D cfg={cfg} />}
-        {tab === 'silicon' && <Silicon cfg={cfg} patch={patch} goTab={setTab} />}
+        {tab === 'silicon' && <Silicon cfg={cfg} patch={patch} goTab={go} />}
         {tab === 'chain' && <ValueChain cfg={cfg} />}
-        {tab === 'business' && <Business cfg={cfg} goTab={setTab} />}
+        {tab === 'business' && <Business cfg={cfg} goTab={go} />}
         {tab === 'ethics' && <Ethics />}
         {tab === 'unsolved' && <Unsolved />}
-        {tab === 'acronyms' && <Acronyms goTab={setTab} />}
+        {tab === 'acronyms' && <Acronyms goTab={go} />}
         {tab === 'compute' && <Compute cfg={cfg} patch={patch} />}
         {tab === 'quantum' && <Quantum />}
         {tab === 'quiz' && <Quiz />}
@@ -298,7 +308,7 @@ export default function App() {
       </div>
 
       <Assistant
-        cfg={cfg} snap={snap} journey={journey} goTab={setTab}
+        cfg={cfg} snap={snap} journey={journey} goTab={go}
         open={assistantOpen} setOpen={setAssistantOpen}
       />
     </div>

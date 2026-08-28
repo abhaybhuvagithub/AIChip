@@ -1968,12 +1968,16 @@ group('Themes and contrast')
     /\.sidebar \{ transform: translateX\(-100%\)/.test(css) && /\.sidebar\.open/.test(css))
   ok('the drawer has an open control, a close control and a scrim',
     /className="side-open/.test(app2) && /className="side-close/.test(app2) && /className="side-scrim/.test(app2))
+  // Navigation now routes through the shared transition helper, so the check
+  // follows it rather than pinning the old direct setter.
   ok('the drawer closes after a destination is chosen',
-    /setTab\(t\.id\); setNavOpen\(false\)/.test(app2))
+    /go\(t\.id\); setNavOpen\(false\)/.test(app2))
   ok('the current section is marked for assistive technology',
     /aria-current=\{tab === t\.id \? 'page' : undefined\}/.test(app2))
+  // The per-element override was folded into the single authoritative
+  // reduced-motion block, which now kills every transition on the page.
   ok('the drawer transition respects reduced motion',
-    /prefers-reduced-motion[\s\S]{0,120}\.sidebar \{ transition: none/.test(css))
+    /@media \(prefers-reduced-motion: reduce\)[\s\S]{0,400}transition: none !important/.test(css))
   ok('the toolbar shows which section you are in',
     /className="crumb"/.test(app2))
 
@@ -2001,6 +2005,63 @@ group('Themes and contrast')
   // that mattered is now that the sidebar scrolls its own list.
   ok('the sidebar scrolls its own destination list',
     /\.side-nav \{[^}]*overflow-y: auto/.test(css))
+}
+
+/* ---------- motion ---------- */
+group('Motion')
+{
+  const css3 = readFileSync(join(root, 'src/styles.css'), 'utf8')
+  const app3 = readFileSync(join(root, 'src/App.jsx'), 'utf8')
+  const mot = readFileSync(join(root, 'src/lib/motion.js'), 'utf8')
+
+  ok('view transitions are defined for the root',
+    /::view-transition-old\(root\)/.test(css3) && /::view-transition-new\(root\)/.test(css3))
+  ok('there is an entrance animation that does not depend on view transitions',
+    /@keyframes page-in/.test(css3) && /\.page \{ animation: page-in/.test(css3))
+  ok('the column animation is dropped where the browser already cross-fades',
+    /@supports \(view-transition-name: none\)[\s\S]{0,80}\.page \{ animation: none/.test(css3))
+  ok('blocks stagger in rather than arriving at once',
+    /@keyframes block-in/.test(css3) && /nth-child\(3\) \{ animation-delay/.test(css3))
+  ok('the stagger is capped rather than unbounded',
+    !/nth-child\((?:[7-9]|\d\d)\) \{ animation-delay/.test(css3))
+  ok('theme changes transition on the surfaces that carry colour',
+    /transition: background-color \.\d+s ease, border-color/.test(css3))
+  ok('overlays animate in', /@keyframes pop-in/.test(css3) && /@keyframes fade-in/.test(css3))
+
+  // The entrance only re-fires if the element is recreated. Without a key,
+  // React reuses the same <main> and the animation plays once, ever.
+  ok('the content column is keyed so its entrance re-fires on every change',
+    /<main className="page" key=\{tab\}>/.test(app3))
+
+  // Navigation must go through one place, or the behaviour drifts per call site.
+  ok('all navigation goes through a single helper',
+    /const go = \(id\) => \{/.test(app3) && /navigate\(\(\) => setTab\(id\)\)/.test(app3))
+  ok('selecting the current tab is a no-op rather than a flash',
+    /if \(id === tab\) return/.test(app3))
+  ok('no component still receives the raw setter as goTab',
+    !/goTab=\{setTab\}/.test(app3),
+    (app3.match(/goTab=\{setTab\}/g) || []).join(', '))
+  ok('the view resets to the top when it changes', /scrollToTop\(\)/.test(mot))
+
+  // Graceful degradation and accessibility, which are the parts that matter.
+  ok('the transition helper falls back when the API is absent',
+    /typeof document\.startViewTransition === 'function'/.test(mot) &&
+    /if \(prefersReducedMotion\(\) \|\| !supportsViewTransitions\(\)\)/.test(mot))
+  ok('a failed transition never costs the navigation',
+    /catch \{[\s\S]{0,140}update\(\)/.test(mot))
+  ok('reduced motion is honoured in the helper, not only in CSS',
+    /prefers-reduced-motion: reduce/.test(mot))
+  // Off, not shortened — a 0.001ms animation is still the thing they declined.
+  ok('reduced motion disables animation entirely rather than shortening it',
+    /animation: none !important/.test(css3) && !/animation-duration: \.001ms/.test(css3))
+  ok('reduced motion also disables transitions and smooth scrolling',
+    /transition: none !important/.test(css3) && /scroll-behavior: auto/.test(css3))
+  ok('reduced motion neutralises the view transition too',
+    /::view-transition-old\(root\), ::view-transition-new\(root\) \{ animation: none/.test(css3))
+  ok('elements that animate in are left visible under reduced motion',
+    /\.assistant, \.tour, \.side-scrim \{ opacity: 1; transform: none; \}/.test(css3))
+  ok('there is exactly one reduced-motion block, so nothing contradicts it',
+    (css3.match(/@media \(prefers-reduced-motion: reduce\)/g) || []).length === 1)
 }
 
 /* ---------- legibility ---------- */
@@ -2175,6 +2236,8 @@ group('Build output')
       ok('both modes shipped', ['dark', 'light'].every((m) =>
         sheet.includes(`data-mode="${m}"`) || sheet.includes(`data-mode=${m}`)))
       ok('reduced motion is respected', sheet.includes('prefers-reduced-motion'))
+      ok('view transitions survived minification', sheet.includes('view-transition'))
+      ok('the entrance animations shipped', sheet.includes('page-in') || sheet.includes('block-in'))
     }
     const readme = readFileSync(join(root, 'README.md'), 'utf8')
     ok('README states how the project was built', /Claude/.test(readme) && /Anthropic/.test(readme))

@@ -233,6 +233,22 @@ Below 1020px it becomes a drawer with a scrim, closing itself once a
 destination is chosen, and its transition is disabled under
 `prefers-reduced-motion`.
 
+## Motion
+
+Every navigation goes through one helper (`src/lib/motion.js`), so the
+behaviour cannot drift between call sites. Where the browser supports the View
+Transitions API it cross-fades the whole view natively; where it does not, a
+CSS entrance animation still softens the swap, and nothing depends on the API
+being present. Content blocks stagger in over 150 ms, the view resets to the
+top, and selecting the tab you are already on does nothing.
+
+**Under `prefers-reduced-motion` all of it is off, not shortened.** A 0.001 ms
+animation still runs and still moves things — it is a shorter version of the
+thing that was declined. One authoritative block disables animation,
+transitions, smooth scrolling and the view transition itself, and leaves
+everything that animates in fully visible. Verify checks that block exists
+exactly once, so nothing can contradict it.
+
 ## Icons
 
 A drawn icon set (`src/ui/Icon.jsx`): **74 technical drawings** on a shared

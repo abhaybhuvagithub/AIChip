@@ -104,6 +104,11 @@ plus the checks that stop the feature regressing.
 >   themes, and the static assets actually shipped.
 > - An error boundary that explains what broke and offers a way back, never a
 >   blank page.
+> - Motion routed through a single navigation helper so it cannot drift between
+>   call sites, using the View Transitions API where available and degrading to
+>   a CSS entrance where not. Under `prefers-reduced-motion`, motion is **off,
+>   not shortened** — a 0.001 ms animation is still the thing the user
+>   declined — in one authoritative block, checked to exist exactly once.
 > - Keyboard focus visible, ARIA labels on every control, semantic headings,
 >   responsive to 360 px, and a **named type scale** with prose and labels
 >   separated: reading text at 17–21px, scan labels no lower than 14px. Define
@@ -914,3 +919,36 @@ had never made the claim that they are one argument.
   upstream of 29 of 57 nodes. The tab says so and then says what it is not: an
   argument rather than a proof, with contingencies that could have gone another
   way, and a check asserts that disclaimer stays.
+
+---
+
+## Twenty-eighth pass: motion
+
+The site had nineteen hover transitions and nothing at all on the thing that
+actually jars: switching tabs swapped content instantly and left the scroll
+halfway down the previous page, which reads as a bug even when nothing is
+wrong.
+
+- **One helper, every call site.** Navigation was scattered across a sidebar,
+  a tour, and nine components each holding `setTab` directly. All of it now
+  routes through `go()`, so the cross-fade, the scroll reset and the
+  ignore-if-already-there behaviour are defined once. A check asserts no
+  component still receives the raw setter.
+- **Use the platform, and do not depend on it.** Where the View Transitions
+  API exists the browser cross-fades natively, which is smoother than anything
+  two overlapping React trees manage. Where it does not, the CSS entrance
+  alone still softens the swap. A `@supports` block drops the column animation
+  where the browser is already cross-fading, because otherwise the content
+  rises twice.
+- **CSS animations only fire when the element is created.** React reuses the
+  same `<main>` across tab changes, so without `key={tab}` the entrance played
+  once, on load, and never again. Easy to write, easy to miss, and it would
+  have looked like the animation simply not working.
+- **Reduced motion is off, not shortened.** The previous rule used the common
+  `animation-duration: .001ms` trick, which still runs the animation and still
+  moves things — a faster version of what the user declined. One authoritative
+  block now sets `animation: none`, kills transitions and smooth scrolling,
+  neutralises the view transition, and leaves anything that animates in fully
+  visible. I regressed it to the old pattern to confirm three checks fired.
+- **Two older checks failed, correctly**, because navigation and the drawer
+  override had both moved. Repointed rather than deleted.
