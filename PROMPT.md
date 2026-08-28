@@ -1056,3 +1056,40 @@ that quantitatively.
   reads identically to a top-level statement in a regex. Replaced with a
   behavioural check: call every export outside a browser and assert none
   throws. Test the property, not the prose.
+
+---
+
+## Thirty-second pass: Javy
+
+Asked for a Jarvis-like system that not only builds the business but runs it.
+The honest constraint came first: this site is static, there is no server and
+no key, and a check asserts as much. So Javy could not be a language model —
+and saying so plainly turned out to be the strongest thing about it.
+
+- **State the limitation, then make it the feature.** Javy is a deterministic
+  policy engine whose six rules are written out and shown before you run it.
+  Same state, same decision, same stated reason, every time. That is a smaller
+  claim than the marketing version and a better property for something running
+  a factory: legibility beats eloquence.
+- **Order is the design.** The quality gate is evaluated before anything
+  commercial, so no cash consideration can reach past it. A gate that yields to
+  pressure is not a gate — and the whole tab is built to let you override it and
+  see the bill.
+- **Three modelling bugs, each caught by testing the behaviour rather than the
+  code.** Yield learning was recomputed from the current quarter's spend, so
+  defect density snapped back whenever spending paused — a sawtooth that looked
+  like the model breathing. The economics turned $120M into $2.2B, which made
+  failure unreachable and the whole exercise pointless. And the automotive gate
+  was **unreachable at any capital**, because escape rate came from defect
+  density alone — fixing it meant modelling test coverage as the second lever,
+  which is also the real answer: one part per million needs mature yield *and*
+  heavy screening.
+- **Refuse the moral.** My first working version had discipline simply winning,
+  which is false. Adding standing — escapes cost the socket, not just the
+  warranty claim — made the comparison **market-dependent**: automotive punishes
+  the override enormously, consumer barely notices. Shipping marginal parts to
+  a consumer market often does pay in the short run. The model says so, and a
+  check asserts the asymmetry holds rather than the outcome.
+- **Leave the failures in.** Thin capital kills the company while it holds the
+  gate. There is a capital cliff, not a slope. An operator that always wins
+  teaches nothing about operating.

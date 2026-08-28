@@ -9,6 +9,7 @@ Five tabs:
 
 | Tab | What it does |
 | --- | --- |
+| **Javy** | An autonomous operator that runs a chip company across twenty quarters on a stated six-rule policy — releasing wafers, booking take-or-pay capacity, pricing, buying yield and test coverage, and deciding whether parts are good enough to ship. Every decision is shown with the numbers behind it. Override the quality gate and watch what it costs. |
 | **Trace** | The argument the rest of the site is making. A 57-node causal graph from constants of nature out to geopolitics — pick any consequence and walk it back. Boltzmann's constant is upstream of more than half of it. |
 | **God view ✨** | One configuration, every consequence — the chain from quartzite through wafer, fab, die, cost and compute on a single screen, with the live line if it is running. Every figure computed from the same die; nothing entered. |
 | **Sand → silicon** | The material chain from quartz rock to a finished die, running by itself — no clicking required. A purity ladder on a log scale, and a mass and energy balance worked backwards from the die you configured. Plus what replaces the people: FOUPs, overhead hoist transport, SECS/GEM, run-to-run control. |
@@ -289,6 +290,25 @@ chamber with whatever enters or leaves it.
 Verify checks that every icon referenced in any data file exists, that no
 unicode glyph is left standing in for one, and that the set has not regressed
 to outlines — it asserts an average of at least four drawn shapes per icon.
+
+## Javy
+
+Javy is **not a language model**, and there is none behind it — this site is
+static, and a build check asserts no key or endpoint ships. Javy is a
+deterministic policy engine: it observes the company state each quarter,
+applies six written rules in order, and acts.
+
+That is a smaller claim than the marketing version and a better property. Every
+rule is legible, the order is load-bearing (the quality gate is evaluated
+before anything commercial, so no cash consideration reaches past it), and the
+same state always produces the same decision with the same stated reason.
+
+Javy can fail, and does. At thin capital it dies holding the gate; override the
+gate in automotive and it gets designed out instead. Those runs are left in,
+because an operator that always wins teaches nothing about operating — and
+because the comparison changes sign between markets. In consumer, shipping
+marginal parts often does pay in the short run. That is uncomfortable and it is
+true, and the model says so rather than tidying it into a moral.
 
 ## The assistant
 

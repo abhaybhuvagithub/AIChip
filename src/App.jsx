@@ -18,6 +18,7 @@ import Teams from './ui/Teams.jsx'
 import Unsolved from './ui/Unsolved.jsx'
 import Acronyms from './ui/Acronyms.jsx'
 import Trace from './ui/Trace.jsx'
+import Javy from './ui/Javy.jsx'
 import SandToSilicon from './ui/SandToSilicon.jsx'
 import Compute from './ui/Compute.jsx'
 import AIChips from './ui/AIChips.jsx'
@@ -31,6 +32,7 @@ import { navigate } from './lib/motion.js'
 const TABS = [
   { id: 'god', label: 'God view ✨', icon: 'spark', group: 'Start' },
   { id: 'trace', label: 'Trace', icon: 'route', group: 'Start' },
+  { id: 'javy', label: 'Javy', icon: 'spark', group: 'Start' },
 
   { id: 'sand', label: 'Sand → silicon', icon: 'quartzite', group: 'Making it' },
   { id: 'line', label: 'Fab line', icon: 'scanner', group: 'Making it' },
@@ -253,6 +255,7 @@ export default function App() {
         {tab === 'line' && <FabLine />}
         {tab === 'god' && <GodView cfg={cfg} snap={snap} goTab={go} />}
         {tab === 'trace' && <Trace goTab={go} />}
+        {tab === 'javy' && <Javy goTab={go} />}
         {tab === 'run' && <FabRun cfg={cfg} onSnapshot={setSnap} />}
         {tab === 'wafer' && <YieldLab cfg={cfg} patch={patch} />}
         {tab === 'economics' && <Economics cfg={cfg} patch={patch} />}

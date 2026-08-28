@@ -177,7 +177,7 @@ group('Content')
   ok('quiz answers all point at a real option', QUIZ.every((q) => q.opts[q.a] !== undefined))
   ok('every quiz question explains itself', QUIZ.every((q) => q.why && q.why.length > 40))
   ok('quiz options are distinct', QUIZ.every((q) => new Set(q.opts).size === q.opts.length))
-  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science', 'clock', 'business', 'ethics', 'teams', 'unsolved', 'acronyms', 'trace', 'ai'].includes(t.tab)))
+  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science', 'clock', 'business', 'ethics', 'teams', 'unsolved', 'acronyms', 'trace', 'ai', 'javy'].includes(t.tab)))
   ok('the tour visits every tab', ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz']
     .every((t) => TOUR.some((s) => s.tab === t)))
   ok('quiz covers the material chain', QUIZ.some((q) => /purity|distill|polysilicon|particle/i.test(q.q)))
@@ -254,6 +254,122 @@ group('3D and beyond')
     BEYOND_CMOS.length >= 4 && BEYOND_CMOS.every((b) => b.name && b.idea && b.why && b.honest.length > 40))
   ok('no beyond-CMOS option is claimed as production',
     BEYOND_CMOS.every((b) => b.status === 'research'))
+}
+
+group('Javy')
+{
+  const J = await import(join(root, 'src/lib/javy.js'))
+
+  ok('the policy is written out and ordered',
+    J.POLICY.length >= 6 && J.POLICY.every((p) => p.id && p.name && p.icon &&
+      p.rule.length > 50 && p.why.length > 60))
+  // Order is load-bearing: nothing commercial may be evaluated before the gate.
+  ok('the quality gate is the first rule', J.POLICY[0].id === 'gate')
+  ok('the gate rule admits no override by cash',
+    /no cash position overrides this/i.test(J.POLICY[0].rule))
+
+  ok('markets differ in target, escape cost and tolerance',
+    J.MARKETS.length === 3 && J.MARKETS.every((m, i) => i === 0 ||
+      (m.dppmTarget < J.MARKETS[i - 1].dppmTarget &&
+       m.escapeUsd > J.MARKETS[i - 1].escapeUsd &&
+       m.tolerance < J.MARKETS[i - 1].tolerance)))
+
+  ok('a new company starts solvent and running',
+    (() => { const c = J.newCompany(); return c.cash > 0 && c.alive && c.quarter === 0 })())
+  ok('the simulation is deterministic', (() => {
+    const a = J.runToEnd(J.newCompany()), b = J.runToEnd(J.newCompany())
+    return a.cash === b.cash && a.quarter === b.quarter && a.escapes === b.escapes
+  })())
+  ok('every quarter records its decisions with reasons', (() => {
+    const r = J.runToEnd(J.newCompany())
+    return r.log.length > 0 && r.log.every((l) =>
+      Array.isArray(l.decisions) && l.decisions.length > 0 &&
+      l.decisions.every((d) => d.what && d.why && d.why.length > 20))
+  })())
+  ok('a run always terminates with a stated reason', (() => {
+    const r = J.runToEnd(J.newCompany())
+    return !r.alive && typeof r.endedWhy === 'string' && r.endedWhy.length > 5
+  })())
+
+  // Yield learning must be monotonic. An earlier version recomputed it from
+  // this quarter's spend, so defect density snapped back whenever spending
+  // paused — a sawtooth that looked like the model breathing.
+  ok('defect density never regresses', (() => {
+    const r = J.runToEnd(J.newCompany({ market: 'automotive' }))
+    return r.log.every((l, i) => i === 0 || l.d0 <= r.log[i - 1].d0 + 1e-9)
+  })())
+  ok('test coverage never regresses', (() => {
+    const r = J.runToEnd(J.newCompany({ market: 'automotive' }))
+    return r.log.every((l, i) => i === 0 || l.coverage >= r.log[i - 1].coverage - 1e-12)
+  })())
+
+  // A gate that can never open is a broken model, not a hard lesson. This is
+  // the bug that made the automotive path unwinnable at any capital.
+  ok('the automotive gate is reachable and does open', (() => {
+    const r = J.runToEnd(J.newCompany({ market: 'automotive' }))
+    return r.log.some((l) => l.gated) && r.log.some((l) => !l.gated && l.sold > 0)
+  })())
+  ok('reaching one DPPM needs both yield and test coverage', (() => {
+    const r = J.runToEnd(J.newCompany({ market: 'automotive' }))
+    const shipping = r.log.find((l) => !l.gated)
+    return shipping && shipping.coverage > 0.999 && shipping.d0 < 0.05
+  })())
+  ok('the gate binds in automotive and rarely in consumer', (() => {
+    const auto = J.runToEnd(J.newCompany({ market: 'automotive' })).log.filter((l) => l.gated).length
+    const cons = J.runToEnd(J.newCompany({ market: 'consumer' })).log.filter((l) => l.gated).length
+    return auto >= 4 && auto > cons
+  })())
+
+  // The comparison the tab exists to make.
+  ok('overriding the gate in automotive costs the socket', (() => {
+    const ovs = {}
+    for (let q = 0; q < 40; q++) ovs[q] = { shipAnyway: true }
+    const r = J.runToEnd(J.newCompany({ market: 'automotive' }), ovs)
+    return /Designed out/i.test(r.endedWhy)
+  })())
+  ok('holding the gate in automotive survives and profits', (() => {
+    const r = J.runToEnd(J.newCompany({ market: 'automotive' }))
+    return r.cash > r.raised && !/Designed out/i.test(r.endedWhy)
+  })())
+  // And the honest counterpart: in consumer, the discipline is not free money.
+  ok('the comparison is market-dependent, not a moral', (() => {
+    const ovs = {}
+    for (let q = 0; q < 40; q++) ovs[q] = { shipAnyway: true }
+    const consHeld = J.runToEnd(J.newCompany({ market: 'consumer' }))
+    const consShip = J.runToEnd(J.newCompany({ market: 'consumer' }), ovs)
+    const autoHeld = J.runToEnd(J.newCompany({ market: 'automotive' }))
+    const autoShip = J.runToEnd(J.newCompany({ market: 'automotive' }), ovs)
+    // Automotive punishes the override far more than consumer does.
+    return (autoHeld.cash - autoShip.cash) > (consHeld.cash - consShip.cash)
+  })())
+
+  ok('failure is reachable — thin capital kills the company', (() => {
+    const r = J.runToEnd(J.newCompany({ market: 'automotive', cashUsd: 80e6 }))
+    return /Ran out of cash/i.test(r.endedWhy)
+  })())
+  ok('and success is reachable at adequate capital', (() => {
+    const r = J.runToEnd(J.newCompany({ market: 'industrial', cashUsd: 250e6 }))
+    return r.cash > 0 && !/Ran out of cash/i.test(r.endedWhy)
+  })())
+  ok('escapes never go negative', (() => {
+    const r = J.runToEnd(J.newCompany({ market: 'consumer' }))
+    return r.escapes >= 0 && r.log.every((l) => l.escapes >= 0)
+  })())
+  ok('standing falls only as escapes accumulate', (() => {
+    const r = J.runToEnd(J.newCompany({ market: 'automotive' }))
+    return r.log.every((l, i) => i === 0 || l.standing <= r.log[i - 1].standing + 1e-9)
+  })())
+
+  // The claim on the tab itself.
+  ok('the tab states plainly that Javy is not a language model', (() => {
+    const ui = readFileSync(join(root, 'src/ui/Javy.jsx'), 'utf8')
+    return /not a language model/i.test(ui) && /no server, no API key/i.test(ui)
+  })())
+  ok('no model endpoint or key is introduced anywhere in Javy', (() => {
+    const lib = readFileSync(join(root, 'src/lib/javy.js'), 'utf8')
+    const ui = readFileSync(join(root, 'src/ui/Javy.jsx'), 'utf8')
+    return !/api[._-]?key|fetch\(|openai|anthropic\.com/i.test(lib + ui)
+  })())
 }
 
 group('AI chips')
@@ -2571,6 +2687,9 @@ group('Build output')
       ok('no API key or endpoint is baked into the bundle',
         !/sk-ant|api\.anthropic\.com|Bearer /.test(bundle))
       ok('the fab simulation shipped', bundle.includes('X-factor') || bundle.includes('bottleneck'))
+      ok('the Javy operator shipped', bundle.includes('Quality gate first') || bundle.includes('Designed out'))
+      ok('Javy ships no API key or endpoint',
+        !/api[._-]?key|api\.openai|api\.anthropic/i.test(bundle))
       ok('the AI chips tab shipped', bundle.includes('roofline') || bundle.includes('Ridge point'))
       ok('the 3D integration maths shipped',
         bundle.includes('Hybrid bond') && (bundle.includes('power-limited') || bundle.includes('limitedBy')))
