@@ -26,6 +26,8 @@ export const TOUR = [
   { id: 't8', tab: 'nodes', title: 'See why the names stopped meaning anything', body: 'From 22 nm the number stops describing a measurable dimension. What kept improving is density and the transistor architecture — planar to fin to nanosheet, one more side of the channel each time.' },
   { id: 't8a1', tab: '3d', title: 'Count the gated faces', body: 'Step along the ladder and watch the cross-section. Planar gates one face of the channel, FinFET three, nanosheet four. Each step buys back electrostatic control that short channels took away.' },
   { id: 't8a2', tab: '3d', title: 'Find the step that shrinks nothing', body: 'CFET is the only rung that reduces cell area without reducing any dimension — the pitch stays the same and one device moves underneath the other. That is why it needs backside power to arrive with it.' },
+  { id: 't8a2b', tab: '3d', title: 'Find where the constraint inverts', body: 'Connection density goes as the inverse square of bonding pitch, so hybrid bonding is 1,600 times denser than a micro-bump — not forty. Watch the last column of the table: at that density the interface stops being pin-limited and becomes power-limited. The problem changes shape.' },
+  { id: 't8a2c', tab: '3d', title: 'See why you test before you stack', body: 'Wafer-to-wafer bonding multiplies the die yields, so twelve high at 95% each is barely half. Place only known-good dies and it is 97%. That gap is the whole reason known-good-die testing is a live problem.' },
   { id: 't8a3', tab: '3d', title: 'Hit the wall', body: 'Drag the tier slider up on the thermal section. Density scales with tiers; the surface you can remove heat through does not. Then drag activity down and watch the problem vanish — that is exactly the trick stacked memory plays and stacked logic cannot.' },
   { id: 't8c1', tab: 'clock', title: 'Find the gap', body: 'A single transistor passed a terahertz in 2007. Processors still clock at five or six gigahertz. Click along the ladder and watch the colours — device f_max, radio carriers and processor clocks are three different quantities, and almost every terahertz chip claim swaps one for another.' },
   { id: 't8c2', tab: 'clock', title: 'Turn the clock up and watch it break', body: 'Drag the target clock past twenty gigahertz. Power goes as the cube of frequency once voltage has to scale with it, so ten times the clock is a thousand times the power — and the signal stops being able to cross your own die within one cycle.' },
@@ -53,7 +55,7 @@ export const TOUR = [
   { id: 't12b', tab: 'unsolved', title: 'Read the dates, not the descriptions', body: 'Several of these bars are longer than the careers of the people working on them. Tunnel FETs have delivered steep slope and useless on-current since 2004; the memory wall was named in 1994 and has widened every year since.' },
   { id: 't12c', tab: 'unsolved', title: 'Note what "contained" means', body: 'Some problems are not solved, they are paid for — every generation, forever, unless something changes. EUV stochastics cost dose on the most expensive tool in the building, on every wafer, and no amount of cleanliness helps.' },
   { id: 't12d', tab: 'acronyms', title: 'Look anything up', body: 'Search covers the acronym, its expansion and its description — so a plain-English phrase works. Type "short channels leak" and it finds DIBL. Most entries link to the tab that explains the thing properly rather than in a sentence.' },
-  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Fifty-five questions. Everything needed to answer them is on the other thirteen tabs.' },
+  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Fifty-eight questions. Everything needed to answer them is on the other thirteen tabs.' },
 ]
 
 export const QUIZ = [
@@ -302,6 +304,24 @@ export const QUIZ = [
     opts: ['Die area on the back of the wafer', 'Front-side metal routing tracks, which power rails were competing with signal for', 'Thermal headroom', 'Mask layers'],
     a: 1,
     why: 'For sixty years signal and power came down through the same metal stack. Moving power to a grid on the reverse of a thinned wafer relieves front-side congestion, cuts IR drop, and lets standard cells shrink in track count — scaling without a new transistor.',
+  },
+  {
+    q: 'Hybrid bonding at 1 µm pitch versus a 40 µm micro-bump. How much denser?',
+    opts: ['40 times', '1,600 times', '400 times', 'About twice'],
+    a: 1,
+    why: 'Connection density goes as the inverse square of pitch, so a fortyfold pitch improvement is a sixteen-hundredfold density improvement. That exponent is the whole story of modern 3D integration.',
+  },
+  {
+    q: 'At hybrid-bond density, what limits how much data crosses the interface?',
+    opts: ['The number of connections', 'The power budget — a million links is far more than you can afford to drive', 'Signal integrity', 'The bonding yield'],
+    a: 1,
+    why: 'At micro-bump pitch the interface is pin-limited and every extra connection is more bandwidth. At hybrid-bond pitch the constraint inverts: the interface stops being a wiring problem and becomes an energy one, which is why energy per bit now matters more than pin count.',
+  },
+  {
+    q: 'Stacking twelve dies at 95% yield each. Why does wafer-to-wafer bonding give barely half?',
+    opts: ['Bonding damages the dies', 'Yields multiply — a good die can land on a bad one and both are lost', 'Thermal stress accumulates', 'Alignment error compounds'],
+    a: 1,
+    why: 'Wafer-to-wafer aligns whole wafers, so stack yield is the product of the die yields and is exponential in tier count. Die-to-wafer places only dies that already passed test, which is why known-good-die testing is worth its cost.',
   },
   {
     q: 'Why did 3D memory ship a decade before 3D logic?',

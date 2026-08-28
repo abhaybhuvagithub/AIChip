@@ -985,3 +985,36 @@ training, engaged in a specific order.
 - **Peak is not average.** A programme ramps, peaks in physical design and
   verification closure, then sheds. Quoting the average as the team you need to
   hire understates the peak by about half, so both are shown.
+
+---
+
+## Thirtieth pass: 3D, computed
+
+The 3D tab described stacking well and never computed the number that explains
+it. Five sections, only one interactive, and the central claim — that hybrid
+bonding changed what a stacked part can be — was asserted rather than shown.
+
+- **The exponent is the argument.** Connection density goes as the inverse
+  square of bonding pitch, so 40 µm to 1 µm is not forty times better, it is
+  **sixteen hundred** times better. Stating the pitches side by side hides
+  that; computing it does not.
+- **The finding I did not expect, and kept.** Adding a power-limited bandwidth
+  alongside the pin-limited one showed the binding constraint *inverting*
+  exactly at hybrid bonding: at micro-bump pitch every extra connection is more
+  bandwidth, and at a million connections per square millimetre the power
+  budget binds long before the pins do. The interface stops being a wiring
+  problem and becomes an energy one. That appears in no pitch figure alone, and
+  it is now a check.
+- **Yield maths makes the case for known-good die.** Wafer-to-wafer multiplies
+  die yields — twelve high at 95% each is 53%. Place only tested dies and it is
+  97%. The gap is the whole reason known-good-die testing is a live problem,
+  and it links directly to the open-problems tab.
+- **A unit error that was at least obvious.** The first IR drop model worked in
+  milliohms per millimetre and produced twelve volts of droop on a 0.75 V
+  supply. Absurd rather than plausible, which made it cheap to catch — unlike
+  the RC delay bug two passes ago, which was wrong by a thousand and looked
+  fine. Both now have checks; I reintroduced this one to confirm.
+- **Show all six architectures at once.** The cross-sections existed but only
+  one at a time, which is the wrong way to present a progression. Side by side,
+  the gated-face count reads as a sequence and the last two visibly stop being
+  about the transistor at all.

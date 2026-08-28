@@ -707,3 +707,15 @@ h3.iconrow { display: flex; gap: 10px; }
   margin: 3px 0 5px; line-height: 1.25; transition: color .14s;
 }
 .trace-note { font-size: var(--fs-note); color: var(--muted); line-height: 1.6; max-width: 68ch; margin-bottom: 8px; }
+
+/* ---------- Architecture comparison strip ---------- */
+.arch-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; }
+.arch-cell {
+  flex: 1 0 132px; cursor: pointer; font-family: inherit; color: var(--text);
+  background: var(--panel2); border: 1px solid var(--border); border-radius: 12px;
+  padding: 8px 8px 10px; transition: border-color .16s, background .16s;
+}
+.arch-cell:hover { border-color: var(--accent); }
+.arch-cell.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.arch-name { font-size: var(--fs-label); font-weight: 600; line-height: 1.2; margin-top: 4px; }
+.arch-meta { font-family: var(--font-mono); font-size: var(--fs-label); margin-top: 3px; }

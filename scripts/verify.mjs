@@ -183,6 +183,7 @@ group('Content')
   ok('quiz covers the material chain', QUIZ.some((q) => /purity|distill|polysilicon|particle/i.test(q.q)))
   ok('quiz covers real silicon', QUIZ.some((q) => /Cerebras|MI300X|wafer-scale/i.test(q.q)))
   ok('quiz covers the value chain', QUIZ.some((q) => /Arm|EUV scanners|Terafab/i.test(q.q)))
+  ok('quiz covers 3D integration', QUIZ.some((q) => /hybrid bond|wafer-to-wafer/i.test(q.q)))
   ok('quiz covers who builds it', QUIZ.some((q) => /discipline is the largest|compiler team/i.test(q.q)))
   ok('quiz covers open problems', QUIZ.some((q) => /Tunnel FET|SRAM bit cell/i.test(q.q)))
   ok('quiz covers transport and interconnect', QUIZ.some((q) => /mobility|copper wire|indirect|Electromigration/i.test(q.q)))
@@ -196,7 +197,7 @@ group('Content')
     QUIZ.some((q) => /X-factor|cycle time|bottleneck|scanners/i.test(q.q)))
   ok('quiz covers 3D transistors and the thermal wall',
     QUIZ.some((q) => /CFET|backside power/i.test(q.q)) && QUIZ.some((q) => /3D memory|3D logic/i.test(q.q)))
-  ok('quiz covers compute and quantum', QUIZ.length >= 55 &&
+  ok('quiz covers compute and quantum', QUIZ.length >= 58 &&
     QUIZ.some((q) => /FP4|sparsity|precision/i.test(q.q)) &&
     QUIZ.some((q) => /qubit|surface code|threshold/i.test(q.q)))
 }
@@ -252,6 +253,94 @@ group('3D and beyond')
     BEYOND_CMOS.length >= 4 && BEYOND_CMOS.every((b) => b.name && b.idea && b.why && b.honest.length > 40))
   ok('no beyond-CMOS option is claimed as production',
     BEYOND_CMOS.every((b) => b.status === 'research'))
+}
+
+group('3D integration')
+{
+  const IG = await import(join(root, 'src/lib/integration.js'))
+
+  // The exponent is the entire argument of the section.
+  ok('connection density goes as the inverse square of pitch',
+    near(IG.connectionDensity(1) / IG.connectionDensity(2), 4, 1e-9))
+  ok('a 1 um hybrid bond is 1600x a 40 um micro-bump',
+    near(IG.connectionDensity(1) / IG.connectionDensity(40), 1600, 1),
+    (IG.connectionDensity(1) / IG.connectionDensity(40)).toFixed(0))
+  ok('a hybrid bond gives about a million connections per mm²',
+    near(IG.connectionDensity(1), 1e6, 1))
+  ok('an invalid pitch returns zero rather than Infinity', IG.connectionDensity(0) === 0)
+
+  ok('the interconnect generations are ordered by pitch and by energy',
+    IG.BONDS.every((b, i) => i === 0 ||
+      (b.pitchUm < IG.BONDS[i - 1].pitchUm && b.pjPerBit < IG.BONDS[i - 1].pjPerBit)))
+  ok('energy per bit falls ~200x from a board trace to a hybrid bond', (() => {
+    const board = IG.BONDS.find((b) => b.id === 'board').pjPerBit
+    const hyb = IG.BONDS.find((b) => b.id === 'hybrid').pjPerBit
+    return board / hyb >= 150
+  })())
+
+  // The non-obvious finding: the binding constraint inverts at hybrid bonding.
+  ok('micro-bump interfaces are pin-limited',
+    IG.interfaceBandwidth({ pitchUm: 40, pjPerBit: 1.0, powerBudgetW: 1 }).limitedBy === 'pins')
+  ok('hybrid-bond interfaces are power-limited, not pin-limited',
+    IG.interfaceBandwidth({ pitchUm: 1, pjPerBit: 0.05, powerBudgetW: 1 }).limitedBy === 'power')
+  ok('usable bandwidth is the lesser of the two limits', (() => {
+    const w = IG.interfaceBandwidth({ pitchUm: 1, pjPerBit: 0.05, powerBudgetW: 1 })
+    return near(w.tbps, Math.min(w.pinTbps, w.powerTbps), 1e-9)
+  })())
+  ok('more interface power buys proportionally more bandwidth when power-limited', (() => {
+    const a = IG.interfaceBandwidth({ pitchUm: 1, pjPerBit: 0.05, powerBudgetW: 1 }).powerTbps
+    const b = IG.interfaceBandwidth({ pitchUm: 1, pjPerBit: 0.05, powerBudgetW: 2 }).powerTbps
+    return near(b / a, 2, 1e-9)
+  })())
+
+  // Stack yield: the case for testing before bonding.
+  ok('wafer-to-wafer yield is the product of the die yields',
+    near(IG.stackYield({ dieYield: 0.9, tiers: 3, mode: 'w2w', bondYield: 1 }).yield, 0.729, 1e-9))
+  ok('wafer-to-wafer collapses with tier count',
+    IG.stackYield({ dieYield: 0.95, tiers: 12, mode: 'w2w' }).yield < 0.6)
+  ok('die-to-wafer holds up where wafer-to-wafer does not', (() => {
+    const w = IG.stackYield({ dieYield: 0.95, tiers: 12, mode: 'w2w' }).yield
+    const d = IG.stackYield({ dieYield: 0.95, tiers: 12, mode: 'd2w' }).yield
+    return d > 0.9 && d > w * 1.5
+  })())
+  ok('both modes degrade as tiers increase', (() => {
+    for (const m of ['w2w', 'd2w']) {
+      let last = 1
+      for (const t of [2, 4, 8, 16]) {
+        const y = IG.stackYield({ dieYield: 0.95, tiers: t, mode: m }).yield
+        if (y > last) return false
+        last = y
+      }
+    }
+    return true
+  })())
+  ok('a single tier is just the die yield',
+    near(IG.stackYield({ dieYield: 0.9, tiers: 1, mode: 'w2w' }).yield, 0.9, 1e-9))
+
+  // Cell height is the density metric that kept moving.
+  ok('halving cell track height halves cell area',
+    near(IG.cellArea({ tracks: 6, mmpNm: 40, cppNm: 50 }).areaNm2 /
+         IG.cellArea({ tracks: 12, mmpNm: 40, cppNm: 50 }).areaNm2, 0.5, 1e-9))
+  ok('cell area is in the right order for a modern node',
+    IG.cellArea({ tracks: 6, mmpNm: 40, cppNm: 50 }).areaUm2 < 0.1)
+
+  // IR drop. The first version worked in the wrong unit and produced twelve
+  // volts of droop on a 0.75 V supply.
+  ok('IR drop is tens of millivolts, not volts', (() => {
+    const d = IG.irDrop({ currentA: 500 })
+    return d.dropMv > 5 && d.dropMv < 300
+  })(), IG.irDrop({ currentA: 500 }).dropMv.toFixed(0) + ' mV')
+  ok('droop is a plausible fraction of the supply',
+    IG.irDrop({ currentA: 500 }).dropPct < 0.2)
+  ok('backside delivery cuts droop several-fold', (() => {
+    const f = IG.irDrop({ currentA: 500 }).dropMv
+    const b = IG.irDrop({ currentA: 500, backside: true }).dropMv
+    return f / b >= 4
+  })())
+  ok('droop scales linearly with current',
+    near(IG.irDrop({ currentA: 1000 }).dropV / IG.irDrop({ currentA: 500 }).dropV, 2, 1e-9))
+  ok('both power delivery options are described',
+    IG.POWER_DELIVERY.length === 2 && IG.POWER_DELIVERY.every((p) => p.name && p.what.length > 60))
 }
 
 group('Thermal wall')
@@ -2315,6 +2404,8 @@ group('Build output')
       ok('no API key or endpoint is baked into the bundle',
         !/sk-ant|api\.anthropic\.com|Bearer /.test(bundle))
       ok('the fab simulation shipped', bundle.includes('X-factor') || bundle.includes('bottleneck'))
+      ok('the 3D integration maths shipped',
+        bundle.includes('Hybrid bond') && (bundle.includes('power-limited') || bundle.includes('limitedBy')))
       ok('the 3D architecture ladder shipped', bundle.includes('CFET') && bundle.includes('Forksheet'))
       ok('backside power shipped', bundle.includes('PowerVia') || bundle.includes('Backside power'))
       ok('no stray non-latin characters in the copy', !/[\u4e00-\u9fff\u3040-\u30ff]/.test(bundle))
