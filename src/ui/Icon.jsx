@@ -550,6 +550,37 @@ export const ICONS = {
     <path d="M8.4 6 h5.6 a4 4 0 0 1 0 8 h-4 a4 4 0 0 0 0 8 h5.6" strokeDasharray="2.5 2" {...THIN} />
   </>),
 
+  graph: (<>
+    <circle cx="12" cy="4.5" r="2.2" />
+    <circle cx="5.5" cy="14" r="2.2" />
+    <circle cx="18.5" cy="14" r="2.2" />
+    <circle cx="12" cy="20.5" r="1.8" {...THIN} />
+    <path d="M10.6 6.3 L6.9 12.2 M13.4 6.3 L17.1 12.2" {...THIN} />
+    <path d="M6.8 15.6 L10.7 19.4 M17.2 15.6 L13.3 19.4" {...HAIR} />
+  </>),
+  gauge: (<>
+    <path d="M3.5 16.5 a8.5 8.5 0 0 1 17 0" />
+    <path d="M3.5 16.5 h17" {...THIN} />
+    <path d="M12 16.5 L16.5 10.5" strokeWidth="1.8" />
+    <circle cx="12" cy="16.5" r="1.6" {...F} />
+    {rep(5, 5.5, 18.5, (t, i) => {
+      const a = (Math.PI * (1 - i / 4))
+      return <path key={i} d={`M${12 + 7 * Math.cos(a)} ${16.5 - 7 * Math.sin(a)} l${-0.9 * Math.cos(a)} ${0.9 * Math.sin(a)}`} {...HAIR} />
+    })}
+  </>),
+  flask: (<>
+    <path d="M9.5 3 v6.5 L4.8 18 a1.6 1.6 0 0 0 1.4 2.4 h11.6 a1.6 1.6 0 0 0 1.4 -2.4 L14.5 9.5 V3" />
+    <path d="M8.5 3 h7" {...THIN} />
+    <path d="M7.3 14.5 h9.4" {...THIN} />
+    <circle cx="10.5" cy="17" r="0.8" {...F} />
+    <circle cx="13.5" cy="18" r="0.55" {...F} />
+  </>),
+  book: (<>
+    <path d="M4 4.5 a2 2 0 0 1 2 -2 h13 v16 h-13 a2 2 0 0 0 -2 2 z" />
+    <path d="M4 4.5 v15" {...THIN} />
+    <path d="M8.5 7 h7 M8.5 10 h7 M8.5 13 h4" {...HAIR} />
+  </>),
+
   // ================================================= INDUSTRY LAYERS ======
   eda: (<>
     <rect x="2.5" y="4" width="19" height="13" rx="1.5" />

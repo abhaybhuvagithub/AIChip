@@ -211,6 +211,22 @@ body, .card, .stat, .tbl-wrap, .sidebar, .toolbar, .btn, .acro, .trace-q,
 }
 .side-close { display: none; }
 
+.side-filter { padding: 0 12px 10px; position: relative; flex: 0 0 auto; }
+.side-filter input {
+  width: 100%; background: color-mix(in srgb, var(--panel2) 70%, transparent);
+  border: 1px solid var(--border); color: var(--text);
+  border-radius: 9px; padding: 7px 28px 7px 11px;
+  font-size: var(--fs-label); font-family: inherit;
+}
+.side-filter input:focus { border-color: var(--accent); outline: none; }
+.side-filter input::placeholder { color: var(--muted); }
+.side-filter button {
+  position: absolute; right: 18px; top: 5px; background: none; border: 0;
+  color: var(--muted); cursor: pointer; font-size: var(--fs-label); padding: 3px 5px;
+}
+.side-filter button:hover { color: var(--accent); }
+.side-empty { padding: 12px; color: var(--muted); font-size: var(--fs-label); }
+
 .side-nav { flex: 1; overflow-y: auto; padding: 0 10px 20px; scrollbar-width: thin; }
 .side-nav::-webkit-scrollbar { width: 5px; }
 .side-nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
@@ -221,7 +237,7 @@ body, .card, .stat, .tbl-wrap, .sidebar, .toolbar, .btn, .acro, .trace-q,
   letter-spacing: .12em; color: var(--muted); padding: 0 8px 7px;
 }
 .side-tab {
-  display: flex; align-items: center; gap: 11px; width: 100%; text-align: left;
+  display: flex; flex-direction: column; align-items: stretch; gap: 0; width: 100%; text-align: left;
   background: transparent; border: 1px solid transparent; color: var(--muted);
   padding: 9px 10px; border-radius: 10px; font-size: var(--fs-data);
   font-family: inherit; cursor: pointer; transition: color .14s, background .14s;
@@ -233,7 +249,14 @@ body, .card, .stat, .tbl-wrap, .sidebar, .toolbar, .btn, .acro, .trace-q,
   background: color-mix(in srgb, var(--accent) 13%, transparent);
   border-color: color-mix(in srgb, var(--accent) 34%, transparent);
 }
-.side-tab span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.side-tab-row { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.side-tab-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Only the active item carries its description, so the panel stays scannable. */
+.side-tab-desc {
+  display: block; margin: 6px 0 1px 31px; font-size: var(--fs-label);
+  font-weight: 400; line-height: 1.45; color: var(--muted); white-space: normal;
+}
+.side-tab.on .side-tab-desc { color: color-mix(in srgb, var(--text) 78%, transparent); }
 
 .side-scrim { display: none; }
 .side-open { display: none; }

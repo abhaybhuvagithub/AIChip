@@ -1115,3 +1115,33 @@ get wrong.
 - **The suite's own meta-check paid off immediately.** Because every module
   under `src/lib` must be exercised, a rename that left the checks pointing at
   `javy.js` would have failed rather than quietly testing nothing.
+
+---
+
+## Thirty-fourth pass: the sidebar, again
+
+The glass sidebar was built for seventeen destinations and now holds
+twenty-three. Structure that worked at seventeen had quietly stopped working.
+
+- **Group by the question, not by build order.** The old groups had drifted:
+  Quantum sat under "Why it works" when it is a frontier topic, and "The real
+  world" mixed real chips with compute theory and industry structure. Seven
+  groups now, each answering one question, and a check asserts none holds more
+  than seven items — over-stuffing a group is exactly how this got bad the
+  first time.
+- **A label is not navigation.** Half the entries were single words — Clock,
+  Trace, Nodes — which tell a newcomer nothing. Every tab now carries a
+  description, and checks assert they exist, are unique, and are longer than a
+  restatement of the label.
+- **Show one, not twenty-three.** Only the active item expands to its
+  description. All of them at once is a wall; one is an explanation, and it
+  costs no height.
+- **Three tabs shared an icon.** `route` was on Trace, Value chain and Open
+  problems; `spark` and `iplicense` were each doubled. An icon set whose
+  members repeat in the nav defeats its own purpose, so four more were drawn
+  and a check now asserts uniqueness. I duplicated one to confirm it names the
+  offender.
+- **Filter, because scanning fails past about twenty.** It matches labels,
+  descriptions and group names, so a reader searching "roofline" or "physics"
+  finds the tab without knowing what it is called — and an empty result says so
+  rather than showing a blank panel.

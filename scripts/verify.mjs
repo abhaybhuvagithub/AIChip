@@ -2361,6 +2361,55 @@ group('Themes and contrast')
     /const GROUPS = TABS\.reduce/.test(app2) && /group: '/.test(app2))
   ok('groups are derived from the tabs so the two cannot drift apart',
     /acc\.find\(\(x\) => x\.label === t\.group\)/.test(app2))
+  // Twenty-three single-word labels are a list, not navigation. Every entry
+  // must say what is inside it.
+  ok('every tab carries a description', (() => {
+    const block = app2.slice(app2.indexOf('const TABS = ['), app2.indexOf('const GROUPS'))
+    const ids = (block.match(/\{ id: '/g) || []).length
+    const descs = (block.match(/desc: '/g) || []).length
+    return ids > 0 && ids === descs
+  })(), (() => {
+    const block = app2.slice(app2.indexOf('const TABS = ['), app2.indexOf('const GROUPS'))
+    return `${(block.match(/\{ id: '/g) || []).length} tabs, ${(block.match(/desc: '/g) || []).length} described`
+  })())
+  ok('descriptions are substantive rather than restating the label', (() => {
+    const block = app2.slice(app2.indexOf('const TABS = ['), app2.indexOf('const GROUPS'))
+    return [...block.matchAll(/desc: '([^']+)'/g)].every((m) => m[1].length > 35)
+  })())
+  ok('descriptions are unique', (() => {
+    const block = app2.slice(app2.indexOf('const TABS = ['), app2.indexOf('const GROUPS'))
+    const d = [...block.matchAll(/desc: '([^']+)'/g)].map((m) => m[1])
+    return new Set(d).size === d.length
+  })())
+  // A nav where three items share an icon defeats the point of having icons.
+  ok('no two tabs share an icon', (() => {
+    const block = app2.slice(app2.indexOf('const TABS = ['), app2.indexOf('const GROUPS'))
+    const ic = [...block.matchAll(/icon: '([a-zA-Z0-9]+)'/g)].map((m) => m[1])
+    return new Set(ic).size === ic.length
+  })(), (() => {
+    const block = app2.slice(app2.indexOf('const TABS = ['), app2.indexOf('const GROUPS'))
+    const ic = [...block.matchAll(/icon: '([a-zA-Z0-9]+)'/g)].map((m) => m[1])
+    return ic.filter((x, i) => ic.indexOf(x) !== i).join(', ') || 'all distinct'
+  })())
+  ok('groups are sized for scanning — none holds more than seven', (() => {
+    const block = app2.slice(app2.indexOf('const TABS = ['), app2.indexOf('const GROUPS'))
+    const counts = {}
+    for (const m of block.matchAll(/group: '([^']+)'/g)) counts[m[1]] = (counts[m[1]] || 0) + 1
+    return Object.values(counts).every((c) => c <= 7) && Object.keys(counts).length >= 6
+  })(), (() => {
+    const block = app2.slice(app2.indexOf('const TABS = ['), app2.indexOf('const GROUPS'))
+    const counts = {}
+    for (const m of block.matchAll(/group: '([^']+)'/g)) counts[m[1]] = (counts[m[1]] || 0) + 1
+    return Object.entries(counts).map(([k, v]) => `${k}:${v}`).join(' ')
+  })())
+  ok('the sidebar can be filtered', /className="side-filter"/.test(app2) && /setNavQuery/.test(app2))
+  ok('the filter searches descriptions and groups, not only labels',
+    /t\.desc\.toLowerCase\(\)\.includes\(q\)/.test(app2) && /t\.group\.toLowerCase\(\)\.includes\(q\)/.test(app2))
+  ok('an empty filter result says so rather than showing nothing',
+    /className="side-empty"/.test(app2))
+  ok('choosing a destination clears the filter', /setNavOpen\(false\); setNavQuery\(''\)/.test(app2))
+  ok('only the current item shows its description',
+    /\{tab === t\.id && <span className="side-tab-desc">/.test(app2))
   ok('every tab carries an icon', (() => {
     const block = app2.slice(app2.indexOf('const TABS = ['), app2.indexOf('const GROUPS'))
     const ids = (block.match(/\{ id: '/g) || []).length

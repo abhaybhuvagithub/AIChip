@@ -232,9 +232,18 @@ npm test         # the whole gate — see below
 
 ## Navigation
 
-A fixed glass sidebar groups the seventeen destinations into six sections —
-Start, Making it, Why it works, The real world, The business, Check — each with
-an icon from the set below.
+A fixed glass sidebar groups the twenty-three destinations into seven sections
+by the question each answers — Orientation, Making a chip, Why it works, What
+it becomes, The industry, The frontier, Reference. No group holds more than
+seven, and a check enforces it.
+
+Every entry carries a one-line description, because twenty-three labels where
+half are single words (Clock, Trace, Nodes) is a list rather than navigation.
+Only the current item expands to show its description — twenty-three at once
+is a wall, one is an explanation. A filter above the list matches labels,
+descriptions and group names, so "yield", "roofline" and "physics" all find
+something. Every tab has a distinct icon, and a check asserts no two share
+one — three did before this pass.
 
 The translucency is built from `--panel` with `color-mix`, so one rule works
 across all five palettes and both modes: a light palette gets light glass, a

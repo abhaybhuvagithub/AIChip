@@ -30,34 +30,62 @@ import { buildJourney } from './lib/journey.js'
 import { navigate } from './lib/motion.js'
 
 const TABS = [
-  { id: 'god', label: 'God view ✨', icon: 'spark', group: 'Start' },
-  { id: 'trace', label: 'Trace', icon: 'route', group: 'Start' },
-  { id: 'operate', label: 'Run & operate', icon: 'spark', group: 'Start' },
+  // Grouped by the question each tab answers, not by when it was built. Every
+  // entry carries a description because a sidebar of twenty-three items where
+  // half the labels are single words — Clock, Trace, Nodes — is a list, not
+  // navigation.
+  { id: 'god', label: 'God view', icon: 'spark', group: 'Orientation',
+    desc: 'The whole pipeline on one screen, live. Every node clicks through.' },
+  { id: 'trace', label: 'Trace', icon: 'graph', group: 'Orientation',
+    desc: 'Pick any fact — eight cores, one EUV supplier — and walk it back to a constant of nature.' },
 
-  { id: 'sand', label: 'Sand → silicon', icon: 'quartzite', group: 'Making it' },
-  { id: 'line', label: 'Fab line', icon: 'scanner', group: 'Making it' },
-  { id: 'run', label: 'Fab run', icon: 'foundry', group: 'Making it' },
-  { id: 'wafer', label: 'Yield lab', icon: 'wafer', group: 'Making it' },
+  { id: 'sand', label: 'Sand → silicon', icon: 'quartzite', group: 'Making a chip',
+    desc: 'Quartzite to a polished wafer, and where nine-nines purity comes from.' },
+  { id: 'line', label: 'Fab line', icon: 'scanner', group: 'Making a chip',
+    desc: 'Seventeen process modules, repeated seventy times over. Click any to run a lot through it.' },
+  { id: 'run', label: 'Fab run', icon: 'foundry', group: 'Making a chip',
+    desc: 'A discrete-event fab simulation, or the full 626-step journey narrated.' },
+  { id: 'wafer', label: 'Yield lab', icon: 'wafer', group: 'Making a chip',
+    desc: 'A live wafer map with four yield models, plus speed binning across the same dies.' },
 
-  { id: 'science', label: 'The science', icon: 'atom', group: 'Why it works' },
-  { id: 'clock', label: 'Clock', icon: 'clock', group: 'Why it works' },
-  { id: '3d', label: '3D & beyond', icon: 'layers', group: 'Why it works' },
-  { id: 'nodes', label: 'Nodes', icon: 'timeline', group: 'Why it works' },
-  { id: 'quantum', label: 'Quantum', icon: 'transmon', group: 'Why it works' },
+  { id: 'science', label: 'The science', icon: 'atom', group: 'Why it works',
+    desc: 'Eleven sections of device physics, computed live — from the switch to how it wears out.' },
+  { id: 'nodes', label: 'Nodes', icon: 'timeline', group: 'Why it works',
+    desc: '180 nm to 2 nm, with drawn cross-sections and what the names stopped meaning.' },
+  { id: 'clock', label: 'Clock', icon: 'clock', group: 'Why it works',
+    desc: 'Why frequency stopped in 2005, and what terahertz actually refers to.' },
+  { id: '3d', label: '3D & beyond', icon: 'layers', group: 'Why it works',
+    desc: 'The gate wrapping the channel, stacking, bonding density and the thermal wall.' },
 
-  { id: 'silicon', label: 'Silicon', icon: 'soc', group: 'The real world' },
-  { id: 'chain', label: 'Value chain', icon: 'route', group: 'The real world' },
-  { id: 'compute', label: 'Compute', icon: 'chart', group: 'The real world' },
-  { id: 'ai', label: 'AI chips', icon: 'npu', group: 'The real world' },
+  { id: 'silicon', label: 'Silicon', icon: 'soc', group: 'What it becomes',
+    desc: 'Twenty real chips drawn to true relative scale on one wafer.' },
+  { id: 'compute', label: 'Compute', icon: 'chart', group: 'What it becomes',
+    desc: 'Transistors to operations per second, and what precision does to the number.' },
+  { id: 'ai', label: 'AI chips', icon: 'npu', group: 'What it becomes',
+    desc: 'The roofline model, and why a thousand-teraflop chip delivers three.' },
 
-  { id: 'economics', label: 'Economics', icon: 'money', group: 'The business' },
-  { id: 'business', label: '0 → market', icon: 'iplicense', group: 'The business' },
-  { id: 'teams', label: 'Teams & roles', icon: 'ipnoc', group: 'The business' },
-  { id: 'ethics', label: 'Discipline', icon: 'shield', group: 'The business' },
+  { id: 'chain', label: 'Value chain', icon: 'route', group: 'The industry',
+    desc: 'Seven layers from instruction sets to packaging, and where the chokepoints are.' },
+  { id: 'economics', label: 'Economics', icon: 'money', group: 'The industry',
+    desc: 'Cost per good die, wafer to product, across eight real product shapes.' },
+  { id: 'business', label: '0 → market', icon: 'iplicense', group: 'The industry',
+    desc: 'Four years and half a billion dollars, and the one calculation that decides it.' },
+  { id: 'teams', label: 'Teams & roles', icon: 'ipnoc', group: 'The industry',
+    desc: 'Who builds it — eight disciplines, 25 roles, and a headcount model.' },
+  { id: 'ethics', label: 'Discipline', icon: 'shield', group: 'The industry',
+    desc: 'Why flawless is the wrong target, and eight places the judgement is real.' },
+  { id: 'operate', label: 'Run & operate', icon: 'gauge', group: 'The industry',
+    desc: 'An autonomous operator runs the company for twenty quarters. Override it and see the bill.' },
 
-  { id: 'unsolved', label: 'Open problems', icon: 'route', group: 'Check' },
-  { id: 'acronyms', label: 'Acronyms', icon: 'iplicense', group: 'Check' },
-  { id: 'quiz', label: 'Quiz', icon: 'quiz', group: 'Check' },
+  { id: 'quantum', label: 'Quantum', icon: 'transmon', group: 'The frontier',
+    desc: 'Surface-code overhead, five modalities, and what a quantum fab has in common with this one.' },
+  { id: 'unsolved', label: 'Open problems', icon: 'flask', group: 'The frontier',
+    desc: 'Eighteen things nobody has solved, and how long each has been open.' },
+
+  { id: 'acronyms', label: 'Acronyms', icon: 'book', group: 'Reference',
+    desc: '172 abbreviations, each with what it actually means rather than just what it stands for.' },
+  { id: 'quiz', label: 'Quiz', icon: 'quiz', group: 'Reference',
+    desc: 'Sixty-one questions. Every answer is somewhere on the other tabs.' },
 ]
 
 /** Groups, in the order they appear, derived so the two cannot drift apart. */
@@ -136,6 +164,7 @@ export default function App() {
   const [snap, setSnap] = useState(null)
   const [assistantOpen, setAssistantOpen] = useState(false)
   const [navOpen, setNavOpen] = useState(false)
+  const [navQuery, setNavQuery] = useState('')
   const journey = useMemo(() => buildJourney(70), [])
   const [copied, setCopied] = useState(false)
 
@@ -207,23 +236,56 @@ export default function App() {
           <div className="logo"><span className="mark" aria-hidden="true" />Fab<span>Sim</span></div>
           <button className="side-close btn sm" onClick={() => setNavOpen(false)} aria-label="Close navigation">✕</button>
         </div>
+        {/* Twenty-three destinations is past the point where scanning works,
+            so: filter the list, and let the current one say what it holds. */}
+        <div className="side-filter">
+          <input
+            value={navQuery}
+            onChange={(e) => setNavQuery(e.target.value)}
+            placeholder="Filter sections"
+            aria-label="Filter sections"
+            autoComplete="off"
+          />
+          {navQuery && (
+            <button onClick={() => setNavQuery('')} aria-label="Clear filter">✕</button>
+          )}
+        </div>
+
         <nav className="side-nav">
-          {GROUPS.map((g) => (
-            <div className="side-group" key={g.label}>
-              <div className="side-group-label">{g.label}</div>
-              {g.tabs.map((t) => (
-                <button
-                  key={t.id}
-                  className={`side-tab ${tab === t.id ? 'on' : ''}`}
-                  onClick={() => { go(t.id); setNavOpen(false) }}
-                  aria-current={tab === t.id ? 'page' : undefined}
-                >
-                  <Icon name={t.icon} size={20} />
-                  <span>{t.label}</span>
-                </button>
-              ))}
-            </div>
-          ))}
+          {(() => {
+            const q = navQuery.trim().toLowerCase()
+            // Match the label, the description and the group, so "yield",
+            // "roofline" and "physics" all find something.
+            const hit = (t) => !q || t.label.toLowerCase().includes(q) ||
+              t.desc.toLowerCase().includes(q) || t.group.toLowerCase().includes(q)
+            const groups = GROUPS
+              .map((g) => ({ ...g, tabs: g.tabs.filter(hit) }))
+              .filter((g) => g.tabs.length)
+            if (!groups.length) {
+              return <div className="side-empty">Nothing matches “{navQuery}”.</div>
+            }
+            return groups.map((g) => (
+              <div className="side-group" key={g.label}>
+                <div className="side-group-label">{g.label}</div>
+                {g.tabs.map((t) => (
+                  <button
+                    key={t.id}
+                    className={`side-tab ${tab === t.id ? 'on' : ''}`}
+                    onClick={() => { go(t.id); setNavOpen(false); setNavQuery('') }}
+                    aria-current={tab === t.id ? 'page' : undefined}
+                  >
+                    <span className="side-tab-row">
+                      <Icon name={t.icon} size={20} />
+                      <span className="side-tab-label">{t.label}</span>
+                    </span>
+                    {/* Only the current item expands. Twenty-three descriptions
+                        at once is a wall; one is an explanation. */}
+                    {tab === t.id && <span className="side-tab-desc">{t.desc}</span>}
+                  </button>
+                ))}
+              </div>
+            ))
+          })()}
         </nav>
       </aside>
 
