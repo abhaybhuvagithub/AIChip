@@ -459,3 +459,242 @@ export const WEAROUT = [
     what: 'Carriers accelerated by the drain field gain enough energy to be injected into the gate dielectric, damaging the interface near the drain.',
     fix: 'Lightly doped drain extensions to spread the field, and lower supply voltage. Notably it gets WORSE as temperature falls, which makes it the odd one out.' },
 ]
+
+// ============================================ THE MOS CAPACITOR ==========
+//
+// The tab jumps straight to a transistor's current, which skips the object the
+// transistor actually is: a capacitor whose semiconductor plate can be
+// persuaded to change what it is made of. Everything about the threshold
+// voltage follows from here, and nothing about it is arbitrary.
+
+/** Fermi potential — how far the Fermi level sits from mid-gap. */
+export const fermiPotential = (dopingCm3, T = 300) =>
+  thermalVoltage(T) * Math.log(dopingCm3 / intrinsicCarriers(T))
+
+/**
+ * Depletion width at the onset of strong inversion.
+ *
+ * Strong inversion is conventionally taken as the surface potential reaching
+ * 2φF — the point where the minority carrier concentration at the surface
+ * equals the majority concentration in the bulk. It is a convention, not a
+ * threshold in nature: the current does not switch on there, it is merely
+ * where everyone agreed to stop calling it subthreshold.
+ */
+export function depletionWidth({ dopingCm3, T = 300 }) {
+  const psi = 2 * fermiPotential(dopingCm3, T)
+  const epsS = SILICON.epsR * K.eps0          // F/cm — K.eps0 already is
+  return Math.sqrt((2 * epsS * psi) / (K.q * dopingCm3))   // cm
+}
+
+/** Depletion charge per unit area, in C/cm². */
+export function depletionCharge({ dopingCm3, T = 300 }) {
+  const psi = 2 * fermiPotential(dopingCm3, T)
+  const epsS = SILICON.epsR * K.eps0
+  return Math.sqrt(2 * K.q * epsS * dopingCm3 * psi)
+}
+
+/**
+ * Body-effect coefficient γ = √(2·q·ε_si·N_a) / C_ox.
+ *
+ * How much the threshold moves when the substrate is biased. A thicker oxide
+ * means a smaller C_ox and a larger γ, which is one reason thin oxides were
+ * worth chasing for reasons beyond drive current.
+ *
+ * NOT `bodyFactor` above, which is the ideality factor n = 1 + C_dep/C_ox used
+ * in subthreshold swing. Both are called "the body factor" in conversation and
+ * they are different quantities; the collision is real enough that it broke
+ * the build when this was added, which is a better outcome than two functions
+ * quietly meaning different things.
+ */
+export function bodyEffectGamma({ dopingCm3, toxNm, kOx = 3.9 }) {
+  const epsS = SILICON.epsR * K.eps0
+  const cox = (kOx * K.eps0) / (toxNm * 1e-7)          // F/cm²
+  return { gamma: Math.sqrt(2 * K.q * epsS * dopingCm3) / cox, cox }
+}
+
+/**
+ * Threshold voltage, assembled from its parts:
+ *
+ *   V_th = V_FB + 2φ_F + γ·√(2φ_F)
+ *
+ * with V_FB = φ_ms − Q_ox/C_ox.
+ *
+ * The interesting term is the flat-band voltage, which is set by the work
+ * function difference between gate and channel. That is a materials property,
+ * and it is precisely why replacing polysilicon with metal was not merely a
+ * conductivity improvement: a metal gate whose work function can be tuned is a
+ * threshold voltage you can choose. Without it, the arithmetic below lands
+ * near zero and the device leaks.
+ */
+export function thresholdVoltage({ dopingCm3, toxNm, kOx = 3.9, phiMs = -0.95, qOxPerCm2 = 0, T = 300 }) {
+  const { gamma, cox } = bodyEffectGamma({ dopingCm3, toxNm, kOx })
+  const phiF = fermiPotential(dopingCm3, T)
+  const vfb = phiMs - qOxPerCm2 / cox
+  const vth = vfb + 2 * phiF + gamma * Math.sqrt(2 * phiF)
+  return { vth, vfb, phiF, gamma, cox, depletionTerm: gamma * Math.sqrt(2 * phiF) }
+}
+
+// ================================================== LEAKAGE PATHS ========
+//
+// "Leakage" is not one thing. A modern transistor leaks by at least five
+// distinct mechanisms with different physics, different temperature
+// behaviour and different fixes — and the one that dominates has changed
+// twice in twenty years.
+
+export const LEAKAGE_PATHS = [
+  { id: 'sub', name: 'Subthreshold conduction', icon: 'planar',
+    law: 'I ∝ exp(−V_th·q/nkT)', temp: 'Worse when hot',
+    what: 'Carriers with enough thermal energy to cross the barrier even with the gate off. Set by the 60 mV/decade floor and therefore by the threshold voltage.',
+    fix: 'Raise V_th, which costs drive current. Better electrostatics — more gated faces — so the floor is actually approached.' },
+  { id: 'gate', name: 'Gate tunnelling', icon: 'ipsec',
+    law: 'I ∝ exp(−2κt)', temp: 'Nearly temperature-independent',
+    what: 'Electrons tunnelling straight through the gate dielectric. Rose tenfold for every 0.18 nm of oxide removed until it dominated everything.',
+    fix: 'High-k dielectrics: a physically thicker film at the same capacitance. This is the whole reason hafnium replaced silicon dioxide.' },
+  { id: 'gidl', name: 'Gate-induced drain leakage', icon: 'ipphy',
+    law: 'I ∝ E·exp(−B/E)', temp: 'Weakly temperature-dependent',
+    what: 'Band-to-band tunnelling in the drain where the gate overlaps it. The high field bends the bands enough that valence electrons tunnel to the conduction band.',
+    fix: 'Lighter drain doping under the overlap, less overlap, lower supply. It sets the floor on standby leakage in memory.' },
+  { id: 'junction', name: 'Junction leakage', icon: 'die',
+    law: 'I ∝ n_i² and n_i', temp: 'Doubles every 8–10 °C',
+    what: 'Reverse-biased source and drain junctions leaking by diffusion and by thermal generation in the depletion region.',
+    fix: 'Little to be done — it is the intrinsic carrier concentration, which is exponential in temperature. It is why hot chips leak more.' },
+  { id: 'punch', name: 'Punch-through', icon: 'finfet',
+    law: 'Onset when depletion regions meet', temp: 'Worse when hot',
+    what: 'Source and drain depletion regions touching beneath the channel, so current flows in the bulk where the gate has no influence at all.',
+    fix: 'Halo implants, thinner bodies, and ultimately wrapping the gate. It is short-channel failure in its most literal form.' },
+]
+
+/** Junction leakage scales with n_i², which is brutally temperature-dependent. */
+export function junctionLeakageRatio(T1, T2) {
+  const n1 = intrinsicCarriers(T1), n2 = intrinsicCarriers(T2)
+  return (n2 * n2) / (n1 * n1)
+}
+
+// ======================================================== NOISE ==========
+//
+// Every measurement has a floor, and for analog circuits the floor is where
+// the design stops. These are not engineering imperfections — thermal noise is
+// the equipartition theorem and shot noise is the discreteness of charge.
+
+/** Johnson–Nyquist thermal noise voltage across a resistor, V rms. */
+export const thermalNoiseV = (rOhm, bandwidthHz, T = 300) =>
+  Math.sqrt(4 * K.kB_J * T * rOhm * bandwidthHz)
+
+/** Shot noise current, from the fact that charge arrives in lumps. */
+export const shotNoiseA = (currentA, bandwidthHz) =>
+  Math.sqrt(2 * K.q * currentA * bandwidthHz)
+
+/**
+ * kTC noise: sampling onto a capacitor traps a random charge, and the
+ * resulting voltage uncertainty is √(kT/C) — independent of the resistance
+ * that charged it, which is the surprising part. It is why every switched
+ * capacitor in a data converter is larger than the signal would require.
+ */
+export const ktcNoiseV = (capF, T = 300) => Math.sqrt((K.kB_J * T) / capF)
+
+/** Flicker (1/f) noise, the one that gets worse as devices shrink. */
+export const flickerNoiseV2 = ({ kf = 1e-25, cox, wCm, lCm, freqHz }) =>
+  kf / (cox * wCm * lCm * freqHz)
+
+/**
+ * Pelgrom's law: mismatch between two nominally identical devices scales as
+ * the inverse square root of their area.
+ *
+ *   σ(ΔV_th) = A_Vth / √(W·L)
+ *
+ * This is why analog circuits use devices vastly larger than the process
+ * allows, and why the smallest transistors on a die — the six in an SRAM cell
+ * — are the ones whose margin erodes first. It is the statistical statement of
+ * the same physics as random dopant fluctuation.
+ */
+export function pelgromMismatch({ aVthMvUm = 3.0, wNm, lNm }) {
+  const areaUm2 = (wNm * 1e-3) * (lNm * 1e-3)
+  return areaUm2 > 0 ? aVthMvUm / Math.sqrt(areaUm2) : Infinity
+}
+
+// ========================================= QUANTUM CONFINEMENT ===========
+
+/**
+ * Ground-state energy in a thin body, from the infinite square well:
+ *
+ *   E₁ = h² / (8·m*·t²)
+ *
+ * Squeeze the channel and the lowest available state moves up, which raises
+ * the threshold voltage — a thin-body device has a different V_th purely
+ * because it is thin. Below about 5 nm this stops being a correction and
+ * becomes a design parameter.
+ */
+export function confinementEnergyEv({ thicknessNm, mStar = 0.19 }) {
+  const t = thicknessNm * 1e-9
+  const h = 2 * Math.PI * K.hbar          // there is no K.h — only hbar
+  const e = (h * h) / (8 * mStar * K.me * t * t)
+  return e / K.q
+}
+
+/**
+ * Effective oxide thickness including the parts that are not oxide.
+ *
+ * The inversion layer has a finite thickness — carriers sit roughly a
+ * nanometre below the interface, not on it — and that distance adds to the
+ * electrical thickness. A polysilicon gate adds a depletion layer of its own.
+ * Together they put a floor under EOT that no dielectric can lower, and
+ * removing the polysilicon term is the second reason metal gates arrived.
+ */
+export function electricalEot({ eotNm, inversionNm = 0.4, polyDepletionNm = 0 }) {
+  const total = eotNm + inversionNm + polyDepletionNm
+  return { total, penalty: total / eotNm, inversionNm, polyDepletionNm }
+}
+
+// ============================================ STRAIN ENGINEERING =========
+//
+// When gate length scaling stopped delivering, mobility was bought instead —
+// by deliberately deforming the crystal. Strain splits the conduction band
+// valleys and warps the valence band, lowering the effective mass along the
+// direction of transport and reducing inter-valley scattering.
+//
+// It is one of the few times the industry improved a material property rather
+// than a dimension, and it bought roughly a generation.
+
+export const STRAIN = [
+  { id: 'sige', name: 'SiGe source/drain', carrier: 'holes', gain: 1.9,
+    how: 'Silicon-germanium grown in etched source and drain recesses. Its larger lattice constant compresses the channel between them.',
+    note: 'The single largest mobility improvement in production, and it arrived at 90 nm.' },
+  { id: 'nitride', name: 'Tensile nitride liner', carrier: 'electrons', gain: 1.3,
+    how: 'A stressed silicon nitride film deposited over the device pulls the channel into tension.',
+    note: 'Applied selectively — the two carriers want opposite strain, so nMOS and pMOS get different treatments on the same die.' },
+  { id: 'sic', name: 'SiC source/drain', carrier: 'electrons', gain: 1.25,
+    how: 'Carbon-doped silicon has a smaller lattice constant, so it pulls rather than pushes.',
+    note: 'The electron counterpart to SiGe, and less widely used because the nitride liner was cheaper.' },
+  { id: 'orientation', name: 'Substrate orientation', carrier: 'holes', gain: 1.5,
+    how: 'Hole mobility is markedly better on a (110) surface than the standard (100).',
+    note: 'Attractive and awkward: electrons prefer (100), so you cannot have both without hybrid substrates.' },
+]
+
+// ================================================== SELF-HEATING =========
+
+/**
+ * Thermal conductivity of thin silicon, reduced by phonon boundary scattering.
+ *
+ * Bulk silicon conducts heat at about 150 W/m·K. A film thinner than the
+ * phonon mean free path does not — phonons scatter off the surfaces before
+ * they travel far, and conductivity collapses. A 5 nm nanosheet conducts heat
+ * roughly an order of magnitude worse than the bulk it is made of, so the same
+ * power makes it far hotter.
+ *
+ * This is the mechanism behind self-heating, and it worsens with exactly the
+ * architectural changes that improve electrostatics. Thin bodies are good for
+ * the gate and bad for the heat.
+ */
+export function thinFilmConductivity({ thicknessNm, bulkWmK = 150, phononMfpNm = 300 }) {
+  return bulkWmK / (1 + phononMfpNm / thicknessNm)
+}
+
+/** Channel temperature rise from self-heating. */
+export function selfHeating({ powerUw, thicknessNm, lengthNm, widthNm }) {
+  const k = thinFilmConductivity({ thicknessNm })
+  // One-dimensional conduction along the channel to the source and drain.
+  const areaM2 = (thicknessNm * 1e-9) * (widthNm * 1e-9)
+  const lenM = (lengthNm * 1e-9) / 2
+  const rth = areaM2 > 0 ? lenM / (k * areaM2) : Infinity
+  return { kEff: k, rthKperW: rth, deltaTK: (powerUw * 1e-6) * rth }
+}

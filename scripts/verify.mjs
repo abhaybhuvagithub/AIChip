@@ -183,6 +183,7 @@ group('Content')
   ok('quiz covers the material chain', QUIZ.some((q) => /purity|distill|polysilicon|particle/i.test(q.q)))
   ok('quiz covers real silicon', QUIZ.some((q) => /Cerebras|MI300X|wafer-scale/i.test(q.q)))
   ok('quiz covers the value chain', QUIZ.some((q) => /Arm|EUV scanners|Terafab/i.test(q.q)))
+  ok('quiz covers the deep device physics', QUIZ.some((q) => /work function|SRAM cell lose margin|barely changes between 25/i.test(q.q)))
   ok('quiz covers AI accelerators', QUIZ.some((q) => /arithmetic intensity|single token|bytes per weight/i.test(q.q)))
   ok('quiz covers 3D integration', QUIZ.some((q) => /hybrid bond|wafer-to-wafer/i.test(q.q)))
   ok('quiz covers who builds it', QUIZ.some((q) => /discipline is the largest|compiler team/i.test(q.q)))
@@ -198,7 +199,7 @@ group('Content')
     QUIZ.some((q) => /X-factor|cycle time|bottleneck|scanners/i.test(q.q)))
   ok('quiz covers 3D transistors and the thermal wall',
     QUIZ.some((q) => /CFET|backside power/i.test(q.q)) && QUIZ.some((q) => /3D memory|3D logic/i.test(q.q)))
-  ok('quiz covers compute and quantum', QUIZ.length >= 61 &&
+  ok('quiz covers compute and quantum', QUIZ.length >= 64 &&
     QUIZ.some((q) => /FP4|sparsity|precision/i.test(q.q)) &&
     QUIZ.some((q) => /qubit|surface code|threshold/i.test(q.q)))
 }
@@ -1290,6 +1291,132 @@ group('Physics')
   ok('higher-k dielectrics have lower barriers — the real trade',
     P.DIELECTRICS.find((d) => d.id === 'hfo2').barrier <
     P.DIELECTRICS.find((d) => d.id === 'sio2').barrier)
+  // ---- the MOS capacitor ----
+  // The unit trap: K.eps0 in this file is already F/cm and says so in a
+  // comment. Multiplying it by 1e-2 made every capacitance and depletion width
+  // a hundred times wrong, which surfaced as a 10 nm depletion region where
+  // 104 nm was expected.
+  ok('Fermi potential is a few tenths of a volt',
+    near(P.fermiPotential(1e17), 0.4167, 0.002), P.fermiPotential(1e17).toFixed(4))
+  ok('Fermi potential rises with doping', P.fermiPotential(1e18) > P.fermiPotential(1e16))
+  ok('the depletion region is about 100 nm at 1e17',
+    near(P.depletionWidth({ dopingCm3: 1e17 }) * 1e7, 103.8, 1),
+    (P.depletionWidth({ dopingCm3: 1e17 }) * 1e7).toFixed(1) + ' nm')
+  ok('heavier doping thins the depletion region',
+    P.depletionWidth({ dopingCm3: 1e18 }) < P.depletionWidth({ dopingCm3: 1e16 }))
+  ok('oxide capacitance is right for a 1 nm oxide',
+    near(P.bodyEffectGamma({ dopingCm3: 1e17, toxNm: 1 }).cox, 3.453e-6, 1e-8),
+    P.bodyEffectGamma({ dopingCm3: 1e17, toxNm: 1 }).cox.toExponential(3))
+  ok('a thicker oxide gives a larger body-effect coefficient',
+    P.bodyEffectGamma({ dopingCm3: 1e17, toxNm: 3 }).gamma >
+    P.bodyEffectGamma({ dopingCm3: 1e17, toxNm: 1 }).gamma)
+  ok('the threshold is the sum of its four terms', (() => {
+    const v = P.thresholdVoltage({ dopingCm3: 1e17, toxNm: 1 })
+    return near(v.vth, v.vfb + 2 * v.phiF + v.depletionTerm, 1e-12)
+  })())
+  // The lesson of the section: without work-function engineering the
+  // arithmetic lands at or below zero and the device is not a switch.
+  ok('an n+ poly gate on a modern oxide gives an unusable threshold',
+    P.thresholdVoltage({ dopingCm3: 1e17, toxNm: 1, phiMs: -0.95 }).vth < 0.1)
+  ok('a tuned metal work function recovers a usable threshold',
+    P.thresholdVoltage({ dopingCm3: 1e17, toxNm: 1, phiMs: -0.15 }).vth > 0.3)
+  ok('the two body factors are distinct functions', (() => {
+    // "Body factor" means the ideality factor n AND the body-effect
+    // coefficient γ. Both exist here and they are different quantities.
+    const src = readFileSync(join(root, 'src/lib/physics.js'), 'utf8')
+    return /export const bodyFactor = /.test(src) && /export function bodyEffectGamma/.test(src)
+  })())
+
+  // ---- leakage ----
+  ok('five leakage paths, each with law, temperature behaviour and a fix',
+    P.LEAKAGE_PATHS.length === 5 && P.LEAKAGE_PATHS.every((l) =>
+      l.name && l.icon && l.law && l.temp && l.what.length > 80 && l.fix.length > 50))
+  ok('junction leakage rises enormously with temperature',
+    P.junctionLeakageRatio(298, 398) > 1e4)
+  ok('junction leakage is symmetric under inversion',
+    near(P.junctionLeakageRatio(298, 398) * P.junctionLeakageRatio(398, 298), 1, 1e-6))
+  ok('gate tunnelling is named as temperature-independent',
+    /temperature-independent/i.test(P.LEAKAGE_PATHS.find((l) => l.id === 'gate').temp))
+
+  // ---- noise ----
+  ok('Johnson noise matches the textbook 4 nV per root hertz at 1 kohm',
+    near(P.thermalNoiseV(1000, 1e6) * 1e6, 4.07, 0.05),
+    (P.thermalNoiseV(1000, 1e6) * 1e6).toFixed(2) + ' uV')
+  ok('thermal noise scales as the square root of resistance',
+    near(P.thermalNoiseV(4000, 1e6) / P.thermalNoiseV(1000, 1e6), 2, 1e-9))
+  ok('kTC noise on a femtofarad is millivolts',
+    near(P.ktcNoiseV(1e-15) * 1e3, 2.03, 0.05), (P.ktcNoiseV(1e-15) * 1e3).toFixed(2) + ' mV')
+  ok('kTC noise falls as the square root of capacitance',
+    near(P.ktcNoiseV(1e-15) / P.ktcNoiseV(4e-15), 2, 1e-9))
+  ok('shot noise scales with the square root of current',
+    near(P.shotNoiseA(4e-6, 1e6) / P.shotNoiseA(1e-6, 1e6), 2, 1e-9))
+
+  // ---- matching ----
+  ok('Pelgrom mismatch goes as one over the square root of area',
+    near(P.pelgromMismatch({ wNm: 100, lNm: 100 }) / P.pelgromMismatch({ wNm: 200, lNm: 200 }), 2, 1e-9))
+  ok('an SRAM-sized device has enormous threshold mismatch',
+    P.pelgromMismatch({ wNm: 20, lNm: 20 }) > 100,
+    P.pelgromMismatch({ wNm: 20, lNm: 20 }).toFixed(0) + ' mV')
+  ok('a large analog device matches to a few millivolts',
+    P.pelgromMismatch({ wNm: 2000, lNm: 2000 }) < 5)
+  ok('zero area returns infinity rather than a number',
+    P.pelgromMismatch({ wNm: 0, lNm: 10 }) === Infinity)
+
+  // ---- confinement ----
+  ok('confinement energy goes as one over thickness squared',
+    near(P.confinementEnergyEv({ thicknessNm: 5 }) / P.confinementEnergyEv({ thicknessNm: 10 }), 4, 1e-9))
+  ok('a 5 nm body lifts the ground state by tens of meV',
+    near(P.confinementEnergyEv({ thicknessNm: 5 }) * 1000, 79.2, 1),
+    (P.confinementEnergyEv({ thicknessNm: 5 }) * 1000).toFixed(1) + ' meV')
+  ok('at 3 nm the shift exceeds thermal energy several times over',
+    P.confinementEnergyEv({ thicknessNm: 3 }) > 8 * P.thermalVoltage(300))
+  ok('the inversion layer and poly depletion add to electrical EOT', (() => {
+    const a = P.electricalEot({ eotNm: 0.9, inversionNm: 0.4, polyDepletionNm: 0 })
+    const b = P.electricalEot({ eotNm: 0.9, inversionNm: 0.4, polyDepletionNm: 0.4 })
+    return a.total > 0.9 && b.total > a.total && near(b.total, 1.7, 1e-9)
+  })())
+
+  // ---- strain ----
+  ok('every strain technique names its carrier, gain and mechanism',
+    P.STRAIN.length >= 4 && P.STRAIN.every((x) => x.name && x.carrier && x.gain > 1 &&
+      x.how.length > 60 && x.note.length > 40))
+  ok('SiGe is the largest single mobility gain', (() => {
+    const sige = P.STRAIN.find((x) => x.id === 'sige')
+    return P.STRAIN.every((x) => x.id === 'sige' || x.gain <= sige.gain)
+  })())
+  ok('electrons and holes are helped by different techniques',
+    P.STRAIN.some((x) => x.carrier === 'holes') && P.STRAIN.some((x) => x.carrier === 'electrons'))
+
+  // ---- self-heating ----
+  ok('thin films conduct heat far worse than bulk',
+    P.thinFilmConductivity({ thicknessNm: 5 }) < 150 * 0.03)
+  ok('conductivity approaches bulk as the film thickens',
+    P.thinFilmConductivity({ thicknessNm: 3000 }) > 150 * 0.85)
+  ok('conductivity rises monotonically with thickness', (() => {
+    let last = 0
+    for (const t of [3, 5, 10, 20, 50, 150, 500]) {
+      const k = P.thinFilmConductivity({ thicknessNm: t })
+      if (k < last) return false
+      last = k
+    }
+    return true
+  })())
+  ok('self-heating in a nanosheet is tens of kelvin, not thousands', (() => {
+    const r = P.selfHeating({ powerUw: 2, thicknessNm: 5, lengthNm: 20, widthNm: 50 })
+    return r.deltaTK > 3 && r.deltaTK < 200
+  })(), P.selfHeating({ powerUw: 2, thicknessNm: 5, lengthNm: 20, widthNm: 50 }).deltaTK.toFixed(0) + ' K')
+  ok('temperature rise scales linearly with power',
+    near(P.selfHeating({ powerUw: 4, thicknessNm: 5, lengthNm: 20, widthNm: 50 }).deltaTK /
+         P.selfHeating({ powerUw: 2, thicknessNm: 5, lengthNm: 20, widthNm: 50 }).deltaTK, 2, 1e-9))
+  // The trap worth stating: thinner is better for the gate and worse for heat.
+  ok('a thinner body is electrostatically better and thermally worse', (() => {
+    const thin = P.naturalLength({ toxNm: 1, tbodyNm: 3 })
+    const thick = P.naturalLength({ toxNm: 1, tbodyNm: 10 })
+    const kThin = P.thinFilmConductivity({ thicknessNm: 3 })
+    const kThick = P.thinFilmConductivity({ thicknessNm: 10 })
+    return thin < thick && kThin < kThick
+  })())
+
   // ---- materials ----
   ok('material table is populated and complete', P.MATERIALS.length >= 6 && P.MATERIALS.every((m) =>
     m.name && m.eg > 0 && m.muE > 0 && m.ebd > 0 && m.kth > 0 && m.note.length > 60))

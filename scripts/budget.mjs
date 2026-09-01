@@ -44,12 +44,15 @@ const dist = join(root, 'dist')
 //           view transitions, 25 role descriptions and a staffing model, ~14 kB)
 //   234 kB  3D integration maths and the AI chips tab (bonding density, stack
 //           yield, roofline model, KV cache and architecture taxonomy, ~12 kB)
+//   248 kB  Run & Operate plus seven deep science sections (policy engine, MOS
+//           capacitor, leakage paths, noise, matching, confinement, strain and
+//           self-heating, ~14 kB)
 // Each rise is a feature that bought the bytes, named in the commit.
 const BUDGET = {
-  'js.gzip': 234 * 1024,
+  'js.gzip': 248 * 1024,
   'css.gzip': 7 * 1024,
   'html.raw': 6 * 1024,
-  'total.gzip': 242 * 1024,
+  'total.gzip': 256 * 1024,
 }
 
 let fail = 0

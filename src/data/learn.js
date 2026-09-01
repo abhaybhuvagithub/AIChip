@@ -37,6 +37,9 @@ export const TOUR = [
   { id: 't8s1b', tab: 'science', title: 'Learn why silicon actually won', body: 'Germanium is three times faster, gallium arsenide six. Silicon won on its native oxide, its abundance and its thermal conductivity — none of them electrical. A semiconductor is chosen on whether you can build a factory around it.' },
   { id: 't8s1c', tab: 'science', title: 'Watch the drain take over', body: 'Drag the channel length down in section 9. Below about seven natural lengths the drain starts controlling the barrier instead of the gate, and DIBL climbs into the hundreds of millivolts per volt. Switch to gate-all-around and the same channel becomes workable — that is the entire roadmap in one control.' },
   { id: 't8s1d', tab: 'science', title: 'Find the wall the transistors did not hit', body: 'Narrow the wire in section 10. Surface scattering, grain boundaries and the diffusion barrier all worsen together, and a 20 nm copper line is several times bulk resistivity. Transistors kept shrinking; their wires did not cooperate.' },
+  { id: 't8s1e', tab: 'science', title: 'Find out where the threshold comes from', body: 'Section 12 assembles V_th from four terms. Set the gate back to n+ polysilicon at a modern oxide and the arithmetic lands below zero — the transistor is on when it should be off. Choosing a metal gate work function fixes it and costs nothing electrical.' },
+  { id: 't8s1f', tab: 'science', title: 'See why SRAM stopped shrinking', body: 'Pelgrom\'s law in section 15: mismatch goes as one over the square root of area. At SRAM dimensions that is 150 mV of threshold spread against a supply under a volt, which is why the six smallest transistors on a die fail first.' },
+  { id: 't8s1g', tab: 'science', title: 'Meet the trap in section 18', body: 'A thinner body keeps the drain out of the channel and cooks it doing so — a 5nm nanosheet conducts heat at 1.6% of bulk silicon. The gate and the heat want opposite things, and the roadmap pays both.' },
   { id: 't8s2', tab: 'science', title: 'Count the photons', body: 'An EUV photon carries fourteen times the energy of an ArF one, so the same dose delivers fourteen times fewer of them. Drop the dose and watch the shot noise climb — that is where stochastic defects come from, and no amount of cleanliness prevents them.' },
   { id: 't8s3', tab: 'science', title: 'Count the dopants', body: 'A 20 nm channel holds about eight dopant atoms. Where they land shifts the threshold voltage by tens of percent, and no process control fixes it — which is why modern channels are undoped.' },
   { id: 't8b', tab: 'silicon', title: 'See what all of this is actually about', body: 'Every part is drawn at true relative area on one 300 mm wafer. An A17 Pro is the small square near the middle; the Cerebras WSE-3 is the wafer. Both are called a chip.' },
@@ -59,7 +62,7 @@ export const TOUR = [
   { id: 't12b', tab: 'unsolved', title: 'Read the dates, not the descriptions', body: 'Several of these bars are longer than the careers of the people working on them. Tunnel FETs have delivered steep slope and useless on-current since 2004; the memory wall was named in 1994 and has widened every year since.' },
   { id: 't12c', tab: 'unsolved', title: 'Note what "contained" means', body: 'Some problems are not solved, they are paid for — every generation, forever, unless something changes. EUV stochastics cost dose on the most expensive tool in the building, on every wafer, and no amount of cleanliness helps.' },
   { id: 't12d', tab: 'acronyms', title: 'Look anything up', body: 'Search covers the acronym, its expansion and its description — so a plain-English phrase works. Type "short channels leak" and it finds DIBL. Most entries link to the tab that explains the thing properly rather than in a sentence.' },
-  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Sixty-one questions. Everything needed to answer them is on the other thirteen tabs.' },
+  { id: 't13', tab: 'quiz', title: 'Check it landed', body: 'Sixty-four questions. Everything needed to answer them is on the other thirteen tabs.' },
 ]
 
 export const QUIZ = [
@@ -350,6 +353,24 @@ export const QUIZ = [
     opts: ['Memory dies are smaller', 'Most of a memory stack is idle at any moment, so power density stays manageable', 'Memory needs fewer through-silicon vias', 'Memory tolerates higher temperatures'],
     a: 1,
     why: 'Stacking multiplies power per unit footprint while the surface available to remove heat stays fixed. Memory gets away with it because simultaneous activity is low. Logic does not have that escape.',
+  },
+  {
+    q: 'With an n⁺ polysilicon gate on a 1 nm oxide, the calculated threshold voltage comes out near zero. What fixes it?',
+    opts: ['A thicker oxide', 'Choosing a gate metal whose work function sets the flat-band voltage', 'Heavier channel doping alone', 'A longer channel'],
+    a: 1,
+    why: 'V_th = V_FB + 2φ_F + γ√(2φ_F), and V_FB is the work function difference between gate and channel — a materials property. Polysilicon offers two values; a metal gate offers a continuum, and with it a threshold you design rather than accept. That is the second reason metal gates arrived at 45 nm, and the one usually left out.',
+  },
+  {
+    q: 'Why do the six transistors in an SRAM cell lose margin before anything else on the die?',
+    opts: ['They switch most often', 'They are the smallest, and mismatch goes as one over the square root of area', 'They run at higher voltage', 'They are furthest from the power grid'],
+    a: 1,
+    why: 'Pelgrom\'s law: σ(ΔV_th) = A_Vth/√(WL). At SRAM dimensions that is over a hundred millivolts of threshold spread against a supply under a volt. It is the statistical form of random dopant fluctuation, and it is why SRAM has nearly stopped shrinking while logic continues.',
+  },
+  {
+    q: 'A leakage current barely changes between 25 °C and 125 °C. What does that tell you?',
+    opts: ['It is subthreshold conduction', 'It is tunnelling through something', 'It is junction leakage', 'The measurement is wrong'],
+    a: 1,
+    why: 'Tunnelling depends on barrier thickness and field, not on how many carriers have thermal energy — so it barely notices temperature. Junction leakage goes as n_i² and rises by five orders of magnitude over that range; subthreshold leakage rises too. A temperature sweep identifies the mechanism before you know anything else.',
   },
   {
     q: 'Silicon has lower carrier mobility than germanium and far lower than gallium arsenide. Why did it win?',

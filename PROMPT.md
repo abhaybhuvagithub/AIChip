@@ -1145,3 +1145,34 @@ twenty-three. Structure that worked at seventeen had quietly stopped working.
   descriptions and group names, so a reader searching "roofline" or "physics"
   finds the tab without knowing what it is called — and an empty result says so
   rather than showing a blank panel.
+
+---
+
+## Thirty-fifth pass: the science, deeper
+
+Eleven sections to eighteen. The tab explained how a transistor behaves and
+never derived why its threshold sits where it does — it started one level above
+the foundation.
+
+- **Section 12 is the one that was missing.** V_th assembled from its four
+  terms, and the payoff is that with an n⁺ polysilicon gate on a modern oxide
+  the arithmetic lands **below zero** — the device conducts with the gate off.
+  Choosing a metal gate's work function fixes it and costs nothing electrical.
+  That is the second reason metal gates arrived at 45 nm and the one usually
+  omitted; the first is that polysilicon depletes and adds to electrical EOT,
+  which is now section 16.
+- **Three unit and naming errors, all from assuming rather than reading.**
+  `K.eps0` in this file is already F/cm and carries a comment saying so — I
+  multiplied by 1e-2 anyway and made every capacitance and depletion width a
+  hundred times wrong. `K.kB` and `K.h` do not exist; the file has `kB_J` and
+  `hbar`. Read the constants block; do not infer it.
+- **A name collision that broke the build, usefully.** "Body factor" means both
+  the ideality factor *n* and the body-effect coefficient *γ*. The file already
+  had one; adding the other failed to compile, which is far better than two
+  functions quietly meaning different things. Renamed to `bodyEffectGamma`.
+- **Sections that connect rather than accumulate.** Pelgrom's law is the
+  statistical form of the dopant fluctuation already in section 6, and it
+  explains the SRAM entry on the open-problems tab. Self-heating is the local
+  version of the thermal wall on the 3D tab — and it carries the trap worth
+  stating plainly: a thinner body keeps the drain out of the channel and cooks
+  it doing so. The gate and the heat want opposite things.

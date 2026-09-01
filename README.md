@@ -17,7 +17,7 @@ Five tabs:
 | **Fab line** | The 17 modules a wafer passes through, from crystal growth to final test. Each opens up into physics, tools, failure modes and duration. A "run a lot" button walks the line. |
 | **Yield lab** | A live 300 mm wafer map drawn to scale, colourable by defects **or by speed bin**. Drag die size, defect density, edge exclusion or scribe width and watch gross dies, yield and good dies move together. Four real yield models side by side on the same wafer, plus per-die maximum clock from process variation, a speed-bin distribution and blended selling price. |
 | **Economics** | Cost per good die, silicon utilisation and gross margin, with eight real product shapes — mobile SoC through SiC power device — computed through the same model. |
-| **The science** | Eleven sections of physics, computed live: the MOSFET I–V family, the subthreshold floor with a temperature slider, gate tunnelling and why hafnium replaced silicon dioxide, Rayleigh optics, EUV photon shot noise, dopant fluctuation, why Dennard scaling ended — then why silicon won despite losing on mobility, carrier transport and Matthiessen's rule, short-channel effects and the natural length, the copper resistivity wall, and the four ways silicon wears out. |
+| **The science** | Eighteen sections of physics, computed live: the MOSFET I–V family, the subthreshold floor with a temperature slider, gate tunnelling and why hafnium replaced silicon dioxide, Rayleigh optics, EUV photon shot noise, dopant fluctuation, why Dennard scaling ended — then why silicon won despite losing on mobility, carrier transport and Matthiessen's rule, short-channel effects and the natural length, the copper resistivity wall, and the four ways silicon wears out — then deeper: where the threshold voltage actually comes from, the five distinct leakage mechanisms, the thermal and shot noise floor, Pelgrom matching, quantum confinement and the EOT floor, strain engineering, and self-heating in thin bodies. |
 | **Clock** | Why frequency stopped in 2005 and the transistors had nothing to do with it. A log ladder from the 740 kHz Intel 4004 to 1.5 THz device f_max, with processor clocks, radio carriers and single-device figures kept visually distinct. Turn the clock up and watch power, heat and signal reach fail in that order. |
 | **Nodes** | 180 nm to 2 nm, with the transistor architecture that made each generation possible, and a drawn cross-section showing how many sides of the channel the gate controls. |
 | **AI chips** | What makes an accelerator an accelerator, built around the roofline model. Arithmetic intensity against attainable throughput with real kernels plotted, KV cache and weight footprint maths, the energy cost of moving a byte versus computing on it, five architectural bets, and three workloads that want three different chips. |
@@ -74,6 +74,16 @@ Five tabs:
 - **Clock physics** — signal velocity c/√ε and reach per cycle, clock period,
   and power against frequency both at fixed voltage (linear) and with voltage
   scaling (cubic).
+- **The MOS capacitor** — Fermi potential, depletion width and charge, the
+  body-effect coefficient, and the threshold voltage assembled from its four
+  terms including the work-function difference.
+- **Leakage** — five distinct mechanisms with their scaling laws, and junction
+  leakage against temperature via n_i².
+- **Noise and matching** — Johnson, shot and kTC noise, and Pelgrom's law for
+  device mismatch against area.
+- **Confinement and heat** — ground-state energy in a thin body, electrical EOT
+  including the inversion layer and poly depletion, thin-film thermal
+  conductivity from phonon boundary scattering, and self-heating.
 - **Carrier transport** — Caughey–Thomas mobility against doping, Matthiessen's
   rule combining phonon and ionised-impurity scattering, and drift velocity
   with saturation.

@@ -85,7 +85,7 @@ const TABS = [
   { id: 'acronyms', label: 'Acronyms', icon: 'book', group: 'Reference',
     desc: '172 abbreviations, each with what it actually means rather than just what it stands for.' },
   { id: 'quiz', label: 'Quiz', icon: 'quiz', group: 'Reference',
-    desc: 'Sixty-one questions. Every answer is somewhere on the other tabs.' },
+    desc: 'Sixty-four questions. Every answer is somewhere on the other tabs.' },
 ]
 
 /** Groups, in the order they appear, derived so the two cannot drift apart. */

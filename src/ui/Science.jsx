@@ -4,6 +4,10 @@ import {
   mobilityVsDoping, mobilityComponents, driftVelocity, saturationField,
   naturalLength, shortChannel, copperResistivity, rcDelay,
   blackMttf, accelerationFactor,
+  LEAKAGE_PATHS, STRAIN,
+  fermiPotential, depletionWidth, thresholdVoltage, junctionLeakageRatio,
+  thermalNoiseV, shotNoiseA, ktcNoiseV, pelgromMismatch,
+  confinementEnergyEv, electricalEot, thinFilmConductivity, selfHeating,
   thermalVoltage, bandgap, intrinsicCarriers, carriers,
   oxideCap, eot, physicalForEot,
   drainCurrent, subthresholdCurrent, subthresholdSwing, ssFloor,
@@ -12,6 +16,7 @@ import {
   dopantFluctuation,
 } from '../lib/physics.js'
 import { fmt } from '../lib/fab.js'
+import Icon from './Icon.jsx'
 
 const sci = (v, d = 2) => (Number.isFinite(v) ? v.toExponential(d) : '—')
 
@@ -135,6 +140,15 @@ export default function Science() {
   const [wireL, setWireL] = useState(500)
   const [jDens, setJDens] = useState(1e6)
   const [tJunc, setTJunc] = useState(100)
+  // Deep sections
+  const [na, setNa] = useState(1e17)
+  const [phiMs, setPhiMs] = useState(-0.95)
+  const [leak, setLeak] = useState('gate')
+  const [capF, setCapF] = useState(1)
+  const [devW, setDevW] = useState(20)
+  const [confT, setConfT] = useState(5)
+  const [shPower, setShPower] = useState(2)
+  const [shThick, setShThick] = useState(5)
 
   const d = DIELECTRICS.find((x) => x.id === diel)
   const cox = oxideCap(tox, d.k)
@@ -154,6 +168,11 @@ export default function Science() {
   const rc = rcDelay({ widthNm: wireW, lengthUm: wireL })
   const rcFat = rcDelay({ widthNm: wireW * 5, lengthUm: wireL })
   const af = accelerationFactor({ tUse: 328, tStress: tJunc + 273 })
+  const vt = thresholdVoltage({ dopingCm3: na, toxNm: eotNm, phiMs })
+  const lk = LEAKAGE_PATHS.find((x) => x.id === leak)
+  const sh = selfHeating({ powerUw: shPower, thicknessNm: shThick, lengthNm: 20, widthNm: 50 })
+  const eEot = electricalEot({ eotNm, inversionNm: 0.4, polyDepletionNm: 0 })
+  const eEotPoly = electricalEot({ eotNm, inversionNm: 0.4, polyDepletionNm: 0.4 })
   const cRun = carriers(1e17, 'n', T)
 
   return (
@@ -758,6 +777,353 @@ export default function Science() {
             into years of use. The whole method rests on the activation energy being right — get it
             wrong and the qualification proves nothing, confidently.
           </p>
+        </div>
+      </div>
+
+      {/* --------------------------------- 12. the MOS capacitor */}
+      <h2 className="sec">12 · Where the threshold voltage actually comes from</h2>
+      <p className="small" style={{ marginBottom: 12, maxWidth: '68ch' }}>
+        Everything above treats V_th as given. It is not — it is assembled from four physical terms,
+        and one of them is a materials property rather than a dimension. That term is why metal gates
+        exist.
+      </p>
+      <div className="grid" style={{ gridTemplateColumns: 'minmax(0,1fr) minmax(280px,340px)' }}>
+        <div>
+          <div className="card" style={{ borderColor: 'var(--accent)' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 18, color: 'var(--accent)', textAlign: 'center', padding: '6px 0 14px' }}>
+              V_th = V_FB + 2φ_F + γ·√(2φ_F)
+            </div>
+            <div className="tbl-wrap">
+              <table className="tbl">
+                <thead><tr><th>Term</th><th>Value</th><th style={{ width: '52%' }}>What it is</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><b>V_FB</b> flat-band</td>
+                    <td className="num" style={{ color: 'var(--bad)' }}>{vt.vfb.toFixed(3)} V</td>
+                    <td className="small">The work function difference between gate and channel. A materials property, and the only term you can choose freely.</td>
+                  </tr>
+                  <tr>
+                    <td><b>2φ_F</b> surface potential</td>
+                    <td className="num">{(2 * vt.phiF).toFixed(3)} V</td>
+                    <td className="small">Band bending needed for strong inversion — where minority carriers at the surface equal majority carriers in the bulk. A convention, not a switch in nature.</td>
+                  </tr>
+                  <tr>
+                    <td><b>γ·√(2φ_F)</b> depletion</td>
+                    <td className="num">{vt.depletionTerm.toFixed(3)} V</td>
+                    <td className="small">The gate charge spent holding the depletion region open before any inversion charge appears. γ = {vt.gamma.toFixed(4)} V^½.</td>
+                  </tr>
+                  <tr style={{ background: 'var(--panel2)' }}>
+                    <td><b>V_th</b></td>
+                    <td className="num" style={{ color: vt.vth > 0.1 ? 'var(--ok)' : 'var(--bad)' }}>{vt.vth.toFixed(3)} V</td>
+                    <td className="small">{vt.vth < 0.1
+                      ? 'Too low — this device conducts with the gate at zero. It is not a switch.'
+                      : 'A usable threshold.'}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <p className="small" style={{ marginTop: 10, maxWidth: '68ch' }}>
+            Set the work function back to an n⁺ polysilicon gate (−0.95 V) at a modern oxide
+            thickness and the arithmetic lands near zero or below — the transistor is on when it
+            should be off. Doping the channel harder fixes it and costs mobility and dopant
+            fluctuation. <b>Choosing the gate metal's work function fixes it and costs nothing
+            electrical</b>, which is the second reason polysilicon was abandoned at 45 nm and the one
+            that is usually left out. The depletion region is currently{' '}
+            {(depletionWidth({ dopingCm3: na }) * 1e7).toFixed(0)} nm deep.
+          </p>
+        </div>
+        <div className="card" style={{ alignSelf: 'start' }}>
+          <Slider label="Channel doping" value={Math.log10(na)} set={(v) => setNa(Math.pow(10, v))}
+            min={15} max={19} step={0.05} fmtV={(v) => `10^${v.toFixed(2)} cm⁻³`}
+            hint={`φ_F = ${fermiPotential(na).toFixed(3)} V. More doping raises the threshold and lowers mobility — the two are the same knob.`} />
+          <Slider label="Gate work function difference" value={phiMs} set={setPhiMs}
+            min={-1.1} max={0.3} step={0.05} unit=" V"
+            hint="Polysilicon gives you two values, set by which dopant you use. A metal gate gives you a continuum, and with it a threshold you can design rather than accept." />
+          <div className="row" style={{ gap: 6 }}>
+            {[['n⁺ poly', -0.95], ['Mid-gap metal', -0.15], ['p⁺ poly', 0.15]].map(([n2, v]) => (
+              <button key={n2} className={`btn sm ${Math.abs(phiMs - v) < 0.03 ? 'active' : ''}`}
+                onClick={() => setPhiMs(v)}>{n2}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ------------------------------------------- 13. leakage */}
+      <h2 className="sec">13 · Five different ways it leaks</h2>
+      <p className="small" style={{ marginBottom: 12, maxWidth: '68ch' }}>
+        "Leakage" is not one thing. There are at least five mechanisms with different physics,
+        different temperature behaviour and different fixes — and which one dominates has changed
+        twice in twenty years.
+      </p>
+      <div className="row" style={{ marginBottom: 12 }}>
+        {LEAKAGE_PATHS.map((x) => (
+          <button key={x.id} className={`btn sm iconrow ${leak === x.id ? 'active' : ''}`} onClick={() => setLeak(x.id)}>
+            <Icon name={x.icon} size={18} />{x.name}
+          </button>
+        ))}
+      </div>
+      <div className="detail">
+        <div className="card">
+          <div className="eyebrow" style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent)' }}>{lk.law}</div>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 22, letterSpacing: '-.02em', marginTop: 6 }}>{lk.name}</h3>
+          <p style={{ marginTop: 8 }}>{lk.what}</p>
+        </div>
+        <div className="card">
+          <dl className="kv">
+            <dt>With temperature</dt><dd>{lk.temp}</dd>
+            <dt>What is done about it</dt><dd style={{ color: 'var(--ok)' }}>{lk.fix}</dd>
+          </dl>
+        </div>
+      </div>
+      <div className="grid g3" style={{ marginTop: 12 }}>
+        <div className="stat bad">
+          <div className="k">Junction leakage, 25 → 125 °C</div>
+          <div className="v" style={{ fontSize: 22 }}>{sci(junctionLeakageRatio(298, 398), 2)}×</div>
+          <div className="sub">it goes as n_i², and n_i is exponential in T</div>
+        </div>
+        <div className="stat">
+          <div className="k">Subthreshold, 25 → 125 °C</div>
+          <div className="v" style={{ fontSize: 22 }}>{(Math.pow(10, (0.3 / (subthresholdSwing(1.3, 298) / 1000)) - (0.3 / (subthresholdSwing(1.3, 398) / 1000)))).toFixed(0)}×</div>
+          <div className="sub">the swing widens with T, so the same V_th leaks more</div>
+        </div>
+        <div className="stat">
+          <div className="k">Gate tunnelling, 25 → 125 °C</div>
+          <div className="v" style={{ fontSize: 22 }}>~1×</div>
+          <div className="sub">tunnelling barely notices temperature at all</div>
+        </div>
+      </div>
+      <p className="small" style={{ marginTop: 10, maxWidth: '68ch' }}>
+        That last column is the useful diagnostic. A leakage current that barely moves with
+        temperature is tunnelling through something; one that doubles every eight degrees is thermal.
+        You can tell the mechanism from a temperature sweep before you know anything else.
+      </p>
+
+      {/* ------------------------------------------- 14. noise */}
+      <h2 className="sec">14 · The floor underneath every measurement</h2>
+      <div className="grid" style={{ gridTemplateColumns: 'minmax(0,1fr) minmax(280px,340px)' }}>
+        <div className="grid g3">
+          <div className="stat hi">
+            <div className="k">kTC noise on {capF} fF</div>
+            <div className="v" style={{ fontSize: 22 }}>{(ktcNoiseV(capF * 1e-15) * 1e3).toFixed(2)}<span style={{ fontSize: 14 }}> mV</span></div>
+            <div className="sub">√(kT/C) — independent of the resistance that charged it</div>
+          </div>
+          <div className="stat">
+            <div className="k">Johnson noise, 1 kΩ, 1 MHz</div>
+            <div className="v" style={{ fontSize: 22 }}>{(thermalNoiseV(1000, 1e6) * 1e6).toFixed(2)}<span style={{ fontSize: 14 }}> µV</span></div>
+            <div className="sub">√(4kTRΔf) — the equipartition theorem, charging a wire</div>
+          </div>
+          <div className="stat">
+            <div className="k">Shot noise, 1 µA, 1 MHz</div>
+            <div className="v" style={{ fontSize: 22 }}>{(shotNoiseA(1e-6, 1e6) * 1e9).toFixed(2)}<span style={{ fontSize: 14 }}> nA</span></div>
+            <div className="sub">√(2qIΔf) — charge arrives in lumps</div>
+          </div>
+        </div>
+        <div className="card" style={{ alignSelf: 'start' }}>
+          <Slider label="Sampling capacitor" value={capF} set={setCapF} min={0.2} max={50} step={0.2} unit=" fF"
+            hint="Halving the capacitor doubles the noise power. Every switched capacitor in a data converter is larger than the signal needs, and this is the entire reason." />
+          <p className="hint" style={{ marginTop: 8 }}>
+            None of these is an engineering imperfection. Thermal noise is the equipartition theorem;
+            shot noise is the discreteness of charge. They are floors in the same sense that 60
+            mV/decade is a floor — you design above them or you do not design.
+          </p>
+        </div>
+      </div>
+
+      {/* ------------------------------------------- 15. matching */}
+      <h2 className="sec">15 · Why two identical devices are not</h2>
+      <div className="grid" style={{ gridTemplateColumns: 'minmax(0,1fr) minmax(280px,340px)' }}>
+        <div>
+          <div className="card" style={{ borderColor: 'var(--accent)' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 18, color: 'var(--accent)', textAlign: 'center', padding: '4px 0 12px' }}>
+              σ(ΔV_th) = A_Vth / √(W·L)
+            </div>
+            <div className="tbl-wrap">
+              <table className="tbl">
+                <thead><tr><th>Device</th><th>Area</th><th>σ(ΔV_th)</th><th style={{ width: 150 }}></th><th>What it is used for</th></tr></thead>
+                <tbody>
+                  {[[2000, 'Analog matched pair'], [500, 'I/O device'], [100, 'Logic gate'], [30, 'Dense logic'], [20, 'SRAM cell']].map(([w, use]) => {
+                    const sig = pelgromMismatch({ wNm: w, lNm: w })
+                    return (
+                      <tr key={w} style={{ cursor: 'pointer', background: w === devW ? 'var(--panel2)' : undefined }}
+                        onClick={() => setDevW(w)}>
+                        <td className="num"><b>{w} × {w} nm</b></td>
+                        <td className="num">{((w * w) / 1e6).toFixed(4)} µm²</td>
+                        <td className="num" style={{ color: sig > 50 ? 'var(--bad)' : sig > 15 ? 'var(--warn)' : 'var(--ok)' }}>
+                          {sig.toFixed(1)} mV
+                        </td>
+                        <td><div className="bar"><i style={{ width: `${Math.min(100, sig / 2)}%`, background: sig > 50 ? 'var(--bad)' : 'var(--accent)' }} /></div></td>
+                        <td className="small">{use}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <p className="small" style={{ marginTop: 10, maxWidth: '68ch' }}>
+            Pelgrom's law is the statistical statement of the dopant fluctuation in section 6: halve
+            the area and mismatch grows by √2. At SRAM dimensions σ reaches{' '}
+            {pelgromMismatch({ wNm: 20, lNm: 20 }).toFixed(0)} mV against a supply under a volt,
+            which is why the six smallest transistors on a die are the ones whose margin fails first
+            — and why <b>SRAM stopped shrinking</b> while logic continued. It is also why analog
+            designers use devices hundreds of times larger than the process permits: they are not
+            being conservative, they are buying √area.
+          </p>
+        </div>
+        <div className="card" style={{ alignSelf: 'start' }}>
+          <Slider label="Device size" value={devW} set={setDevW} min={15} max={3000} step={5} unit=" nm square" />
+          <div className="stat hi">
+            <div className="k">Threshold mismatch</div>
+            <div className="v">{pelgromMismatch({ wNm: devW, lNm: devW }).toFixed(1)}<span style={{ fontSize: 15 }}> mV</span></div>
+            <div className="sub">one standard deviation, between two neighbours</div>
+          </div>
+          <p className="hint" style={{ marginTop: 10 }}>
+            A six-sigma tail on an SRAM array with a billion cells is not a rare event — it is
+            thousands of cells. Redundancy exists because this distribution has tails and the array
+            is large enough to find them.
+          </p>
+        </div>
+      </div>
+
+      {/* ------------------------------------------- 16. confinement */}
+      <h2 className="sec">16 · The floor under the oxide</h2>
+      <div className="grid" style={{ gridTemplateColumns: 'minmax(0,1fr) minmax(280px,340px)' }}>
+        <div className="grid g3">
+          <div className="stat">
+            <div className="k">Drawn EOT</div>
+            <div className="v" style={{ fontSize: 22 }}>{eotNm.toFixed(2)}<span style={{ fontSize: 14 }}> nm</span></div>
+            <div className="sub">what the dielectric gives you</div>
+          </div>
+          <div className="stat bad">
+            <div className="k">Electrical EOT, metal gate</div>
+            <div className="v" style={{ fontSize: 22 }}>{eEot.total.toFixed(2)}<span style={{ fontSize: 14 }}> nm</span></div>
+            <div className="sub">{fmt.pct(eEot.penalty - 1, 0)} worse — the inversion layer is not at the surface</div>
+          </div>
+          <div className="stat bad">
+            <div className="k">Electrical EOT, poly gate</div>
+            <div className="v" style={{ fontSize: 22 }}>{eEotPoly.total.toFixed(2)}<span style={{ fontSize: 14 }}> nm</span></div>
+            <div className="sub">{fmt.pct(eEotPoly.penalty - 1, 0)} worse — poly depletes too</div>
+          </div>
+          <div className="stat hi">
+            <div className="k">Confinement energy at {confT} nm</div>
+            <div className="v" style={{ fontSize: 22 }}>{(confinementEnergyEv({ thicknessNm: confT }) * 1000).toFixed(0)}<span style={{ fontSize: 14 }}> meV</span></div>
+            <div className="sub">ground state lifted by squeezing the channel</div>
+          </div>
+          <div className="stat">
+            <div className="k">Against thermal energy</div>
+            <div className="v" style={{ fontSize: 22 }}>{(confinementEnergyEv({ thicknessNm: confT }) / thermalVoltage(300)).toFixed(1)}×</div>
+            <div className="sub">kT/q at room temperature</div>
+          </div>
+          <div className="stat">
+            <div className="k">Threshold shift</div>
+            <div className="v" style={{ fontSize: 22 }}>+{(confinementEnergyEv({ thicknessNm: confT }) * 1000).toFixed(0)}<span style={{ fontSize: 14 }}> mV</span></div>
+            <div className="sub">roughly, from the subband alone</div>
+          </div>
+        </div>
+        <div className="card" style={{ alignSelf: 'start' }}>
+          <Slider label="Body thickness" value={confT} set={setConfT} min={2} max={20} step={0.5} unit=" nm"
+            hint="E₁ = h²/(8m*t²). The inverse square is what matters — halving the thickness quadruples the shift, so below about 5 nm this stops being a correction and becomes a design parameter." />
+          <p className="hint" style={{ marginTop: 8 }}>
+            Two things put a floor under how thin a gate stack can electrically be, and neither is
+            the dielectric. Carriers sit roughly 0.4 nm below the interface rather than on it, and a
+            polysilicon gate depletes on its own side. Together they add nearly a nanometre to an
+            oxide you spent a decade thinning — and removing the poly term is the <i>first</i> reason
+            metal gates arrived, with the work function being the second.
+          </p>
+        </div>
+      </div>
+
+      {/* ------------------------------------------- 17. strain */}
+      <h2 className="sec">17 · Buying mobility back</h2>
+      <p className="small" style={{ marginBottom: 12, maxWidth: '68ch' }}>
+        When gate-length scaling stopped delivering, the industry improved the material instead —
+        by deliberately deforming the crystal. Strain splits the conduction band valleys and warps
+        the valence band, lowering the effective mass along the direction of travel and reducing
+        inter-valley scattering. It is one of very few times a material property rather than a
+        dimension was improved, and it bought roughly a generation.
+      </p>
+      <div className="tbl-wrap">
+        <table className="tbl">
+          <thead><tr><th>Technique</th><th>Helps</th><th>Gain</th><th style={{ width: 130 }}></th><th style={{ width: '34%' }}>How</th><th style={{ width: '24%' }}>Note</th></tr></thead>
+          <tbody>
+            {STRAIN.map((x) => (
+              <tr key={x.id}>
+                <td><b>{x.name}</b></td>
+                <td className="small">{x.carrier}</td>
+                <td className="num" style={{ color: 'var(--accent)' }}>{x.gain}×</td>
+                <td><div className="bar"><i style={{ width: `${(x.gain - 1) * 100}%` }} /></div></td>
+                <td className="small">{x.how}</td>
+                <td className="small">{x.note}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="small" style={{ marginTop: 10, maxWidth: '68ch' }}>
+        Note the awkwardness in the middle: electrons and holes want <i>opposite</i> strain, and
+        opposite crystal orientations. Every strained process therefore does two different things to
+        two device types a few tens of nanometres apart, which is a large part of why the module
+        count climbed.
+      </p>
+
+      {/* ------------------------------------------- 18. self-heating */}
+      <h2 className="sec">18 · Thin bodies cook</h2>
+      <div className="grid" style={{ gridTemplateColumns: 'minmax(0,1fr) minmax(280px,340px)' }}>
+        <div>
+          <div className="grid g3">
+            <div className="stat bad">
+              <div className="k">Effective conductivity</div>
+              <div className="v" style={{ fontSize: 22 }}>{sh.kEff.toFixed(1)}</div>
+              <div className="sub">W/m·K, against 150 for bulk silicon</div>
+            </div>
+            <div className="stat">
+              <div className="k">Thermal resistance</div>
+              <div className="v" style={{ fontSize: 22 }}>{sci(sh.rthKperW, 2)}</div>
+              <div className="sub">K per watt, channel to contact</div>
+            </div>
+            <div className={`stat ${sh.deltaTK > 50 ? 'bad' : ''}`}>
+              <div className="k">Channel temperature rise</div>
+              <div className="v" style={{ fontSize: 22 }}>+{sh.deltaTK.toFixed(0)}<span style={{ fontSize: 14 }}> K</span></div>
+              <div className="sub">above the substrate, while switching</div>
+            </div>
+          </div>
+          <div className="tbl-wrap" style={{ marginTop: 12 }}>
+            <table className="tbl">
+              <thead><tr><th>Body thickness</th><th>Thermal conductivity</th><th>Fraction of bulk</th><th style={{ width: 200 }}></th></tr></thead>
+              <tbody>
+                {[150, 50, 20, 10, 5, 3].map((t) => {
+                  const k = thinFilmConductivity({ thicknessNm: t })
+                  return (
+                    <tr key={t} style={{ cursor: 'pointer', background: t === shThick ? 'var(--panel2)' : undefined }}
+                      onClick={() => setShThick(t)}>
+                      <td className="num"><b>{t} nm</b></td>
+                      <td className="num">{k.toFixed(1)} W/m·K</td>
+                      <td className="num" style={{ color: k / 150 < 0.1 ? 'var(--bad)' : 'var(--warn)' }}>{fmt.pct(k / 150, 1)}</td>
+                      <td><div className="bar"><i style={{ width: `${(k / 150) * 100}%` }} /></div></td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="small" style={{ marginTop: 10, maxWidth: '68ch' }}>
+            A film thinner than the phonon mean free path — about 300 nm in silicon — does not
+            conduct heat like the bulk it is made of. Phonons scatter off the surfaces before they
+            travel far, and conductivity collapses. A 5 nm nanosheet conducts heat at roughly{' '}
+            {fmt.pct(thinFilmConductivity({ thicknessNm: 5 }) / 150, 1)} of bulk silicon.
+          </p>
+          <p className="small" style={{ marginTop: 8, maxWidth: '68ch', color: 'var(--warn)' }}>
+            And here is the trap: this worsens with exactly the architectural changes that improve
+            electrostatics. Thinner bodies keep the drain out of the channel — section 9 — and cook
+            the channel doing it. The gate and the heat want opposite things, and the roadmap has to
+            pay both.
+          </p>
+        </div>
+        <div className="card" style={{ alignSelf: 'start' }}>
+          <Slider label="Body thickness" value={shThick} set={setShThick} min={3} max={150} step={1} unit=" nm" />
+          <Slider label="Device power" value={shPower} set={setShPower} min={0.2} max={20} step={0.2} unit=" µW"
+            hint="A single device while switching. Multiply by billions and you get the chip-level problem on the 3D tab — but this is the local one, inside one channel." />
         </div>
       </div>
 
