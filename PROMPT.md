@@ -1218,3 +1218,34 @@ them. Five were doable; the sixth was not, and saying which is the point.
   returns the string unchanged when the needle is absent. It has now caused a
   missing check group, a missing tab wiring and a missing chart table. Every
   edit in this pass that mattered was asserted with `assert old in s`.
+
+---
+
+## Thirty-seventh pass: the silicon catalogue
+
+Two problems, and the second was the one worth fixing.
+
+- **"Others" was doing real work.** It held Tesla and Qualcomm — not footnotes.
+  A catch-all that large is a sign the taxonomy has stopped describing the
+  thing it sorts, so seven makers gained their own entries and the bucket is
+  now genuinely for parts whose maker appears once. A check caps it at a fifth
+  of the catalogue, and another asserts every maker in the legend is actually
+  used.
+- **The catalogue was a distorted picture of silicon.** Fourteen of twenty-one
+  parts were AI accelerators, with the rest phone and laptop SoCs. That is what
+  gets written about, not what gets made. Added: a 51.2 Tb/s Ethernet switch,
+  a stacked image sensor (where die stacking actually shipped first, a decade
+  before logic), a silicon-carbide power MOSFET that is one transistor and a
+  whole industry, and an automotive microcontroller — the part whose shortage
+  stopped car production in 2021 and which nobody writes about. A check now
+  asserts AI parts stay under 55%.
+- **The existing sourcing checks caught four errors in my own additions**,
+  which is the best outcome available. A mining ASIC claimed both a die area
+  and that its area was undisclosed. Ponte Vecchio's 1,280 mm² is a sum across
+  47 tiles in a package, and dividing a package-wide transistor count by it
+  produces a "density" describing nothing. A single SiC transistor is not
+  comparable on a transistors-per-mm² axis at all. And four new categories had
+  no labels, so they would have rendered as `undefined`.
+- **Verified rather than recalled.** Graphcore's GC200 figures — 59.4 billion
+  transistors on 823 mm² at TSMC 7 nm — were checked against the vendor's own
+  announcement before being written down.

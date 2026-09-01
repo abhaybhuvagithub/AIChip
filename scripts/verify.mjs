@@ -697,6 +697,29 @@ group('Real silicon')
     SILICON.every((s) => s.areaKnown === false ? s.areaMm2 === 0 : s.areaMm2 >= 0))
   ok('every part with a nonzero area has areaKnown unset or true',
     SILICON.every((s) => !(s.areaMm2 > 0 && s.areaKnown === false)))
+  // The "Others" bucket had grown to hold Tesla and Qualcomm, which are not
+  // footnotes. A catch-all that large means the taxonomy has stopped
+  // describing the thing it sorts.
+  ok('no maker bucket is a dumping ground', (() => {
+    const other = SILICON.filter((s2) => s2.maker === 'other').length
+    return other <= SILICON.length * 0.2
+  })(), `${SILICON.filter((s2) => s2.maker === 'other').length} of ${SILICON.length} unattributed`)
+  ok('every maker referenced has an entry with a name and a colour',
+    SILICON.every((s2) => MAKERS[s2.maker] && MAKERS[s2.maker].name && MAKERS[s2.maker].hue))
+  ok('every maker entry is actually used',
+    Object.keys(MAKERS).every((m) => SILICON.some((s2) => s2.maker === m)),
+    Object.keys(MAKERS).filter((m) => !SILICON.some((s2) => s2.maker === m)).join(', ') || 'all used')
+  ok('every category referenced has a label',
+    SILICON.every((s2) => CATEGORIES[s2.cat]),
+    [...new Set(SILICON.filter((s2) => !CATEGORIES[s2.cat]).map((s2) => s2.cat))].join(', ') || 'all labelled')
+  // The catalogue was almost entirely AI accelerators and phone SoCs, which is
+  // a distorted picture of what silicon actually is.
+  ok('the catalogue is not only AI accelerators',
+    SILICON.filter((s2) => s2.cat === 'ai').length < SILICON.length * 0.55,
+    `${SILICON.filter((s2) => s2.cat === 'ai').length} of ${SILICON.length} are AI parts`)
+  ok('networking, sensors, power and embedded are all represented',
+    ['network', 'sensor', 'power', 'embedded'].every((c) => SILICON.some((s2) => s2.cat === c)))
+
   ok('at least one part declines to state its die area',
     SILICON.some((s) => s.areaKnown === false))
   ok('Apple areas are all marked as estimates',

@@ -21,14 +21,29 @@ export const MAKERS = {
   google: { name: 'Google', hue: '#4dd6e8' },
   nvidia: { name: 'NVIDIA', hue: '#76b900' },
   amd: { name: 'AMD', hue: '#f6685e' },
+  intel: { name: 'Intel', hue: '#5aa9e6' },
+  tesla: { name: 'Tesla', hue: '#e82127' },
+  qualcomm: { name: 'Qualcomm', hue: '#3253dc' },
   cerebras: { name: 'Cerebras', hue: '#ffb020' },
+  broadcom: { name: 'Broadcom', hue: '#cc0000' },
+  graphcore: { name: 'Graphcore', hue: '#ff6b35' },
+  ibm: { name: 'IBM', hue: '#8a9ba8' },
+  aws: { name: 'AWS', hue: '#ff9900' },
+  // Kept deliberately small. "Others" was doing real work here — it held Tesla
+  // and Qualcomm, which are not footnotes — and a bucket that large is a sign
+  // the taxonomy has stopped describing the thing. It is now genuinely for
+  // parts whose maker appears once.
   other: { name: 'Others', hue: '#a679ff' },
 }
 
 export const CATEGORIES = {
   mobile: 'Phone and tablet',
-  pc: 'Laptop and desktop',
+  pc: 'Laptop, desktop and server',
   ai: 'Datacentre AI',
+  network: 'Networking',
+  sensor: 'Image sensor',
+  power: 'Power',
+  embedded: 'Embedded and automotive',
   extreme: 'Beyond the reticle',
 }
 
@@ -178,19 +193,96 @@ export const SILICON = [
 
   // ---------------- Others ----------------
   {
-    id: 'd1', icon: 'npu', maker: 'other', cat: 'ai', name: 'Tesla D1 (Dojo)', year: 2021,
+    id: 'd1', icon: 'npu', maker: 'tesla', cat: 'ai', name: 'Tesla D1 (Dojo)', year: 2021,
     foundry: 'TSMC', node: '7 nm', transistors: 50e9, areaMm2: 645, dies: 1,
     power: 400, est: true,
     what: 'Built to be tiled: 25 dies bonded onto a single substrate as a "training tile" with no packaging between them, so the array behaves like one large fabric. An answer to the reticle limit that sits between chiplets and wafer scale.',
     notable: '25 dies per training tile',
   },
   {
-    id: 'sd8elite', icon: 'soc', maker: 'other', cat: 'mobile', name: 'Snapdragon 8 Elite', year: 2024,
+    id: 'sd8elite', icon: 'soc', maker: 'qualcomm', cat: 'mobile', name: 'Snapdragon 8 Elite', year: 2024,
     foundry: 'TSMC', node: 'N3E', transistors: 0, areaMm2: 125, est: true, dies: 1,
     power: 10,
     what: 'The other half of the flagship phone market. Same foundry, same node family as Apple, different design philosophy — custom Arm-compatible cores clocked aggressively, in a part sold to many handset makers rather than one.',
     notable: 'Merchant flagship SoC',
   },
+
+  // ---- networking, sensors, power: the silicon nobody writes about --------
+  {
+    id: 'tomahawk5', icon: 'ipnoc', maker: 'broadcom', cat: 'network', name: 'Tomahawk 5', year: 2022,
+    foundry: 'TSMC', node: '5 nm', transistors: 0, areaMm2: 0, areaKnown: false, dies: 1,
+    power: 0,
+    what: 'A 51.2 terabit-per-second Ethernet switch on one die. Every large AI cluster is limited as much by what moves between accelerators as by the accelerators, and this is the part doing the moving — which is why a switch ASIC belongs beside them rather than in a footnote.',
+    notable: '51.2 Tb/s on a single die',
+  },
+  {
+    id: 'imx', icon: 'ipisp', maker: 'other', cat: 'sensor', name: 'Stacked CMOS image sensor', year: 2023,
+    foundry: 'Sony', node: '40 nm + 22 nm', transistors: 0, areaMm2: 0, areaKnown: false, dies: 2,
+    power: 0,
+    what: 'Two dies bonded face to face: a photodiode array optimised for capturing light on top, and a logic die underneath doing the readout and processing. Neither process can do the other job well, which is exactly the argument for stacking — and image sensors got there a decade before logic did.',
+    notable: 'Stacking shipped here first, in phones',
+  },
+  {
+    id: 'sicfet', icon: 'power', maker: 'other', cat: 'power', name: 'Silicon-carbide power MOSFET', year: 2023,
+    foundry: 'Wolfspeed / Infineon / onsemi', node: 'Not a logic node', transistors: 0,
+    areaMm2: 25, dies: 1,
+    power: 0, est: true,
+    what: 'One transistor, roughly the area of a fingernail, switching hundreds of amps at over a thousand volts. Silicon carbide blocks ten times the field of silicon and conducts heat three times better, which is why every fast-charging electric vehicle contains these and not silicon.',
+    notable: 'A single transistor, and a whole industry',
+  },
+  {
+    id: 'mcu', icon: 'mcu', maker: 'other', cat: 'embedded', name: 'Automotive microcontroller', year: 2022,
+    foundry: 'TSMC / in-house', node: '40 nm', transistors: 0.4e9, areaMm2: 30, dies: 1,
+    power: 2, est: true,
+    what: 'A mature-node part with embedded flash, made in enormous volume, qualified to AEC-Q100 and supplied for fifteen years. There are dozens in a modern car. Nobody writes about these and the industry could not function without them — the shortage that stopped car production in 2021 was largely this part.',
+    notable: 'Dozens per car, a decade of supply',
+  },
+
+  // ---- more compute ------------------------------------------------------
+  {
+    id: 'pontevecchio', icon: 'chiplet', maker: 'intel', cat: 'ai', name: 'Ponte Vecchio (Xe HPC)', year: 2022,
+    foundry: 'Intel + TSMC', node: 'Five nodes in one package', transistors: 100e9,
+    areaMm2: 0, areaKnown: false, dies: 47,
+    power: 600, est: true,
+    what: 'Forty-seven tiles across five process nodes from two foundries, in one package. The most aggressively disaggregated product yet shipped, and a useful demonstration that the packaging complexity is real rather than free — it was years late.',
+    notable: '47 tiles, 5 nodes, 2 foundries',
+  },
+  {
+    id: 'gc200', icon: 'waferscale', maker: 'graphcore', cat: 'ai', name: 'Colossus MK2 GC200 (IPU)', year: 2020,
+    foundry: 'TSMC', node: '7 nm', transistors: 59.4e9, areaMm2: 823, dies: 1,
+    power: 300, est: true,
+    what: 'Nine hundred megabytes of SRAM on the die itself and no external memory at all — a bet that if the model fits on chip, the memory wall does not apply. It works beautifully when the model fits, and the difficulty is entirely in the word "if".',
+    notable: '900 MB of on-die SRAM, no DRAM',
+  },
+  {
+    id: 'telum', icon: 'cpu', maker: 'ibm', cat: 'pc', name: 'Telum', year: 2021,
+    foundry: 'Samsung', node: '7 nm', transistors: 22.5e9, areaMm2: 530, dies: 1,
+    power: 400, est: true,
+    what: 'A mainframe processor with an AI accelerator on the die, placed so a transaction can be scored for fraud while it is still in flight. Built for a market that values never being wrong over being fast, which produces very different silicon.',
+    notable: 'Inference inside the transaction',
+  },
+  {
+    id: 'graviton4', icon: 'cpu', maker: 'aws', cat: 'pc', name: 'Graviton4', year: 2023,
+    foundry: 'TSMC', node: '4 nm', transistors: 73e9, areaMm2: 0, areaKnown: false, dies: 7,
+    power: 0,
+    what: 'A cloud provider designing its own server CPU, on Arm, because at their volume the economics of a custom part beat buying one. The clearest example of what the value chain tab calls the third business model — build silicon for yourself and never sell a chip.',
+    notable: 'Designed by the customer, sold to nobody',
+  },
+  {
+    id: 'lpu', icon: 'npu', maker: 'other', cat: 'ai', name: 'Groq LPU', year: 2020,
+    foundry: 'GlobalFoundries', node: '14 nm', transistors: 26.8e9, areaMm2: 725, dies: 1,
+    power: 300, est: true,
+    what: 'Entirely deterministic: no caches, no branch prediction, no arbitration — the compiler schedules every cycle in advance. On a mature node, which is the point. Predictable latency is worth more than peak throughput when you are serving requests rather than training.',
+    notable: 'Deterministic, on a 14 nm node',
+  },
+  {
+    id: 'miner', icon: 'die', maker: 'other', cat: 'extreme', name: 'Bitcoin mining ASIC', year: 2023,
+    foundry: 'TSMC / Samsung', node: '5 nm', transistors: 0, areaMm2: 0, areaKnown: false, dies: 1,
+    power: 25, est: true,
+    what: 'A chip that computes exactly one hash function and nothing else. The extreme end of specialisation: no memory hierarchy worth the name, no flexibility, and an efficiency per operation that no general-purpose part approaches. Made in enormous volume on leading-edge nodes.',
+    notable: 'One function, and nothing else',
+  },
+
 ]
 
 // Transistor count over time, for the log plot. Only parts with a published
