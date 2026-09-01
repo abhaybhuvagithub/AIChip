@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { SILICON, MAKERS, CATEGORIES, COUNTED } from '../data/silicon.js'
+import { SILICON, MAKERS, CATEGORIES, STATUS, STATUS_AS_OF, COUNTED } from '../data/silicon.js'
 import { computeRun, fmt, RETICLE } from '../lib/fab.js'
 import { ops } from '../lib/compute.js'
 import Icon from './Icon.jsx'
@@ -154,6 +154,11 @@ export default function Silicon({ cfg, patch, goTab }) {
             </div>
             <span className="badge">{CATEGORIES[s.cat]}</span>
             {s.isa && <span className="badge" style={{ color: s.isa === 'Arm' ? MAKERS.arm.hue : undefined, borderColor: s.isa === 'Arm' ? MAKERS.arm.hue : undefined }}>{s.isa}</span>}
+            {s.status && (
+              <span className="badge" style={{ color: STATUS[s.status].hue, borderColor: STATUS[s.status].hue }}>
+                {STATUS[s.status].label}
+              </span>
+            )}
           </div>
           <h3 className="iconrow" style={{ fontFamily: 'var(--font-display)', fontSize: 26, letterSpacing: '-.02em', marginTop: 6 }}>
             <Icon name={s.icon} size={30} style={{ color: MAKERS[s.maker].hue }} title={s.name} />
@@ -161,6 +166,36 @@ export default function Silicon({ cfg, patch, goTab }) {
           </h3>
           <div style={{ color: MAKERS[s.maker].hue, fontSize: 17, margin: '4px 0 12px' }}>{s.notable}</div>
           <p style={{ fontSize: 18, lineHeight: 1.6 }}>{s.what}</p>
+          {s.epitaph && <p className="why" style={{ marginTop: 10 }}>{s.epitaph}</p>}
+
+          {/* A single `year` conflated two dates that are routinely years
+              apart. Separating them makes the gap visible, and the gap is
+              often the story. */}
+          <div className="lifecycle">
+            <div className="life-step">
+              <span className="life-k">Announced</span>
+              <span className="life-v">{s.announced || '—'}</span>
+            </div>
+            <span className="life-arrow" aria-hidden="true">→</span>
+            <div className="life-step">
+              <span className="life-k">Reached market</span>
+              <span className="life-v">
+                {s.shipped || (s.status === 'announced' || s.status === 'expected' ? 'not yet' : '—')}
+              </span>
+            </div>
+            <span className="life-arrow" aria-hidden="true">→</span>
+            <div className="life-step">
+              <span className="life-k">Status</span>
+              <span className="life-v" style={{ color: STATUS[s.status]?.hue }}>
+                {STATUS[s.status]?.label}
+              </span>
+            </div>
+            {s.announced && s.shipped && s.shipped > s.announced && (
+              <span className="life-gap">
+                {s.shipped - s.announced} year{s.shipped - s.announced > 1 ? 's' : ''} to market
+              </span>
+            )}
+          </div>
 
           <dl className="kv" style={{ marginTop: 12 }}>
             <dt>Made by</dt><dd>{s.foundry} · {s.node}</dd>
@@ -328,7 +363,12 @@ export default function Silicon({ cfg, patch, goTab }) {
         Figures gathered from vendor announcements and public reporting through mid-2026. Vendors
         count transistors differently and die-shot measurements carry their own error, so read the
         rankings rather than the digits.
-      </p>
+      {' '}
+        Availability is stated as of {STATUS_AS_OF}; a status with no as-of date is a claim about
+        the present made by someone who has left the building, and this one will go stale like any
+        other. {SILICON.filter((x) => x.status === 'discontinued').length} of these parts are no
+        longer made, and they are kept here rather than deleted — a cancelled architecture is often
+        more instructive than a surviving one.</p>
     </div>
   )
 }

@@ -797,3 +797,21 @@ h3.iconrow { display: flex; gap: 10px; }
   caption-side: top; text-align: left; padding: 10px 14px 6px;
   font-size: var(--fs-label); color: var(--muted);
 }
+
+/* ---------- Part lifecycle ---------- */
+.lifecycle {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 12px 14px; margin: 12px 0 2px;
+  background: var(--panel2); border: 1px solid var(--border); border-radius: 12px;
+}
+.life-step { display: flex; flex-direction: column; gap: 2px; }
+.life-k {
+  font-family: var(--font-mono); font-size: var(--fs-label);
+  text-transform: uppercase; letter-spacing: .1em; color: var(--muted);
+}
+.life-v { font-size: var(--fs-data); font-weight: 600; }
+.life-arrow { color: var(--muted); font-size: var(--fs-data); }
+.life-gap {
+  margin-left: auto; font-size: var(--fs-label); color: var(--accent);
+  font-family: var(--font-mono);
+}

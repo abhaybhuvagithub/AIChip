@@ -23,7 +23,7 @@ const { ARCH, STATUS, BACKSIDE, STACKING, BEYOND_CMOS, THERMAL_LIMITS } =
   await import(join(root, 'src/data/arch3d.js'))
 const { cellArea, areaReduction, stackThermal, coolingFor } = await import(join(root, 'src/lib/thermal.js'))
 const { LAYERS, ARM, MODELS, FAB_TIERS, TERAFAB } = await import(join(root, 'src/data/value-chain.js'))
-const { SILICON, MAKERS, CATEGORIES, COUNTED } = await import(join(root, 'src/data/silicon.js'))
+const { SILICON, MAKERS, CATEGORIES, STATUS: SIL_STATUS, STATUS_AS_OF, COUNTED } = await import(join(root, 'src/data/silicon.js'))
 const { CHAIN, AUTOMATION, WHY_NO_HUMANS } = await import(join(root, 'src/data/sand.js'))
 const { traceBack, waferMass, nines, impurityPpb, grams, SI_DENSITY } =
   await import(join(root, 'src/lib/chain.js'))
@@ -700,6 +700,47 @@ group('Real silicon')
   // The "Others" bucket had grown to hold Tesla and Qualcomm, which are not
   // footnotes. A catch-all that large means the taxonomy has stopped
   // describing the thing it sorts.
+  // ---- lifecycle ----
+  // A single `year` conflated when a chip was unveiled with when anyone could
+  // buy one — routinely years apart, and the gap is often the story.
+  ok('every part has a status', SILICON.every((s2) => s2.status && SIL_STATUS[s2.status]))
+  ok('status vocabulary is defined and distinct',
+    Object.keys(SIL_STATUS).length >= 5 &&
+    Object.values(SIL_STATUS).every((v) => v.label && v.hue && v.note.length > 25))
+  ok('the status carries an as-of date', typeof STATUS_AS_OF === 'string' && /20\d\d/.test(STATUS_AS_OF))
+  ok('the as-of date is surfaced to the reader', (() => {
+    const ui = readFileSync(join(root, 'src/ui/Silicon.jsx'), 'utf8')
+    return /STATUS_AS_OF/.test(ui) && /go stale/i.test(ui)
+  })())
+  ok('most parts record when they were announced',
+    SILICON.filter((s2) => s2.announced).length >= SILICON.length * 0.75,
+    `${SILICON.filter((s2) => s2.announced).length} of ${SILICON.length}`)
+  ok('nothing ships before it is announced',
+    SILICON.filter((s2) => s2.announced && s2.shipped)
+      .every((s2) => s2.shipped >= s2.announced - 1),
+    SILICON.filter((s2) => s2.announced && s2.shipped && s2.shipped < s2.announced - 1)
+      .map((s2) => s2.id).join(', '))
+  // This check was written with 'shipping' in its own allowed list, which made
+  // it named for a condition it permitted — it passed while a part with no
+  // shipping date claimed to be shipping. A check whose title contradicts its
+  // predicate is worse than no check, because it reads as coverage.
+  ok('a part with no shipping date cannot claim to be shipping',
+    SILICON.filter((s2) => !s2.shipped && s2.announced)
+      .every((s2) => ['announced', 'expected', 'ramping'].includes(s2.status)),
+    SILICON.filter((s2) => !s2.shipped && s2.announced &&
+      !['announced', 'expected', 'ramping'].includes(s2.status)).map((s2) => s2.id).join(', '))
+  ok('announced-but-unshipped parts do not claim to be shipping',
+    SILICON.filter((s2) => s2.status === 'announced').every((s2) => !s2.shipped))
+  ok('at least one part took years from announcement to market',
+    SILICON.some((s2) => s2.announced && s2.shipped && s2.shipped - s2.announced >= 3))
+  // Cancelled work is kept rather than deleted, and says why.
+  ok('discontinued parts exist and are labelled',
+    SILICON.filter((s2) => s2.status === 'discontinued').length >= 2)
+  ok('the cancelled Dojo part records what happened to it', (() => {
+    const d = SILICON.find((s2) => s2.id === 'd1')
+    return d && d.status === 'discontinued' && /2025/.test(d.epitaph || '') && /shut down|disbanded/i.test(d.epitaph || '')
+  })())
+
   // ---- Arm ----
   // Arm is the reason the instruction set is recorded at all: it is in a third
   // of this catalogue and made almost none of it, which is invisible unless

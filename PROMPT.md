@@ -1273,3 +1273,29 @@ Two problems, and the second was the one worth fixing.
   Arm keeps appearing in far more parts than it makes, because if that ever
   stops being true it is a genuine change in the industry rather than a data
   error.
+
+---
+
+## Thirty-ninth pass: dates and availability
+
+A single `year` field was doing three jobs badly.
+
+- **Announced and shipped are different dates, routinely years apart.** Ponte
+  Vecchio was announced in 2019 and reached customers in 2023. Collapsing that
+  into one number hides the gap, and the gap is often the story — so both are
+  recorded, and the card shows the distance between them.
+- **A status with no as-of date is a claim about the present made by someone
+  who has left the building.** So `STATUS_AS_OF` is stated on the tab, and the
+  page says plainly that it will go stale like any other. Six states, each
+  defined: shipping, ramping, announced, expected, legacy, discontinued.
+- **Searching corrected a live claim.** The site presented Tesla's D1 as
+  current. Tesla disbanded the Dojo team in **August 2025** and ended the
+  programme, with Musk calling the successor an evolutionary dead end. The
+  entry now says so, and keeps the part rather than deleting it — a cancelled
+  architecture is often more instructive than a surviving one, and quietly
+  removing it would erase the more interesting half of the lesson.
+- **Checks on the shape, not the values.** Nothing may ship before it is
+  announced; a part with no shipping date may not claim to be shipping; every
+  discontinued entry must record what happened to it. Those catch the drift a
+  status field exists to prevent, and I set an unshipped part to "shipping" to
+  confirm they fire.
