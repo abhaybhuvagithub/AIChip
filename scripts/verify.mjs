@@ -700,6 +700,30 @@ group('Real silicon')
   // The "Others" bucket had grown to hold Tesla and Qualcomm, which are not
   // footnotes. A catch-all that large means the taxonomy has stopped
   // describing the thing it sorts.
+  // ---- Arm ----
+  // Arm is the reason the instruction set is recorded at all: it is in a third
+  // of this catalogue and made almost none of it, which is invisible unless
+  // you count.
+  ok('Arm appears as a maker and as an instruction set',
+    MAKERS.arm && SILICON.some((s2) => s2.maker === 'arm') &&
+    SILICON.filter((s2) => s2.isa === 'Arm').length >= 8,
+    `${SILICON.filter((s2) => s2.isa === 'Arm').length} Arm-ISA parts, ${SILICON.filter((s2) => s2.maker === 'arm').length} made by Arm`)
+  ok('Arm makes far fewer parts than it appears in',
+    SILICON.filter((s2) => s2.maker === 'arm').length < SILICON.filter((s2) => s2.isa === 'Arm').length / 4)
+  ok('the first Arm-made part is dated to 2026', (() => {
+    const a = SILICON.find((s2) => s2.maker === 'arm')
+    return a && a.year >= 2026 && /Neoverse/i.test(a.what)
+  })())
+  ok('Apple and Qualcomm parts are recorded as Arm', (() => {
+    const ids = ['a17pro', 'm1', 'sd8elite']
+    return ids.every((id) => SILICON.find((s2) => s2.id === id)?.isa === 'Arm')
+  })())
+  ok('non-Arm architectures are recorded too, not just Arm',
+    new Set(SILICON.filter((s2) => s2.isa).map((s2) => s2.isa)).size >= 4)
+  ok('most parts declare an instruction set',
+    SILICON.filter((s2) => s2.isa).length >= SILICON.length * 0.7,
+    `${SILICON.filter((s2) => s2.isa).length} of ${SILICON.length}`)
+
   ok('no maker bucket is a dumping ground', (() => {
     const other = SILICON.filter((s2) => s2.maker === 'other').length
     return other <= SILICON.length * 0.2

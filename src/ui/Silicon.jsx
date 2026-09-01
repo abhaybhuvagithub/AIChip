@@ -153,6 +153,7 @@ export default function Silicon({ cfg, patch, goTab }) {
               {MAKERS[s.maker].name} · {s.year}
             </div>
             <span className="badge">{CATEGORIES[s.cat]}</span>
+            {s.isa && <span className="badge" style={{ color: s.isa === 'Arm' ? MAKERS.arm.hue : undefined, borderColor: s.isa === 'Arm' ? MAKERS.arm.hue : undefined }}>{s.isa}</span>}
           </div>
           <h3 className="iconrow" style={{ fontFamily: 'var(--font-display)', fontSize: 26, letterSpacing: '-.02em', marginTop: 6 }}>
             <Icon name={s.icon} size={30} style={{ color: MAKERS[s.maker].hue }} title={s.name} />
@@ -212,6 +213,25 @@ export default function Silicon({ cfg, patch, goTab }) {
             </p>
           )}
         </div>
+      </div>
+
+      <div className="card" style={{ marginTop: 16, borderColor: MAKERS.arm.hue }}>
+        <div className="eyebrow" style={{ color: MAKERS.arm.hue }}>The company that is in a third of this list once</div>
+        <p style={{ marginTop: 8, fontSize: 'var(--fs-prose)', lineHeight: 1.62 }}>
+          {SILICON.filter((x) => x.isa === 'Arm').length} of these {SILICON.length} parts run Arm
+          instructions. One of them was made by Arm. For thirty-five years the company sold designs
+          and the right to build them and never sold a chip, which is why it is everywhere in this
+          catalogue and almost invisible in it — a business whose product is other companies'
+          products.
+        </p>
+        <p style={{ marginTop: 10, fontSize: 'var(--fs-prose)', lineHeight: 1.62 }}>
+          That changed in March 2026 with the AGI CPU, and the interesting part is the tension rather
+          than the chip: a licensor that starts selling finished silicon is now competing with the
+          customers it licenses to.
+          <button className="btn sm" style={{ marginLeft: 8 }} onClick={() => goTab('chain')}>
+            The licensing model →
+          </button>
+        </p>
       </div>
 
       <h2 className="sec">All of it, in one table</h2>

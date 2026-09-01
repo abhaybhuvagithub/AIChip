@@ -1249,3 +1249,27 @@ Two problems, and the second was the one worth fixing.
 - **Verified rather than recalled.** Graphcore's GC200 figures — 59.4 billion
   transistors on 823 mm² at TSMC 7 nm — were checked against the vendor's own
   announcement before being written down.
+
+---
+
+## Thirty-eighth pass: Arm
+
+"Add Arm" looked trivial and was not, for two reasons.
+
+- **Searching first changed the answer.** I was about to write that Arm ships
+  no silicon — the thing everyone knows about Arm and the thing that made it
+  interesting to add. It stopped being true in March 2026, when Arm announced
+  the AGI CPU, its first complete chip in thirty-five years. That is news I did
+  not have, and asserting the familiar version from memory would have put a
+  confidently wrong claim on a public site.
+- **The catalogue already covered it and the site did not.** The value chain
+  tab had picked the news up in an earlier pass; the silicon catalogue had not.
+  Worth noting that a site large enough to contradict itself needs the checks
+  to be about consistency, not just correctness.
+- **The interesting fact about Arm is not a part.** Eleven of thirty-two parts
+  here run Arm instructions and Arm made one of them. That is invisible unless
+  the instruction set is recorded, so every entry now carries one — and the
+  observation only exists because the data made it countable. A check asserts
+  Arm keeps appearing in far more parts than it makes, because if that ever
+  stops being true it is a genuine change in the industry rather than a data
+  error.
