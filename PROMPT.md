@@ -1297,5 +1297,13 @@ A single `year` field was doing three jobs badly.
 - **Checks on the shape, not the values.** Nothing may ship before it is
   announced; a part with no shipping date may not claim to be shipping; every
   discontinued entry must record what happened to it. Those catch the drift a
-  status field exists to prevent, and I set an unshipped part to "shipping" to
-  confirm they fire.
+  status field exists to prevent.
+- **One of my own checks was self-defeating.** "Unshipped parts are marked
+  announced or expected, never shipping" had `shipping` in its own allowed
+  list, so it passed while a part with no shipping date claimed to be shipping.
+  I only found it because I regressed the data to test the check and *nothing
+  failed*. A check whose title contradicts its predicate is worse than no
+  check, because it reads as coverage. This is now the third distinct failure
+  in the same family — checks never inserted, checks scoped to the wrong file,
+  and now a check that permits what it forbids. All three read as coverage
+  while providing none, which makes testing the test the only real defence.
