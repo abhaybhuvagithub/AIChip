@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react'
 import {
   NODES, LAYERS, QUESTIONS, node, ancestry, descendants, principalPath, reach, roots,
 } from '../data/trace.js'
+import ChartData from './ChartData.jsx'
 
 const layerOf = (id) => LAYERS.find((l) => l.id === node(id).layer)
 
@@ -154,6 +155,10 @@ export default function Trace({ goTab }) {
       <h2 className="sec">The whole graph</h2>
       <div className="card">
         <Strata sel={sel} up={up} down={down} onPick={setSel} />
+        <ChartData
+          caption={`Causal chain to “${node(sel).label}” — ${chain.length} steps from a first principle.`}
+          columns={['Step', 'Layer', 'Fact']}
+          rows={chain.map((id, i) => [String(i + 1), layerOf(id).label, node(id).label])} />
         <p className="small" style={{ marginTop: 6 }}>
           {NODES.length} facts, arranged by distance from first principles. Causes flow downward and
           never back — this is a strict hierarchy, not a web, and a verify check enforces it. The lit

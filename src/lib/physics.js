@@ -279,6 +279,7 @@ const CT = {
   n: { min: 68.5, max: 1414, ref: 9.2e16, alpha: 0.711 },
   p: { min: 44.9, max: 470.5, ref: 2.23e17, alpha: 0.719 },
 }
+// [caughey1967]
 export function mobilityVsDoping(dopingCm3, type = 'n') {
   const c = CT[type]
   return c.min + (c.max - c.min) / (1 + Math.pow(dopingCm3 / c.ref, c.alpha))
@@ -375,6 +376,7 @@ export const CU = { rho0: 1.68, mfpNm: 39, R: 0.43, p: 0.5 }  // µΩ·cm, nm
  * current — so the conducting cross-section shrinks faster than the drawn one.
  * At 20 nm the barrier alone can take a third of the wire.
  */
+// [fuchs1938] surface scattering, [mayadas1970] grain boundaries
 export function copperResistivity({ widthNm, heightNm = null, barrierNm = 1.5 }) {
   const w = widthNm, h = heightNm || widthNm * 2
   const { rho0, mfpNm, R, p } = CU
@@ -436,6 +438,7 @@ export function rcDelay({ widthNm, heightNm = null, lengthUm, capPerMmPf = 0.2, 
  * its neighbour. It is why current density limits appear in every design rule
  * deck, and why they tighten as wires narrow.
  */
+// [black1969]
 export function blackMttf({ currentDensityAcm2, T = 373, eaEv = 0.9, n = 2, A = 1e-14 }) {
   return A * Math.pow(currentDensityAcm2, -n) * Math.exp(eaEv / (K.kB_eV * T))
 }
@@ -607,6 +610,7 @@ export const flickerNoiseV2 = ({ kf = 1e-25, cox, wCm, lCm, freqHz }) =>
  * — are the ones whose margin erodes first. It is the statistical statement of
  * the same physics as random dopant fluctuation.
  */
+// [pelgrom1989]
 export function pelgromMismatch({ aVthMvUm = 3.0, wNm, lNm }) {
   const areaUm2 = (wNm * 1e-3) * (lNm * 1e-3)
   return areaUm2 > 0 ? aVthMvUm / Math.sqrt(areaUm2) : Infinity

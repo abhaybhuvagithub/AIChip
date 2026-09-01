@@ -265,6 +265,42 @@ Below 1020px it becomes a drawer with a scrim, closing itself once a
 destination is chosen, and its transition is disabled under
 `prefers-reduced-motion`.
 
+## Sources
+
+An audit found **zero citations** across every data and library file. The site
+insisted on saying what was estimated and what was contested, then asked the
+reader to take several hundred factual claims on trust — the largest gap
+between what it preached and what it did.
+
+`src/data/sources.js` now carries thirty entries under two rules that cost
+coverage and are worth it: **no URL unless it is real** (a fabricated link is
+worse than none, because it looks checkable), and **coverage is partial and
+says so**. Each is tagged by kind — peer-reviewed, standard, vendor, analyst,
+reporting — because those should be weighed differently, and vendor and analyst
+entries carry explicit caveats. The Sources tab also lists what is *not*
+sourced.
+
+Tracking down one citation immediately corrected an error: Horowitz's 640 pJ is
+a DRAM **access**, not a 32-bit read as the site had it.
+
+## Performance
+
+The site shipped as a single 238 kB gzipped bundle — everyone downloaded the
+fab simulator, the glossary and eighteen sections of device physics to read one
+tab. Route-level code splitting cut the entry chunk to **108 kB**, with each
+tab its own chunk of at most 16 kB. The budget script now measures
+`initial.gzip` and `route.max.gzip` separately, because the total stopped being
+what a reader waits for.
+
+## Accessibility of charts
+
+Sixteen SVGs, each labelled with *what it is* rather than what it shows — a
+reader using a screen reader got "Roofline: attainable performance against
+arithmetic intensity" and no data. An `aria-label` describes a picture; it
+cannot convey a distribution. The four charts carrying the most argument now
+have the underlying numbers behind a "Show the numbers" disclosure, as real
+tables with scoped headers.
+
 ## Motion
 
 Every navigation goes through one helper (`src/lib/motion.js`), so the

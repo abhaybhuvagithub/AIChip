@@ -7,6 +7,7 @@ import {
 import { fmt } from '../lib/fab.js'
 import { ops } from '../lib/compute.js'
 import Icon from './Icon.jsx'
+import ChartData from './ChartData.jsx'
 
 const gb = (b) => (b >= 1e12 ? `${(b / 1e12).toFixed(2)} TB` : `${(b / 1e9).toFixed(1)} GB`)
 
@@ -144,6 +145,14 @@ export default function AIChips() {
             <span className="small" style={{ color: 'var(--ok)' }}>● compute-bound</span>
             <span className="small" style={{ color: 'var(--warn)' }}>┆ ridge point</span>
           </div>
+          <ChartData
+            caption={`Roofline at ${peakTf} TFLOPS peak and ${bwTb} TB/s bandwidth. Ridge point ${ridge.toFixed(0)} operations per byte.`}
+            columns={['Kernel', 'Arithmetic intensity', 'Attainable (TFLOPS)', 'Share of peak', 'Limited by']}
+            rows={KERNELS.map((x) => {
+              const rr = roofline({ peakFlops, bandwidthBps, intensity: x.intensity })
+              return [x.name, String(x.intensity), (rr.attainable / 1e12).toFixed(1),
+                fmt.pct(rr.utilisation, 1), rr.bound]
+            })} />
         </div>
         <div className="card" style={{ alignSelf: 'start' }}>
           <div className="grid g2">

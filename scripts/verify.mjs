@@ -177,7 +177,7 @@ group('Content')
   ok('quiz answers all point at a real option', QUIZ.every((q) => q.opts[q.a] !== undefined))
   ok('every quiz question explains itself', QUIZ.every((q) => q.why && q.why.length > 40))
   ok('quiz options are distinct', QUIZ.every((q) => new Set(q.opts).size === q.opts.length))
-  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science', 'clock', 'business', 'ethics', 'teams', 'unsolved', 'acronyms', 'trace', 'ai', 'operate'].includes(t.tab)))
+  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science', 'clock', 'business', 'ethics', 'teams', 'unsolved', 'acronyms', 'trace', 'ai', 'operate', 'sources'].includes(t.tab)))
   ok('the tour visits every tab', ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz']
     .every((t) => TOUR.some((s) => s.tab === t)))
   ok('quiz covers the material chain', QUIZ.some((q) => /purity|distill|polysilicon|particle/i.test(q.q)))
@@ -2467,8 +2467,27 @@ group('Themes and contrast')
   ok('a default applies before JavaScript runs', /:root, \[data-theme="litho"\]\[data-mode="dark"\]/.test(css))
   ok('the mode switch is styled', /\.modeswitch/.test(css))
 
+
+
   // ---- glass sidebar ----
   const app2 = readFileSync(join(root, 'src/App.jsx'), 'utf8')
+  // ---- code splitting ----
+  ok('routes are lazily loaded rather than bundled together',
+    /lazy\(\(\) => import\(/.test(app2))
+  ok('at least fifteen routes are split', (app2.match(/lazy\(\(\) => import\(/g) || []).length >= 15,
+    String((app2.match(/lazy\(\(\) => import\(/g) || []).length))
+  ok('a suspense boundary wraps the routed content',
+    /<Suspense fallback=/.test(app2) && /<\/Suspense>/.test(app2))
+  // A spinner on the first thing a visitor sees is worse than the bytes saved.
+  ok('the overview stays eager so the landing view never waits',
+    /^import GodView from/m.test(app2))
+  ok('narrow viewports scroll tables rather than squashing them',
+    /@media \(max-width: 860px\)[\s\S]{0,200}\.tbl \{ min-width/.test(css))
+  ok('a scrolling table says that it scrolls',
+    /\.tbl-wrap::after \{[\s\S]{0,80}content: .scroll/.test(css))
+  ok('multi-column grids collapse on a phone',
+    /@media \(max-width: 640px\)[\s\S]{0,400}\.grid\.g3, \.grid\.g2 \{ grid-template-columns: 1fr/.test(css))
+
   ok('the sidebar exists and is fixed', /\.sidebar \{[^}]*position: fixed/.test(css))
   ok('the sidebar is actually glass, not just translucent',
     /\.sidebar \{[^}]*backdrop-filter: blur/.test(css))
@@ -2758,7 +2777,172 @@ group('Speech')
   ok('the module imports cleanly outside a browser', typeof SP.speak === 'function')
 }
 
+/* ---------- sources and accessibility ---------- */
+group('Sources')
+{
+  const SR = await import(join(root, 'src/data/sources.js'))
+
+  ok('the site has citations at all', SR.IDS.length >= 25, String(SR.IDS.length))
+  ok('every source is fully identified', SR.IDS.every((id) => {
+    const x = SR.SOURCES[id]
+    return x.title && x.author && x.venue && x.year && x.kind && x.supports &&
+      SR.KINDS[x.kind] && x.supports.length > 30
+  }))
+  ok('years are plausible', SR.IDS.every((id) => SR.SOURCES[id].year >= 1900 && SR.SOURCES[id].year <= 2026))
+  // A fabricated link is worse than no link, because it looks checkable.
+  ok('every URL present is absolute and https', SR.IDS
+    .filter((id) => SR.SOURCES[id].url)
+    .every((id) => /^https:\/\/[a-z0-9.-]+\.[a-z]{2,}/.test(SR.SOURCES[id].url)),
+    SR.IDS.filter((id) => SR.SOURCES[id].url && !/^https:\/\//.test(SR.SOURCES[id].url)).join(', '))
+  ok('sources without a URL still carry enough to find the work',
+    SR.IDS.filter((id) => !SR.SOURCES[id].url)
+      .every((id) => SR.SOURCES[id].author && SR.SOURCES[id].venue && SR.SOURCES[id].year))
+  ok('the foundational papers are cited',
+    ['dennard1974', 'moore1965', 'pelgrom1989', 'black1969', 'horowitz2014',
+     'murphy1964', 'stapper1975', 'caughey1967', 'fuchs1938', 'mayadas1970']
+      .every((id) => SR.SOURCES[id]))
+  ok('peer-reviewed work is the largest category', (() => {
+    const c = {}
+    for (const id of SR.IDS) c[SR.SOURCES[id].kind] = (c[SR.SOURCES[id].kind] || 0) + 1
+    return Object.entries(c).every(([k, v]) => k === 'paper' || v <= c.paper)
+  })())
+  // The weakest numbers on the site must be labelled as such rather than
+  // laundered by sitting in a citation list.
+  ok('the analyst cost estimates carry an explicit caveat',
+    /factor of two/i.test(SR.SOURCES.ibs.caveat) && /no company publishes/i.test(SR.SOURCES.ibs.caveat))
+  ok('vendor figures are flagged as not disinterested',
+    SR.IDS.filter((id) => SR.SOURCES[id].kind === 'vendor')
+      .some((id) => /disinterested/i.test(SR.SOURCES[id].caveat || '')))
+  ok('the named occupational-health case keeps its qualification in the citation too',
+    /did not concede/i.test(SR.SOURCES.samsung2018.caveat))
+  ok('every kind is explained rather than just labelled',
+    Object.values(SR.KINDS).every((k) => k.label && k.hue && k.note.length > 40))
+  ok('the formatter produces a readable citation',
+    /Horowitz.*ISSCC.*2014/.test(SR.format('horowitz2014')))
+  // Saying what is NOT sourced is the part that keeps the page honest.
+  ok('the tab names what remains unsourced', (() => {
+    const ui = readFileSync(join(root, 'src/ui/Sources.jsx'), 'utf8')
+    return /still unsourced/i.test(ui) && /Coverage is partial/i.test(ui)
+  })())
+
+  // The error this work uncovered: Horowitz's 640 pJ is a DRAM access, not a
+  // 32-bit read, and mislabelling it overstated the per-bit cost twofold.
+  const RF2 = await import(join(root, 'src/lib/roofline.js'))
+  ok('the DRAM energy figure is labelled as an access, not a 32-bit read',
+    /access/i.test(RF2.ENERGY_PJ.find((e) => e.id === 'ddr').name) &&
+    !/32 bits/i.test(RF2.ENERGY_PJ.find((e) => e.id === 'ddr').name))
+  ok('the energy table names its source', RF2.ENERGY_SOURCE === 'horowitz2014')
+}
+
+group('Chart accessibility')
+{
+  const cd = readFileSync(join(root, 'src/ui/ChartData.jsx'), 'utf8')
+  ok('there is a component that exposes chart data as a table',
+    /<table className="tbl">/.test(cd) && /<caption/.test(cd))
+  ok('data tables use scoped headers so a screen reader can navigate them',
+    /scope="col"/.test(cd) && /scope="row"/.test(cd))
+  ok('the disclosure state is announced', /aria-expanded=\{open\}/.test(cd))
+  // An aria-label describes a picture. It cannot convey a distribution.
+  const charted = ['AIChips', 'Trace', 'Unsolved', 'Operate']
+  for (const f of charted) {
+    const src = readFileSync(join(root, `src/ui/${f}.jsx`), 'utf8')
+    ok(`${f}: its chart has the numbers behind it`,
+      /<ChartData/.test(src) && /caption=/.test(src) && /columns=/.test(src) && /rows=/.test(src))
+  }
+}
+
 /* ---------- meta ---------- */
+group('Reading path')
+{
+  const gv = readFileSync(join(root, 'src/ui/GodView.jsx'), 'utf8')
+  ok('the overview offers routes through rather than a flat list',
+    /Three ways through/.test(gv) && /TAB_NAME/.test(gv))
+  ok('every route step points at a real tab', (() => {
+    const app3 = readFileSync(join(root, 'src/App.jsx'), 'utf8')
+    const ids = [...gv.matchAll(/t: \[([^\]]+)\]/g)]
+      .flatMap((m) => m[1].split(',').map((x) => x.trim().replace(/'/g, '')))
+    return ids.length >= 9 && ids.every((id) => app3.includes(`id: '${id}'`))
+  })())
+  // The site has never been read by anyone who did not write it, and saying so
+  // is more useful than pretending the judgement behind it is reliable.
+  ok('the site admits it has never been user-tested',
+    /never been read by anyone who does not already know/i.test(gv))
+}
+
+group('Against published values')
+{
+  // Almost everything else in this suite checks that my models agree with
+  // themselves. That is worth having and it is not the same as being right.
+  // These compare against numbers published elsewhere, which is the only kind
+  // of check that can catch a model that is coherent and wrong.
+  const P2 = await import(join(root, 'src/lib/physics.js'))
+  const RF3 = await import(join(root, 'src/lib/roofline.js'))
+  const R3 = await import(join(root, 'src/lib/rigor.js'))
+  const SR2 = await import(join(root, 'src/data/sources.js'))
+
+  // Silicon at 300 K, from any device physics text.
+  ok('intrinsic carrier concentration is ~1.0e10 /cm³ at 300 K',
+    P2.intrinsicCarriers(300) > 5e9 && P2.intrinsicCarriers(300) < 2e10,
+    P2.intrinsicCarriers(300).toExponential(2))
+  ok('silicon bandgap is 1.12 eV at 300 K', near(P2.bandgap(300), 1.12, 0.01), P2.bandgap(300).toFixed(3))
+  ok('thermal voltage is 25.85 mV at 300 K', near(P2.thermalVoltage(300) * 1000, 25.85, 0.05))
+  // Returns volts, not millivolts — which is exactly the confusion that put a
+  // divide-by-1000 into the science tab and rendered a leakage ratio as
+  // infinity. This check caught it.
+  ok('the subthreshold floor is 59.6 mV/decade at 300 K',
+    near(P2.subthresholdSwing(1, 300) * 1000, 59.6, 0.2),
+    (P2.subthresholdSwing(1, 300) * 1000).toFixed(1) + ' mV/dec')
+  ok('electron mobility in lightly doped silicon is ~1400 cm²/V·s [caughey1967]',
+    near(P2.mobilityVsDoping(1e14), 1400, 25))
+  ok('copper bulk resistivity is 1.68 µΩ·cm', near(P2.CU.rho0, 1.68, 0.01))
+  ok('copper electron mean free path is ~39 nm', near(P2.CU.mfpNm, 39, 2))
+  ok('silicon saturation velocity is ~1e7 cm/s', near(P2.SILICON.vSat, 1e7, 2e6))
+
+  // Six sigma is 3.4 DPMO by the industry convention with the 1.5σ shift.
+  ok('the sigma table matches the published convention',
+    near(R3.sigmaFromDpmo(3.4), 6, 0.01) && near(R3.sigmaFromDpmo(66807), 3, 0.02))
+
+  // Horowitz ISSCC 2014, the figures as commonly reproduced.
+  ok('DRAM access energy matches the cited 640 pJ [horowitz2014]',
+    RF3.ENERGY_PJ.find((e) => e.id === 'ddr').pj === 640)
+  ok('an FP16 multiply-add is sub-picojoule at 45 nm [horowitz2014]',
+    RF3.ENERGY_PJ.find((e) => e.id === 'fp16').pj < 1)
+  ok('memory access dominates arithmetic by two to three orders of magnitude',
+    RF3.ENERGY_PJ.find((e) => e.id === 'ddr').pj /
+    RF3.ENERGY_PJ.find((e) => e.id === 'fp16').pj > 500)
+
+  // Roofline, against a published accelerator's own figures [nvidia].
+  ok('an H100-class ridge point is ~295 ops per byte [nvidia]',
+    near(RF3.ridgePoint({ peakFlops: 989e12, bandwidthBps: 3.35e12 }), 295, 3))
+
+  // EUV, from the tool vendor's published parameters [asml].
+  ok('EUV wavelength is 13.5 nm [asml]',
+    P2.LITHO.some((l) => Math.abs(l.lambda - 13.5) < 0.1))
+  ok('193 nm immersion has NA above 1 because of the water [asml]',
+    P2.LITHO.some((l) => Math.abs(l.lambda - 193) < 1 && l.naMax > 1 && /water/i.test(l.medium)))
+
+  // Every source id referenced in a library comment must exist.
+  ok('source ids cited in code all resolve', (() => {
+    const files = readdirSync(join(root, 'src/lib')).filter((f) => f.endsWith('.js'))
+    const cited = new Set()
+    for (const f of files) {
+      const t = readFileSync(join(root, 'src/lib', f), 'utf8')
+      for (const m of t.matchAll(/\[([a-z]+\d{4}|ibs|itrs|irds|jedec|asml|tsmc|nvidia|sia|rba|ucie|cerebras|aecq100)\]/g)) {
+        cited.add(m[1])
+      }
+    }
+    return [...cited].every((c) => SR2.SOURCES[c])
+  })(), (() => {
+    const files = readdirSync(join(root, 'src/lib')).filter((f) => f.endsWith('.js'))
+    const cited = new Set()
+    for (const f of files) {
+      const t = readFileSync(join(root, 'src/lib', f), 'utf8')
+      for (const m of t.matchAll(/\[([a-z]+\d{4}|ibs|itrs|irds|jedec|asml|tsmc|nvidia|sia|rba|ucie|cerebras|aecq100)\]/g)) cited.add(m[1])
+    }
+    return [...cited].filter((c) => !SR2.SOURCES[c]).join(', ') || `${cited.size} ids, all resolve`
+  })())
+}
+
 group('The suite itself')
 {
   // A module can be added, shipped and used while its checks quietly do not
@@ -2842,7 +3026,14 @@ group('Build output')
     ok('a JS bundle was emitted', js.length > 0)
     ok('a CSS bundle was emitted', css.length > 0)
     if (js.length) {
-      const bundle = readFileSync(join(dist, 'assets', js[0]), 'utf8')
+      // Read every JS asset, not just the first. Route-level code splitting
+      // moved most of the site out of the entry chunk, and thirty content
+      // checks failed at once because they were looking in the wrong file —
+      // the content still shipped, in a different chunk. What these assert is
+      // "did this reach the browser", and the browser gets all of them.
+      const bundle = js.map((f) => readFileSync(join(dist, 'assets', f), 'utf8')).join('\n')
+      ok('the site is split into route chunks rather than one bundle', js.length >= 15,
+        `${js.length} chunks`)
       ok('the fab line content shipped', bundle.includes('Czochralski'))
       ok('the yield models shipped', bundle.includes('Negative binomial') || bundle.includes('negbinom'))
       // The provenance note is a claim the repo makes to its readers, so it
@@ -2854,6 +3045,8 @@ group('Build output')
       ok('the provenance note shipped', bundle.includes('Anthropic') && bundle.includes('publicly available'))
       ok('the no-confidential-data statement shipped', /confidential/i.test(bundle))
       ok('the icon set shipped', bundle.includes('waferscale') && bundle.includes('iplicense'))
+      ok('the sources tab shipped', bundle.includes('Where the numbers come from') || bundle.includes('horowitz'))
+      ok('chart data tables shipped', bundle.includes('Show the numbers'))
       ok('the trace graph shipped', bundle.includes('downstream') && bundle.includes('Boltzmann'))
       ok('the acronym glossary shipped', bundle.includes('acronyms') || bundle.includes('DIBL'))
       ok('the open problems tab shipped', bundle.includes('Open problems') || bundle.includes('nobody has solved'))

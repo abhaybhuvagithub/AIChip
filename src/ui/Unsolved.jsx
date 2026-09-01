@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { PROBLEMS, DOMAINS, STATUS, CAVEAT } from '../data/unsolved.js'
 import Icon from './Icon.jsx'
+import ChartData from './ChartData.jsx'
 
 const NOW = 2026
 
@@ -99,6 +100,11 @@ export default function Unsolved() {
       </div>
       <div className="card">
         <OpenFor items={items} sel={sel} onPick={setSel} />
+        <ChartData
+          caption="How long each problem has been recognised as open, in years."
+          columns={['Problem', 'Domain', 'Since', 'Years open', 'Status']}
+          rows={items.map((x) => [x.name, DOMAINS[x.domain].label, String(x.since),
+            String(NOW - x.since), STATUS[x.status].label])} />
       </div>
       <p className="small" style={{ marginTop: 10, maxWidth: '68ch' }}>
         Dates are when each was first recognised as a distinct open problem, not when it was first

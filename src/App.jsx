@@ -1,29 +1,39 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import FabLine from './ui/FabLine.jsx'
-import FabRun from './ui/FabRun.jsx'
+import React, { useEffect, useMemo, useState, lazy, Suspense } from 'react'
 import GodView from './ui/GodView.jsx'
 import Assistant from './ui/Assistant.jsx'
+
+// Route-level code splitting. The whole site was shipping as one 238 kB chunk,
+// so a reader who wanted the acronym glossary also downloaded the fab
+// simulator, the causal graph and eighteen sections of device physics before
+// anything appeared. Each tab is now its own chunk, fetched when asked for.
+//
+// GodView stays eager: it is the overview, it is small, and a spinner on the
+// first thing someone sees is worse than the bytes it saves.
+const SandToSilicon = lazy(() => import('./ui/SandToSilicon.jsx'))
+const FabLine = lazy(() => import('./ui/FabLine.jsx'))
+const FabRun = lazy(() => import('./ui/FabRun.jsx'))
+const YieldLab = lazy(() => import('./ui/YieldLab.jsx'))
+const Economics = lazy(() => import('./ui/Economics.jsx'))
+const Quiz = lazy(() => import('./ui/Quiz.jsx'))
+const Beyond3D = lazy(() => import('./ui/Beyond3D.jsx'))
+const Silicon = lazy(() => import('./ui/Silicon.jsx'))
+const ValueChain = lazy(() => import('./ui/ValueChain.jsx'))
+const Compute = lazy(() => import('./ui/Compute.jsx'))
+const Quantum = lazy(() => import('./ui/Quantum.jsx'))
+const Science = lazy(() => import('./ui/Science.jsx'))
+const Clock = lazy(() => import('./ui/Clock.jsx'))
+const Business = lazy(() => import('./ui/Business.jsx'))
+const Ethics = lazy(() => import('./ui/Ethics.jsx'))
+const Teams = lazy(() => import('./ui/Teams.jsx'))
+const Unsolved = lazy(() => import('./ui/Unsolved.jsx'))
+const Acronyms = lazy(() => import('./ui/Acronyms.jsx'))
+const Sources = lazy(() => import('./ui/Sources.jsx'))
+const Trace = lazy(() => import('./ui/Trace.jsx'))
+const Operate = lazy(() => import('./ui/Operate.jsx'))
+const AIChips = lazy(() => import('./ui/AIChips.jsx'))
+
 import Icon from './ui/Icon.jsx'
-import YieldLab from './ui/YieldLab.jsx'
-import Economics from './ui/Economics.jsx'
 import NodesView from './ui/Nodes.jsx'
-import Silicon from './ui/Silicon.jsx'
-import Beyond3D from './ui/Beyond3D.jsx'
-import Science from './ui/Science.jsx'
-import Clock from './ui/Clock.jsx'
-import ValueChain from './ui/ValueChain.jsx'
-import Business from './ui/Business.jsx'
-import Ethics from './ui/Ethics.jsx'
-import Teams from './ui/Teams.jsx'
-import Unsolved from './ui/Unsolved.jsx'
-import Acronyms from './ui/Acronyms.jsx'
-import Trace from './ui/Trace.jsx'
-import Operate from './ui/Operate.jsx'
-import SandToSilicon from './ui/SandToSilicon.jsx'
-import Compute from './ui/Compute.jsx'
-import AIChips from './ui/AIChips.jsx'
-import Quantum from './ui/Quantum.jsx'
-import Quiz from './ui/Quiz.jsx'
 import { TOUR } from './data/learn.js'
 import { PRODUCTS } from './data/nodes.js'
 import { buildJourney } from './lib/journey.js'
@@ -39,7 +49,7 @@ const TABS = [
   { id: 'trace', label: 'Trace', icon: 'graph', group: 'Orientation',
     desc: 'Pick any fact — eight cores, one EUV supplier — and walk it back to a constant of nature.' },
 
-  { id: 'sand', label: 'Sand → silicon', icon: 'quartzite', group: 'Making a chip',
+  { id: 'sand', label: 'Sand → silicon', icon: 'materials', group: 'Making a chip',
     desc: 'Quartzite to a polished wafer, and where nine-nines purity comes from.' },
   { id: 'line', label: 'Fab line', icon: 'scanner', group: 'Making a chip',
     desc: 'Seventeen process modules, repeated seventy times over. Click any to run a lot through it.' },
@@ -84,6 +94,8 @@ const TABS = [
 
   { id: 'acronyms', label: 'Acronyms', icon: 'book', group: 'Reference',
     desc: '172 abbreviations, each with what it actually means rather than just what it stands for.' },
+  { id: 'sources', label: 'Sources', icon: 'quartzite', group: 'Reference',
+    desc: 'Where the numbers come from — thirty citations, weighted by kind, and what is still unsourced.' },
   { id: 'quiz', label: 'Quiz', icon: 'quiz', group: 'Reference',
     desc: 'Sixty-four questions. Every answer is somewhere on the other tabs.' },
 ]
@@ -318,6 +330,7 @@ export default function App() {
         </header>
 
       <main className="page" key={tab}>
+        <Suspense fallback={<div className="route-loading">Loading…</div>}>
         {tab === 'sand' && <SandToSilicon cfg={cfg} />}
         {tab === 'line' && <FabLine />}
         {tab === 'god' && <GodView cfg={cfg} snap={snap} goTab={go} />}
@@ -340,7 +353,9 @@ export default function App() {
         {tab === 'compute' && <Compute cfg={cfg} patch={patch} />}
         {tab === 'ai' && <AIChips />}
         {tab === 'quantum' && <Quantum />}
+        {tab === 'sources' && <Sources />}
         {tab === 'quiz' && <Quiz />}
+        </Suspense>
       </main>
 
       {tourStep >= 0 && (

@@ -16,6 +16,12 @@ import WaferMap from './WaferMap.jsx'
  * more quartzite, more energy, fewer parts per wafer, a different cost per
  * operation and a different cooling class, and no single tab shows that.
  */
+const TAB_NAME = {
+  sand: 'Sand → silicon', line: 'Fab line', wafer: 'Yield lab', economics: 'Economics',
+  science: 'The science', clock: 'Clock', '3d': '3D & beyond', unsolved: 'Open problems',
+  chain: 'Value chain', business: '0 → market', teams: 'Teams & roles', operate: 'Run & operate',
+}
+
 export default function GodView({ cfg, snap, goTab }) {
   const run = computeRun(cfg)
   const trace = traceBack(cfg, run)
@@ -45,6 +51,44 @@ export default function GodView({ cfg, snap, goTab }) {
         watch it move the rock, the energy, the parts per wafer, the cost per operation and the
         cooling class together — because in reality they were never separate.
       </p>
+
+      {/* Twenty-four tabs with no order is not a curriculum. Three routes
+          through, so a newcomer is not left to guess. */}
+      <h2 className="sec">Three ways through</h2>
+      <div className="grid g3">
+        {[
+          { k: 'Never seen a fab', t: ['sand', 'line', 'wafer', 'economics'],
+            why: 'Follow the material. Sand becomes a wafer, the wafer goes through the line, most of the dies die, and the survivors have to pay for all of it.' },
+          { k: 'Want the physics', t: ['science', 'clock', '3d', 'unsolved'],
+            why: 'Start with why a transistor switches, then why it stopped getting faster, then what is being done about it, then what nobody has solved.' },
+          { k: 'Here for the industry', t: ['chain', 'business', 'teams', 'operate'],
+            why: 'Who does what, what it costs to start, who you would have to hire, and then run one yourself for twenty quarters.' },
+        ].map((path) => (
+          <div className="card" key={path.k}>
+            <div className="eyebrow">{path.k}</div>
+            <p className="small" style={{ marginTop: 8 }}>{path.why}</p>
+            <div className="row" style={{ gap: 6, marginTop: 10 }}>
+              {path.t.map((id, i) => (
+                <React.Fragment key={id}>
+                  {i > 0 && <span className="small" style={{ color: 'var(--muted)' }}>→</span>}
+                  <button className="btn sm" onClick={() => goTab(id)}>{TAB_NAME[id] || id}</button>
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="card" style={{ marginTop: 14, borderColor: 'var(--warn)' }}>
+        <div className="eyebrow" style={{ color: 'var(--warn)' }}>One thing this site cannot tell you</div>
+        <p style={{ marginTop: 8, fontSize: 'var(--fs-prose)', lineHeight: 1.62 }}>
+          It has never been read by anyone who does not already know the subject. Every judgement
+          about what is clear, what is too dense and what order things belong in has been made by
+          the person who wrote it — which is the least reliable possible source for those
+          judgements. If something here is confusing, that is information the site does not
+          otherwise have, and the repository is the place to say so.
+        </p>
+      </div>
 
       {/* The chain, end to end. */}
       <div className="godflow" style={{ marginTop: 22 }}>

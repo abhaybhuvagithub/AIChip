@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react'
 import { newCompany, runToEnd, MARKETS, POLICY } from '../lib/operate.js'
 import { fmt } from '../lib/fab.js'
 import Icon from './Icon.jsx'
+import ChartData from './ChartData.jsx'
 
 const usd = (v) => {
   const a = Math.abs(v), sign = v < 0 ? '−' : ''
@@ -151,6 +152,11 @@ export default function Operate({ goTab }) {
 
       <div className="card" style={{ marginTop: 14 }}>
         <Trace log={result.log} />
+        <ChartData
+          caption={`Quarterly cash and standing, ${m.name} market at $${capital}M starting capital.`}
+          columns={['Quarter', 'Cash', 'Units sold', 'DPPM', 'Standing', 'Shipment']}
+          rows={result.log.map((l) => [`Q${l.q}`, usd(l.cash), `${(l.sold / 1e6).toFixed(2)}M`,
+            l.dppm.toFixed(2), `${((l.standing ?? 1) * 100).toFixed(0)}%`, l.gated ? 'held' : 'shipping'])} />
         <div className="row" style={{ gap: 14 }}>
           <span className="small" style={{ color: 'var(--accent)' }}>— cash</span>
           <span className="small" style={{ color: 'var(--ok)' }}>┄ standing with the customer</span>

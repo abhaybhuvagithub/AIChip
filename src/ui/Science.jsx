@@ -884,7 +884,7 @@ export default function Science() {
         </div>
         <div className="stat">
           <div className="k">Subthreshold, 25 → 125 °C</div>
-          <div className="v" style={{ fontSize: 22 }}>{(Math.pow(10, (0.3 / (subthresholdSwing(1.3, 298) / 1000)) - (0.3 / (subthresholdSwing(1.3, 398) / 1000)))).toFixed(0)}×</div>
+          <div className="v" style={{ fontSize: 22 }}>{(Math.pow(10, (0.3 / subthresholdSwing(1.3, 298)) - (0.3 / subthresholdSwing(1.3, 398)))).toFixed(0)}×</div>
           <div className="sub">the swing widens with T, so the same V_th leaks more</div>
         </div>
         <div className="stat">

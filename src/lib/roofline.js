@@ -72,13 +72,15 @@ export const KERNELS = [
 /**
  * Energy to move a number versus energy to compute with it.
  *
- * These are the widely-cited figures from Horowitz's work, at 45 nm, and the
- * ratios have held far better than the absolute values. The striking one:
+ * Figures from Horowitz, ISSCC 2014, at 45 nm [horowitz2014]. The ratios have
+ * held far better than the absolute values, and reproductions of his table
+ * differ in detail between papers that cite it. The striking one:
  * reading an operand from DRAM costs several hundred times the arithmetic
  * performed on it. Data movement, not computation, is where the energy goes —
  * which is the entire argument for on-chip memory, for locality, and for
  * caring about arithmetic intensity at all.
  */
+export const ENERGY_SOURCE = 'horowitz2014'
 export const ENERGY_PJ = [
   { id: 'int8', name: 'INT8 add', pj: 0.03, where: 'Arithmetic' },
   { id: 'fp16', name: 'FP16 multiply-add', pj: 0.4, where: 'Arithmetic' },
@@ -86,8 +88,11 @@ export const ENERGY_PJ = [
   { id: 'sram8', name: 'Read 32 bits from 8 kB SRAM', pj: 5, where: 'On-chip memory' },
   { id: 'sram1m', name: 'Read 32 bits from 1 MB SRAM', pj: 50, where: 'On-chip memory' },
   { id: 'onchip', name: 'Move 32 bits across the die', pj: 60, where: 'Interconnect' },
-  { id: 'hbm', name: 'Read 32 bits from HBM', pj: 300, where: 'Off-chip memory' },
-  { id: 'ddr', name: 'Read 32 bits from DDR', pj: 640, where: 'Off-chip memory' },
+  // Horowitz's 640 pJ is a DRAM ACCESS, not a 32-bit read — mislabelling it
+  // as the latter overstated the per-bit cost by a factor of two, and the
+  // error only surfaced when the citation was tracked down.
+  { id: 'hbm', name: 'HBM access', pj: 300, where: 'Off-chip memory' },
+  { id: 'ddr', name: 'DRAM access', pj: 640, where: 'Off-chip memory' },
 ]
 
 /**

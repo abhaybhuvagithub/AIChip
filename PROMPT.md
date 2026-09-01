@@ -1176,3 +1176,45 @@ the foundation.
   version of the thermal wall on the 3D tab — and it carries the trap worth
   stating plainly: a thinner body keeps the drain out of the channel and cooks
   it doing so. The gate and the heat want opposite things.
+
+---
+
+## Thirty-sixth pass: acting on the audit
+
+Asked what to improve, I listed six things and was then asked to do all of
+them. Five were doable; the sixth was not, and saying which is the point.
+
+- **The site cited nothing.** Zero URLs across every data file, while insisting
+  elsewhere on marking what is estimated and what is contested. That was the
+  largest gap between what it preached and what it did. Thirty sources now,
+  under two rules that cost coverage: no link unless it is real, and coverage
+  is partial and says so. Tagged by kind, because a vendor datasheet and a
+  peer-reviewed paper are not the same evidence — and the analyst cost figures,
+  the weakest numbers on the site, are labelled as such rather than laundered
+  by appearing in a citation list.
+- **Tracking a citation corrected a fact.** Horowitz's 640 pJ is a DRAM
+  *access*, not a 32-bit read as the site had it. Citing forces you to check,
+  which is most of why citing is worth doing.
+- **One 238 kB bundle became 108 kB plus per-route chunks.** Thirty content
+  checks failed at once, correctly: they read the entry chunk and the content
+  had moved. The fix was to read all chunks — what those checks assert is "did
+  this reach the browser", and it does.
+- **Charts were decorative to a screen reader.** Sixteen SVGs labelled with
+  what they are, not what they show. An aria-label cannot convey a
+  distribution, so the four load-bearing charts now expose their numbers as
+  real tables — which sighted readers wanting exact figures also use.
+- **Checking against published values found a live bug.** Almost all 900-odd
+  checks verified my models against themselves. Adding a dozen that compare to
+  external figures immediately caught `subthresholdSwing` returning volts where
+  a UI stat divided by a thousand — a leakage ratio rendering as infinity. A
+  coherent model can still be wrong, and only an outside number catches it.
+- **The sixth item I could not do.** Nobody who does not already know the
+  subject has read this site, and I cannot recruit someone. What I could do is
+  build three reading paths so a newcomer is not left guessing, and put the
+  admission on the front page: every judgement about what is clear here was
+  made by the person who wrote it, which is the least reliable possible source
+  for that judgement. A check asserts that admission stays.
+- **A silent no-op replace cost me a third time.** Python's `str.replace`
+  returns the string unchanged when the needle is absent. It has now caused a
+  missing check group, a missing tab wiring and a missing chart table. Every
+  edit in this pass that mattered was asserted with `assert old in s`.

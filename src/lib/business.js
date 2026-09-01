@@ -20,6 +20,7 @@
 // magnitude and no more. Nobody publishes their real mask bill.
 
 /** Design and mask cost by node. All figures are estimates; see above. */
+export const NODE_COSTS_SOURCE = 'ibs'
 export const NODE_COSTS = [
   { node: '180 nm', maskUsd: 0.12e6, designUsd: 5e6, engineerYears: 25, waferUsd: 800 },
   { node: '90 nm', maskUsd: 0.8e6, designUsd: 20e6, engineerYears: 80, waferUsd: 1600 },

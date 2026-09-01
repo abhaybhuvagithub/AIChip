@@ -87,6 +87,7 @@ export const ESCAPE_STAGES = [
 ]
 
 /** Practical DPPM targets by market. Automotive is the demanding one. */
+// Automotive target per [aecq100]; stress methods per [jedec].
 export const DPPM_TARGETS = [
   { market: 'Consumer electronics', dppm: 500, note: 'A failure is an annoyance and a return.' },
   { market: 'Industrial', dppm: 50, note: 'A failure stops a machine that someone is paid to keep running.' },
