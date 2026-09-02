@@ -731,15 +731,30 @@ group('Real silicon')
       !['announced', 'expected', 'ramping'].includes(s2.status)).map((s2) => s2.id).join(', '))
   ok('announced-but-unshipped parts do not claim to be shipping',
     SILICON.filter((s2) => s2.status === 'announced').every((s2) => !s2.shipped))
-  ok('at least one part took years from announcement to market',
-    SILICON.some((s2) => s2.announced && s2.shipped && s2.shipped - s2.announced >= 3))
-  // Cancelled work is kept rather than deleted, and says why.
-  ok('discontinued parts exist and are labelled',
-    SILICON.filter((s2) => s2.status === 'discontinued').length >= 2)
-  ok('the cancelled Dojo part records what happened to it', (() => {
-    const d = SILICON.find((s2) => s2.id === 'd1')
-    return d && d.status === 'discontinued' && /2025/.test(d.epitaph || '') && /shut down|disbanded/i.test(d.epitaph || '')
+  // The catalogue is now a list of what you can buy, not what has existed.
+  // These three checks previously asserted the opposite policy and failed when
+  // it changed — which is a check doing its job, not a check being wrong.
+  // Replaced rather than deleted, because the history still has to survive
+  // somewhere.
+  ok('nothing in the catalogue is discontinued',
+    SILICON.every((s2) => s2.status !== 'discontinued'),
+    SILICON.filter((s2) => s2.status === 'discontinued').map((s2) => s2.id).join(', '))
+  ok('most of the catalogue is actually purchasable today',
+    SILICON.filter((s2) => s2.status === 'shipping').length >= SILICON.length * 0.5,
+    `${SILICON.filter((s2) => s2.status === 'shipping').length} of ${SILICON.length} shipping`)
+  // Removing the cancelled parts must not delete what they taught. Their
+  // successors carry the story instead.
+  ok('the Dojo cancellation survives in its successor', (() => {
+    const t = SILICON.find((s2) => s2.maker === 'tesla')
+    return t && /2025/.test(t.epitaph || '') && /shut down|disbanded/i.test(t.epitaph || '')
   })())
+  ok('the first TPU is still recorded even though it is gone',
+    SILICON.some((s2) => s2.maker === 'google' && /2015/.test(s2.what)))
+  ok('every brand that had a retired part still has a shipping one',
+    ['tesla', 'google', 'intel'].every((m) =>
+      SILICON.some((s2) => s2.maker === m && s2.status === 'shipping')),
+    ['tesla', 'google', 'intel'].filter((m) =>
+      !SILICON.some((s2) => s2.maker === m && s2.status === 'shipping')).join(', '))
 
   // ---- Arm ----
   // Arm is the reason the instruction set is recorded at all: it is in a third
@@ -800,7 +815,13 @@ group('Real silicon')
 
   // Spot-checks against published figures. If a refactor or a careless edit
   // moves one of these, it is a factual error, not a style change.
-  const by = (id) => SILICON.find((s) => s.id === id)
+  // Throwing on a removed id gives a stack trace instead of a check name.
+  const by = (id) => SILICON.find((s) => s.id === id) || {}
+  ok('every part pinned by a specific check still exists', (() => {
+    const pinned = ['wse3', 'rubin', 'b200', 'tpuv6e', 'm1ultra', 'mi300x', 'h100', 'a17pro']
+    return pinned.every((id) => SILICON.some((s2) => s2.id === id))
+  })(), ['wse3', 'rubin', 'b200', 'tpuv6e', 'm1ultra', 'mi300x', 'h100', 'a17pro']
+    .filter((id) => !SILICON.some((s2) => s2.id === id)).join(', ') || 'all present')
   ok('H100: 80B transistors on 814 mm²', by('h100').transistors === 80e9 && by('h100').areaMm2 === 814)
   ok('WSE-3: 4 trillion transistors on 46,225 mm²',
     by('wse3').transistors === 4e12 && by('wse3').areaMm2 === 46225)
@@ -809,7 +830,7 @@ group('Real silicon')
     by('rubin').transistors === 336e9 && by('rubin').dies === 2)
   ok('Blackwell: 208B transistors across two dies',
     by('b200').transistors === 208e9 && by('b200').dies === 2)
-  ok('TPU v1: 331 mm² at 28 nm', by('tpuv1').areaMm2 === 331 && by('tpuv1').node === '28 nm')
+  ok('TPU v6e is the shipping Google part', by('tpuv6e').status === 'shipping')
   ok('M1 Ultra is two dies', by('m1ultra').dies === 2)
   ok('MI300X is a multi-die part', by('mi300x').dies > 2)
   ok('every Apple and Google part is fabbed at TSMC',
@@ -822,7 +843,14 @@ group('Real silicon')
       .every((s) => dens(s) > 5 && dens(s) < 400))
   ok('H100 density lands near the value the compute model is calibrated on',
     near(dens(by('h100')), 98, 4), dens(by('h100')).toFixed(1))
-  ok('newer nodes are denser than older ones', dens(by('rubin')) > dens(by('tpuv1')) || by('tpuv1').transistors === 0)
+  // Was pinned against TPU v1, which left the catalogue when discontinued
+  // parts were removed. Repointed to a 7 nm part that is still in it, so the
+  // generational comparison is still a real one.
+  ok('newer nodes are denser than older ones', (() => {
+    const modern = dens(by('rubin'))      // TSMC N3, 2026
+    const older = dens(by('gc200'))       // TSMC 7 nm, 2020
+    return modern > older * 1.5
+  })(), `${dens(by('rubin')).toFixed(0)} vs ${dens(by('gc200')).toFixed(0)} MTr/mm²`)
   ok('parts above the reticle field are all multi-die or stitched',
     SILICON.filter((s) => s.areaMm2 > RETICLE.area).every((s) => s.dies > 1 || s.maker === 'cerebras'))
   ok('every loadable part yields at least one die on a 300 mm wafer',

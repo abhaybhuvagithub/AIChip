@@ -366,9 +366,10 @@ export default function Silicon({ cfg, patch, goTab }) {
       {' '}
         Availability is stated as of {STATUS_AS_OF}; a status with no as-of date is a claim about
         the present made by someone who has left the building, and this one will go stale like any
-        other. {SILICON.filter((x) => x.status === 'discontinued').length} of these parts are no
-        longer made, and they are kept here rather than deleted — a cancelled architecture is often
-        more instructive than a surviving one.</p>
+        other. Nothing listed here is discontinued: this is a catalogue of what you can actually
+        buy. Where a brand's earlier part was retired or cancelled — Tesla's Dojo, Google's first
+        TPU, Intel's Ponte Vecchio — its successor carries that history in the text, because the
+        story is worth keeping even when the part is not orderable.</p>
     </div>
   )
 }

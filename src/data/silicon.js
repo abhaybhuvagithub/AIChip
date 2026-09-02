@@ -124,14 +124,6 @@ export const SILICON = [
 
   // ---------------- Google ----------------
   {
-    id: 'tpuv1', icon: 'npu', maker: 'google', cat: 'ai', name: 'TPU v1', year: 2015,
-    foundry: 'TSMC', node: '28 nm', transistors: 0, areaMm2: 331, dies: 1,
-    power: 75, isa: 'Custom', tops: 92e12, precision: 'INT8',
-    announced: 2016, shipped: 2015, status: 'discontinued',
-    what: 'A deliberately boring chip built around one idea: a 256×256 systolic array of multipliers with the weights held still and the data flowing through. No caches, no speculation, no out-of-order machinery. It went from silicon to datacentre deployment in about fifteen months.',
-    notable: 'The systolic array bet',
-  },
-  {
     id: 'tpuv4', icon: 'npu', maker: 'google', cat: 'ai', name: 'TPU v4', year: 2021,
     foundry: 'TSMC', node: '7 nm', transistors: 0, areaMm2: 0, areaKnown: false, dies: 1,
     power: 200, isa: 'Custom', est: true, tops: 275e12, precision: 'BF16',
@@ -236,15 +228,6 @@ export const SILICON = [
 
   // ---------------- Others ----------------
   {
-    id: 'd1', icon: 'npu', maker: 'tesla', cat: 'ai', name: 'Tesla D1 (Dojo)', year: 2021,
-    foundry: 'TSMC', node: '7 nm', transistors: 50e9, areaMm2: 645, dies: 1,
-    power: 400, isa: 'Custom', est: true,
-    announced: 2021, shipped: 2022, status: 'discontinued',
-    what: 'Built to be tiled: 25 dies bonded onto a single substrate as a "training tile" with no packaging between them, so the array behaves like one large fabric. An answer to the reticle limit sitting between chiplets and wafer scale — and a reminder that an elegant answer is not the same as a surviving one.',
-    notable: 'Cancelled — Dojo was shut down in August 2025',
-    epitaph: 'Tesla disbanded the Dojo team in August 2025 and the programme was ended, with the work converging on its AI5 and AI6 parts instead. Musk described the planned successor as an evolutionary dead end. The architecture was genuinely interesting and it is not coming back, which is worth recording rather than quietly deleting.',
-  },
-  {
     id: 'sd8elite', icon: 'soc', maker: 'qualcomm', cat: 'mobile', name: 'Snapdragon 8 Elite', year: 2024,
     foundry: 'TSMC', node: 'N3E', transistors: 0, areaMm2: 125, est: true, dies: 1,
     power: 10, isa: 'Arm',
@@ -289,15 +272,6 @@ export const SILICON = [
   },
 
   // ---- more compute ------------------------------------------------------
-  {
-    id: 'pontevecchio', icon: 'chiplet', maker: 'intel', cat: 'ai', name: 'Ponte Vecchio (Xe HPC)', year: 2022,
-    foundry: 'Intel + TSMC', node: 'Five nodes in one package', transistors: 100e9,
-    areaMm2: 0, areaKnown: false, dies: 47,
-    power: 600, isa: 'x86 + Xe', est: true,
-    announced: 2019, shipped: 2023, status: 'discontinued',
-    what: 'Forty-seven tiles across five process nodes from two foundries, in one package. The most aggressively disaggregated product yet shipped, and a useful demonstration that the packaging complexity is real rather than free — it was years late.',
-    notable: '47 tiles, 5 nodes, 2 foundries',
-  },
   {
     id: 'gc200', icon: 'waferscale', maker: 'graphcore', cat: 'ai', name: 'Colossus MK2 GC200 (IPU)', year: 2020,
     foundry: 'TSMC', node: '7 nm', transistors: 59.4e9, areaMm2: 823, dies: 1,
@@ -346,6 +320,29 @@ export const SILICON = [
     announced: 2026, status: 'ramping',
     what: 'Arm’s first complete chip in thirty-five years of selling designs rather than parts. Up to 136 Neoverse V3 cores across two chiplets, built from its own Compute Subsystem, with memory and I/O attached as further chiplets. Announced in March 2026 with Meta as launch customer.',
     notable: 'The licensor became a supplier',
+  },
+
+  {
+    id: 'tpuv6e', icon: 'npu', maker: 'google', cat: 'ai', name: 'TPU v6e (Trillium)', year: 2024,
+    foundry: 'TSMC', node: 'Undisclosed', transistors: 0, areaMm2: 0, areaKnown: false, dies: 1,
+    power: 0, isa: 'Custom', announced: 2024, shipped: 2024, status: 'shipping',
+    what: 'The volume workhorse of Google\'s fleet, generally available since late 2024 and quoted at roughly four times the training throughput per chip of v5e. It descends directly from the TPU v1 that Google built in fifteen months and deployed internally in 2015 — a part that never sold to anyone and started all of this.',
+    notable: 'Nine generations from an internal experiment',
+  },
+  {
+    id: 'ai4', icon: 'soc', maker: 'tesla', cat: 'embedded', name: 'Tesla AI4 (HW4)', year: 2023,
+    foundry: 'Samsung', node: '7 nm', transistors: 0, areaMm2: 0, areaKnown: false, dies: 1,
+    power: 300, isa: 'Custom', announced: 2023, shipped: 2023, status: 'shipping', est: true,
+    what: 'The inference computer in every Tesla built since 2023 — redundant compute, camera pipelines and a neural accelerator on one automotive-qualified part. Mass-produced, safety-critical, and running continuously in millions of vehicles, which is a harder engineering problem than any benchmark.',
+    notable: 'The successor to the cancelled Dojo effort',
+    epitaph: 'Tesla\'s datacentre programme around the D1 chip was shut down in August 2025 and the team disbanded, with the work converging on this in-car line and its AI5 successor. AI5 taped out in April 2026 with volume production expected in 2027, so what actually ships today is still AI4.',
+  },
+  {
+    id: 'lunarlake', icon: 'chiplet', maker: 'intel', cat: 'pc', name: 'Core Ultra 200V (Lunar Lake)', year: 2024,
+    foundry: 'TSMC + Intel', node: 'N3B compute tile', transistors: 0, areaMm2: 0, areaKnown: false, dies: 2,
+    power: 30, isa: 'x86', announced: 2024, shipped: 2024, status: 'shipping', est: true,
+    what: 'Intel\'s flagship laptop part with its compute tile built by TSMC rather than Intel, memory packaged alongside the die, and the tiles assembled with Foveros. An integrated device manufacturer buying leading-edge capacity from a competitor for its own headline product is the clearest statement of where manufacturing leadership sits.',
+    notable: 'Intel\'s compute tile, made by TSMC',
   },
 ]
 

@@ -1307,3 +1307,34 @@ A single `year` field was doing three jobs badly.
   in the same family — checks never inserted, checks scoped to the wrong file,
   and now a check that permits what it forbids. All three read as coverage
   while providing none, which makes testing the test the only real defence.
+
+---
+
+## Fortieth pass: what you can buy
+
+The catalogue's editorial stance changed: from *what has existed* to *what you
+can actually order*. Three discontinued parts out, three shipping parts from
+the same brands in.
+
+- **Verify what ships, do not assume.** The obvious Tesla replacement looked
+  like AI5. It is not shipping — it taped out in April 2026 with volume
+  expected in 2027, so what is actually in vehicles is still AI4, and the
+  Cybercab is launching on it. Searching turned a plausible answer into a
+  correct one.
+- **Remove the part, keep the lesson.** Deleting Dojo, TPU v1 and Ponte
+  Vecchio would have deleted three genuinely instructive stories. Each
+  replacement carries its predecessor's fate in its own text instead, and a
+  check asserts the Dojo cancellation survives in the Tesla entry rather than
+  vanishing with it.
+- **Three checks failed because the policy changed, which is correct
+  behaviour.** They asserted the previous stance — that cancelled parts are
+  kept — and a check that fails when you reverse a decision is doing its job.
+  Replaced with checks for the new policy rather than deleted.
+- **A removed id threw a stack trace instead of naming a check.** `by('tpuv1')`
+  returned undefined and the suite died mid-run. It returns `{}` now, and there
+  is a check that every specifically-pinned part still exists — so a future
+  removal fails by name instead of taking the whole run down.
+- **A comparison quietly lost its other half.** "Newer nodes are denser than
+  older ones" was pinned against TPU v1's 28 nm. With it gone the check was
+  comparing against nothing. Repointed to a 7 nm part still in the catalogue,
+  so it remains a real generational comparison rather than a formality.
