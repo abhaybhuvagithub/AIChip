@@ -29,6 +29,7 @@ const Unsolved = lazy(() => import('./ui/Unsolved.jsx'))
 const Acronyms = lazy(() => import('./ui/Acronyms.jsx'))
 const Sources = lazy(() => import('./ui/Sources.jsx'))
 const Trace = lazy(() => import('./ui/Trace.jsx'))
+const Matters = lazy(() => import('./ui/Matters.jsx'))
 const Operate = lazy(() => import('./ui/Operate.jsx'))
 const AIChips = lazy(() => import('./ui/AIChips.jsx'))
 
@@ -47,6 +48,8 @@ const TABS = [
   // navigation.
   { id: 'god', label: 'God view', icon: 'spark', group: 'Orientation',
     desc: 'The whole pipeline on one screen, live. Every node clicks through.' },
+  { id: 'matters', label: 'Why it matters', icon: 'atom', group: 'Orientation',
+    desc: 'Silicon is almost never the expensive part — it is the part everything stops without.' },
   { id: 'trace', label: 'Trace', icon: 'graph', group: 'Orientation',
     desc: 'Pick any fact — eight cores, one EUV supplier — and walk it back to a constant of nature.' },
 
@@ -59,7 +62,7 @@ const TABS = [
   { id: 'wafer', label: 'Yield lab', icon: 'wafer', group: 'Making a chip',
     desc: 'A live wafer map with four yield models, plus speed binning across the same dies.' },
 
-  { id: 'science', label: 'The science', icon: 'atom', group: 'Why it works',
+  { id: 'science', label: 'The science', icon: 'ipdsp', group: 'Why it works',
     desc: 'Eleven sections of device physics, computed live — from the switch to how it wears out.' },
   { id: 'nodes', label: 'Nodes', icon: 'timeline', group: 'Why it works',
     desc: '180 nm to 2 nm, with drawn cross-sections and what the names stopped meaning.' },
@@ -366,6 +369,7 @@ export default function App() {
         {tab === 'line' && <FabLine />}
         {tab === 'god' && <GodView cfg={cfg} snap={snap} goTab={go} />}
         {tab === 'trace' && <Trace goTab={go} />}
+        {tab === 'matters' && <Matters goTab={go} />}
         {tab === 'operate' && <Operate goTab={go} />}
         {tab === 'run' && <FabRun cfg={cfg} onSnapshot={setSnap} />}
         {tab === 'wafer' && <YieldLab cfg={cfg} patch={patch} />}

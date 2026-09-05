@@ -1423,3 +1423,34 @@ check rather than guessing again.
   went into an endpoint I could not verify. The one that should work does not
   need verification, because it does not depend on the part I was unable to
   test.
+
+---
+
+## Forty-fourth pass: why it matters
+
+The site explained how a chip is made in enormous detail and never said why a
+reader should care. That gap invites the worst writing available — "chips are
+in everything!" — so the tab was built to make the opposite impossible.
+
+- **Every claim is a number.** The organising idea is leverage: semiconductors
+  are almost never the expensive part of anything, and always the part without
+  which the rest does not function. A pacemaker is four hundred times its
+  silicon content, a car sixty. Adjectives cannot carry that; a table can.
+- **The inversion is the non-obvious half.** In an AI training server the ratio
+  collapses to one — the chips are not a component of the product, they are
+  essentially the entire product. That happened within a decade and most of the
+  industry's recent economics follow from it.
+- **The 2021 shortage is the cleanest demonstration available.** 7.7 million
+  vehicles not built, $210 billion lost, caused by parts costing a few dollars
+  on twenty-year-old nodes. Verified against the AlixPartners release and
+  filed as an analyst source with the caveat that it was a forecast made during
+  the event and revised upward once already.
+- **Separating leading-edge from mature dependence.** Conflating them is the
+  commonest error in public argument about this industry, and the tab says
+  plainly that if leading-edge supply stopped, the lights would stay on.
+- **The page argues against itself, and that is checked.** Leverage is a
+  description of power, not a defence of it; the costs are real and unevenly
+  borne; the value is captured narrowly; and importance is not an argument for
+  any particular policy. I deleted the counterweight to confirm three checks
+  fail without it — a "why it matters" page that only celebrates would be
+  precisely the writing this site exists to avoid.

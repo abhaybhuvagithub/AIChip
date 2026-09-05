@@ -10,6 +10,7 @@ Five tabs:
 | Tab | What it does |
 | --- | --- |
 | **Run & operate** | An autonomous operator that runs a chip company across twenty quarters on a stated six-rule policy — releasing wafers, booking take-or-pay capacity, pricing, buying yield and test coverage, and deciding whether parts are good enough to ship. Every decision is shown with the numbers behind it. Override the quality gate and watch what it costs. |
+| **Why it matters** | The case for caring, made in numbers rather than adjectives: silicon is almost never the expensive part of anything and always the part it stops without. A pacemaker is 400× its silicon content; an AI server is 1×. Includes the 2021 shortage as the demonstration, and a section arguing against the tab itself. |
 | **Trace** | The argument the rest of the site is making. A 57-node causal graph from constants of nature out to geopolitics — pick any consequence and walk it back. Boltzmann's constant is upstream of more than half of it. |
 | **God view ✨** | One configuration, every consequence — the chain from quartzite through wafer, fab, die, cost and compute on a single screen, with the live line if it is running. Every figure computed from the same die; nothing entered. |
 | **Sand → silicon** | The material chain from quartz rock to a finished die, running by itself — no clicking required. A purity ladder on a log scale, and a mass and energy balance worked backwards from the die you configured. Plus what replaces the people: FOUPs, overhead hoist transport, SECS/GEM, run-to-run control. |

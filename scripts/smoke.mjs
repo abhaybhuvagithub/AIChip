@@ -60,6 +60,7 @@ const { default: Teams } = await import('../src/ui/Teams.jsx')
 const { default: AIChips } = await import('../src/ui/AIChips.jsx')
 const { default: Operate } = await import('../src/ui/Operate.jsx')
 const { default: Sources } = await import('../src/ui/Sources.jsx')
+const { default: Matters } = await import('../src/ui/Matters.jsx')
 const { default: GodView } = await import('../src/ui/GodView.jsx')
 const { default: Journey } = await import('../src/ui/Journey.jsx')
 const { default: Assistant } = await import('../src/ui/Assistant.jsx')
@@ -91,7 +92,7 @@ const TABS = [
   ['SandToSilicon', SandToSilicon], ['FabLine', FabLine], ['FabRun', FabRun], ['YieldLab', YieldLab],
   ['Economics', Economics], ['Nodes', Nodes], ['Beyond3D', Beyond3D],
   ['Silicon', Silicon], ['ValueChain', ValueChain], ['Compute', Compute],
-  ['Quantum', Quantum], ['Quiz', Quiz], ['GodView', GodView], ['Journey', Journey], ['Science', Science], ['Clock', ClockTab], ['Business', Business], ['Ethics', Ethics], ['Teams', Teams], ['AIChips', AIChips], ['Unsolved', Unsolved], ['Acronyms', Acronyms], ['Trace', Trace], ['Operate', Operate], ['Sources', Sources],
+  ['Quantum', Quantum], ['Quiz', Quiz], ['GodView', GodView], ['Journey', Journey], ['Science', Science], ['Clock', ClockTab], ['Business', Business], ['Ethics', Ethics], ['Teams', Teams], ['AIChips', AIChips], ['Unsolved', Unsolved], ['Acronyms', Acronyms], ['Trace', Trace], ['Operate', Operate], ['Matters', Matters], ['Sources', Sources],
 ]
 
 let pass = 0, fail = 0

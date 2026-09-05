@@ -56,7 +56,7 @@ const dist = join(root, 'dist')
 const BUDGET = {
   'initial.gzip': 118 * 1024,   // entry chunk — what every visitor pays
   'route.max.gzip': 20 * 1024,  // the largest single tab chunk
-  'js.gzip': 275 * 1024,        // all chunks together (splitting adds a little per-chunk overhead)
+  'js.gzip': 290 * 1024,        // all chunks together (splitting adds a little per-chunk overhead)
   'css.gzip': 9 * 1024,
   'html.raw': 6 * 1024,
 }

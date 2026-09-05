@@ -3059,6 +3059,65 @@ group('Against published values')
   })())
 }
 
+group('Why it matters')
+{
+  const M = await import(join(root, 'src/data/matters.js'))
+  const SR3 = await import(join(root, 'src/data/sources.js'))
+  const ui = readFileSync(join(root, 'src/ui/Matters.jsx'), 'utf8')
+
+  ok('every product carries counts, content and value',
+    M.LEVERAGE.length >= 7 && M.LEVERAGE.every((l) =>
+      l.name && l.icon && l.chips > 0 && l.contentUsd > 0 && l.valueUsd > 0 && l.note.length > 50))
+  // The argument of the tab is the ratio, so the ratios have to be real.
+  ok('semiconductor content is a small share of most products',
+    M.LEVERAGE.filter((l) => l.contentUsd / l.valueUsd < 0.3).length >= 6)
+  ok('a pacemaker has extreme leverage', (() => {
+    const p2 = M.LEVERAGE.find((l) => l.id === 'pacemaker')
+    return p2.valueUsd / p2.contentUsd > 200
+  })())
+  // And the inversion, which is the non-obvious half.
+  ok('the AI server inverts the ratio', (() => {
+    const a = M.LEVERAGE.find((l) => l.id === 'aiserver')
+    return a.contentUsd / a.valueUsd > 0.7 && a.valueUsd / a.contentUsd < 2
+  })())
+  ok('a car needs over a thousand chips',
+    M.LEVERAGE.find((l) => l.id === 'car').chips >= 1000)
+
+  ok('the shortage figures are complete and sourced',
+    M.SHORTAGE.vehiclesLost > 1e6 && M.SHORTAGE.revenueLostUsd > 1e11 &&
+    SR3.SOURCES[M.SHORTAGE.source])
+  ok('the shortage source is dated and caveated',
+    SR3.SOURCES.alixpartners2021.year === 2021 &&
+    /revised sharply upward/i.test(SR3.SOURCES.alixpartners2021.caveat))
+  ok('the shortage entry says what it was not',
+    /not a technology failure/i.test(M.SHORTAGE.lesson) && /mature/i.test(M.SHORTAGE.lesson))
+
+  // Conflating leading-edge with all silicon is the commonest public error.
+  ok('leading-edge and mature dependence are separated',
+    M.DEPENDENCE.length === 3 && M.DEPENDENCE.every((d) => d.node && d.what && d.stakes.length > 60))
+  ok('the tab says mature nodes carry most of what a society runs on',
+    /society actually rests on/i.test(M.DEPENDENCE.find((d) => d.id === 'mature').stakes))
+  ok('it admits the leading edge is narrower than the coverage suggests',
+    /narrower than the coverage/i.test(M.DEPENDENCE.find((d) => d.id === 'leading').stakes))
+
+  // A "why it matters" page that only celebrates would be the exact writing
+  // this site exists to avoid, so it has to argue against itself.
+  ok('the page argues against itself', M.AGAINST.length >= 4 &&
+    M.AGAINST.every((a) => a.k && a.what.length > 120))
+  ok('it separates mattering from being good',
+    M.AGAINST.some((a) => /not the same as being good/i.test(a.k)))
+  ok('it declines to draw a policy conclusion',
+    M.AGAINST.some((a) => /no case about what should be done|not one arithmetic settles/i.test(a.what)))
+  ok('the counterweight is rendered, not just stored',
+    /case against this page/i.test(ui))
+  ok('it names the environmental and human costs',
+    M.AGAINST.some((a) => /water|warming|illness/i.test(a.what)))
+  ok('the closing note flags the figures as estimates',
+    /order-of-magnitude estimates/i.test(ui) && /ratios are the argument/i.test(ui))
+  ok('it makes the case for understanding rather than only caring',
+    /metaphors are where bad policy hides/i.test(M.WHY_UNDERSTAND))
+}
+
 group('Page-load counter')
 {
   const C = await import(join(root, 'src/lib/counter.js'))

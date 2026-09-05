@@ -208,6 +208,14 @@ export const SOURCES = {
     supports: 'The NRE, mask-set and engineer-year figures on the business and teams tabs.',
     caveat: 'These are the most-quoted and least-verifiable numbers on the site. They vary by more than a factor of two between sources and between companies, and no company publishes its real mask bill. Read the ratios between nodes, not the digits.',
   },
+  alixpartners2021: {
+    kind: 'analyst',
+    title: 'Shortages related to semiconductors to cost the auto industry $210 billion in revenues this year',
+    author: 'AlixPartners', venue: 'Press release, 23 September 2021', year: 2021,
+    url: 'https://www.alixpartners.com/newsroom/press-release-shortages-related-to-semiconductors-to-cost-the-auto-industry-210-billion-in-revenues-this-year-says-new-alixpartners-forecast/',
+    supports: 'The 2021 automotive shortage figures on the Why it matters tab — 7.7 million vehicles not built and $210 billion of lost revenue.',
+    caveat: 'A consultancy forecast made during the event rather than an audited retrospective, and revised sharply upward from $110 billion four months earlier. Widely reproduced, and worth reading as the scale of the disruption rather than a settled number.',
+  },
   sia: {
     kind: 'analyst',
     title: 'Industry factbook and market data',
