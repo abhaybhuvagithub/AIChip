@@ -301,6 +301,26 @@ cannot convey a distribution. The four charts carrying the most argument now
 have the underlying numbers behind a "Show the numbers" disclosure, as real
 tables with scoped headers.
 
+## The page-load counter
+
+The header shows a count, and three things about it are worth stating.
+
+It counts **page loads, not viewers** — reloads and repeat visits each
+increment it. Calling that "viewers" would be a small lie of the kind the rest
+of this site refuses to tell.
+
+It is the site's **only external request**. Everything else here is static and
+self-contained; this one sends a request per load to a third-party counter
+service, which is a real privacy cost for a cosmetic number. `Do Not Track` is
+honoured before any request is made, and the request carries nothing but the
+counter key.
+
+**Failure is silent.** Free counter services die — the one everybody used
+became unreliable and its successors are personal projects. Every failure path
+returns `null` and the header renders nothing at all, because a counter showing
+a broken value is worse than no counter, and `0 page loads` on a live site is
+worse than either. A check asserts no failure path returns zero.
+
 ## Motion
 
 Every navigation goes through one helper (`src/lib/motion.js`), so the

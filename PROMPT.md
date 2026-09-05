@@ -1338,3 +1338,31 @@ the same brands in.
   older ones" was pinned against TPU v1's 28 nm. With it gone the check was
   comparing against nothing. Repointed to a 7 nm part still in the catalogue,
   so it remains a real generational comparison rather than a formality.
+
+---
+
+## Forty-first pass: the page-load counter
+
+A small feature with an unusually high ratio of judgement to code.
+
+- **Name it for what it measures.** These services count page loads, including
+  reloads and repeat visits. "Viewers" would have been a small lie, and on a
+  site with a Sources tab and an admission that nobody has user-tested it, a
+  small lie is expensive. The label says "page loads" and a check asserts the
+  word "viewers" does not appear.
+- **Failure had to be silent, and that drove the design.** Free counter
+  services die — countapi.xyz was the standard and became unreliable. So every
+  failure path returns `null`, never `0`: a broken number is worse than no
+  number, and "0 page loads" on a live site is worse than either. I made a
+  failure path return zero to confirm two checks fire.
+- **I could not test the endpoint.** The build environment has no route to that
+  host, so this ships as the only untested network code in the project. The
+  honest response was to write for uncertainty rather than pretend — several
+  plausible response shapes are accepted rather than one assumed, and the
+  render is conditional on a real value arriving.
+- **It is the site's only external request, and that is a cost.** Do Not Track
+  is honoured before anything is sent, the request carries no payload, and it
+  is abortable so it cannot outlive the page.
+- **The meta-check earned itself again.** `counter.js` was flagged as untested
+  the moment it existed, before I had written a single check for it — which is
+  exactly the failure that guard was added for, now catching it a second time.

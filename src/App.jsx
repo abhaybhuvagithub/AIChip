@@ -38,6 +38,7 @@ import { TOUR } from './data/learn.js'
 import { PRODUCTS } from './data/nodes.js'
 import { buildJourney } from './lib/journey.js'
 import { navigate } from './lib/motion.js'
+import { fetchCount, formatCount } from './lib/counter.js'
 
 const TABS = [
   // Grouped by the question each tab answers, not by when it was built. Every
@@ -177,6 +178,14 @@ export default function App() {
   const [assistantOpen, setAssistantOpen] = useState(false)
   const [navOpen, setNavOpen] = useState(false)
   const [navQuery, setNavQuery] = useState('')
+  // Page loads, fetched once. Null until it arrives and null forever if it
+  // does not, so a dead counter service renders nothing rather than a zero.
+  const [loads, setLoads] = useState(null)
+  useEffect(() => {
+    const ac = new AbortController()
+    fetchCount({ signal: ac.signal }).then(setLoads)
+    return () => ac.abort()
+  }, [])
   const journey = useMemo(() => buildJourney(70), [])
   const [copied, setCopied] = useState(false)
 
@@ -308,6 +317,11 @@ export default function App() {
           <div className="toolbar-top">
             <button className="side-open btn sm" onClick={() => setNavOpen(true)} aria-label="Open navigation">☰</button>
             <div className="crumb">{TABS.find((t) => t.id === tab)?.label}</div>
+            {loads !== null && (
+              <span className="loadcount" title="Total page loads, counted by a third-party service. Loads, not people — reloads and repeat visits each count once.">
+                {formatCount(loads)} <span className="loadcount-k">page loads</span>
+              </span>
+            )}
             <div className="spacer" />
             <button className="btn sm" onClick={share}>{copied ? '✓ Link copied' : 'Copy link'}</button>
             <button className="btn sm" onClick={() => (tourStep < 0 ? tourNext() : setTourStep(-1))}>

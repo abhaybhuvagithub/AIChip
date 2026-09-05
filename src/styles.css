@@ -815,3 +815,12 @@ h3.iconrow { display: flex; gap: 10px; }
   margin-left: auto; font-size: var(--fs-label); color: var(--accent);
   font-family: var(--font-mono);
 }
+
+/* Page-load counter. Deliberately quiet: it is a cosmetic number sitting next
+   to a breadcrumb, and it renders only once a real value has arrived. */
+.loadcount {
+  font-family: var(--font-mono); font-size: var(--fs-label);
+  color: var(--muted); white-space: nowrap; margin-left: 10px;
+}
+.loadcount-k { opacity: .75; }
+@media (max-width: 640px) { .loadcount-k { display: none; } }
