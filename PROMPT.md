@@ -1366,3 +1366,33 @@ A small feature with an unusually high ratio of judgement to code.
 - **The meta-check earned itself again.** `counter.js` was flagged as untested
   the moment it existed, before I had written a single check for it — which is
   exactly the failure that guard was added for, now catching it a second time.
+
+---
+
+## Forty-second pass: the counter that showed nothing
+
+Reported as "I can't see it", and there were two independent faults, either of
+which alone would have produced exactly the same symptom: nothing.
+
+- **The endpoint was retired.** counterapi.dev v1 no longer exists, and its v2
+  requires an account and a bearer token — which cannot go in a public bundle
+  on a site that has checks asserting no API keys ship. Moved to a keyless
+  service that is the stated successor to countapi.xyz.
+- **And the parser would have rejected a correct response anyway.** That API
+  returns `value` as a **string** — `"3"` — and `Number.isFinite('3')` is
+  false. I had written the fetch to accept several response *shapes*, which
+  felt appropriately defensive, and the value's *type* was the actual bug.
+  Defending against the wrong axis is not defending.
+- **The real failure was untestability.** The container has no route to the
+  counter host, so I shipped network code I could not exercise. Parsing is now
+  a separate exported function and the fetch takes an injectable
+  implementation, so the whole path is testable without a network — and the
+  string-value case is pinned by a check. I reintroduced the bug to confirm it
+  fires.
+- **Silent to the reader must not mean silent to the maintainer.** Failure
+  still renders nothing, but now logs why to the console. Invisible and
+  undiagnosable are different things, and the first version conflated them.
+- **Two of my own checks matched their own comments.** "No key is sent" tripped
+  on the word "token" in the prose explaining why no token is used. Comments
+  are now stripped before anything is asserted about the code — testing the
+  prose is a false positive in both directions.

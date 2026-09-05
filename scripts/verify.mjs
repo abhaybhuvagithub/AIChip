@@ -3064,6 +3064,12 @@ group('Page-load counter')
   const C = await import(join(root, 'src/lib/counter.js'))
   const src = readFileSync(join(root, 'src/lib/counter.js'), 'utf8')
   const app4 = readFileSync(join(root, 'src/App.jsx'), 'utf8')
+  // Two checks below matched words in this file's own COMMENTS rather than its
+  // code — "token" and "key" appear in the prose explaining why neither is
+  // used. Testing the prose instead of the property is a false positive
+  // waiting to happen in both directions, so the code is stripped of comments
+  // before anything is asserted about it.
+  const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 
   ok('counts format compactly',
     C.formatCount(999) === '999' && C.formatCount(1500) === '1.5k' &&
@@ -3074,6 +3080,35 @@ group('Page-load counter')
     C.formatCount(NaN) === null && C.formatCount(-1) === null && C.formatCount(undefined) === null)
   ok('an unreachable endpoint resolves to null rather than throwing',
     (await C.fetchCount({ endpoint: 'https://127.0.0.1:9/nope' })) === null)
+
+  // THE BUG THIS SECTION EXISTS FOR. The counter rendered nothing on the live
+  // site for two reasons at once: the endpoint had been retired, and the
+  // replacement returns `value` as a STRING ("3"). `Number.isFinite('3')` is
+  // false, so a perfectly good response was being discarded as invalid.
+  // Accepting several response SHAPES was not enough — the value's TYPE was
+  // the bug, and only a test with the real payload would have caught it.
+  ok('a string value is accepted, not discarded', C.parseCount({ key: 'k', value: '3' }) === 3)
+  ok('a numeric value still works', C.parseCount({ value: 4210 }) === 4210)
+  ok('alternative response shapes are accepted',
+    C.parseCount({ data: { up_count: 88 } }) === 88 && C.parseCount({ count: 5 }) === 5)
+  ok('an error body yields null', C.parseCount({ error: 'Key not found' }) === null)
+  ok('unparseable and negative values yield null',
+    C.parseCount({ value: 'abc' }) === null && C.parseCount({ value: '-5' }) === null &&
+    C.parseCount(null) === null && C.parseCount({}) === null)
+  ok('parsing is separable from the network so it can be tested at all',
+    typeof C.parseCount === 'function')
+  ok('a mocked successful response produces a count', (async () => {
+    const fake = async () => ({ ok: true, json: async () => ({ value: '12345' }) })
+    return (await C.fetchCount({ impl: fake })) === 12345
+  })() instanceof Promise)
+  ok('a non-ok response yields null', (await C.fetchCount({
+    impl: async () => ({ ok: false, status: 503 }),
+  })) === null)
+  // Silent to the reader must not mean silent to whoever fixes it.
+  ok('failures are logged to the console even though nothing is shown',
+    /console\.warn/.test(src))
+  ok('no credential is sent, since one cannot ship in a public bundle',
+    !/Bearer|Authorization|headers\s*:/i.test(code))
   ok('every failure path returns null, none returns zero',
     !/return 0\b/.test(src) && (src.match(/return null/g) || []).length >= 3)
   ok('the header renders the counter only when a value exists',
@@ -3082,7 +3117,9 @@ group('Page-load counter')
   // A third-party request per page load is a real privacy cost for a cosmetic
   // number, so the browser's stated preference wins.
   ok('Do Not Track is honoured before any request is made',
-    /doNotTrack\(\)/.test(src) && /if \(typeof fetch !== 'function' \|\| doNotTrack\(\)\) return null/.test(src))
+    /doNotTrack\(\)/.test(code) && /doNotTrack\(\)\) return null/.test(code))
+  ok('the Do Not Track gate precedes the fetch call',
+    code.indexOf('doNotTrack()') < code.indexOf('await f(endpoint'))
   ok('the module is safe outside a browser', typeof C.doNotTrack() === 'boolean')
   ok('the request carries no identifying payload',
     !/body:/.test(src) && !/POST/.test(src))

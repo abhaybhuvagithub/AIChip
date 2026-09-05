@@ -21,7 +21,14 @@
 //
 // Everything below follows from those three.
 
-const ENDPOINT = 'https://api.counterapi.dev/v1/abhaybhuva-aichip/pageloads/up'
+// counterapi.dev v1 was retired and its v2 requires an account and a bearer
+// token, which cannot go in a public bundle — a site with checks asserting no
+// API keys ship is not going to ship an API key for a hit counter. This
+// service is keyless by design and is the stated successor to countapi.xyz.
+//
+// Keys are global here; there are no namespaces, so the key is deliberately
+// distinctive to avoid colliding with someone else's counter.
+const ENDPOINT = 'https://countapi.mileshilliard.com/api/v1/hit/abhaybhuva_aichip_fabsim_loads'
 
 /** Respect the browser's stated preference before counting anything. */
 export function doNotTrack() {
@@ -42,17 +49,44 @@ export function doNotTrack() {
  * rather than one assumed. Shipping untested network code means tolerating
  * uncertainty about what comes back, not pretending to know.
  */
-export async function fetchCount({ signal, endpoint = ENDPOINT } = {}) {
-  if (typeof fetch !== 'function' || doNotTrack()) return null
+export async function fetchCount({ signal, endpoint = ENDPOINT, impl } = {}) {
+  const f = impl || (typeof fetch === 'function' ? fetch : null)
+  if (!f || doNotTrack()) return null
   try {
-    const res = await fetch(endpoint, { signal, cache: 'no-store' })
-    if (!res.ok) return null
+    const res = await f(endpoint, { signal, cache: 'no-store' })
+    if (!res.ok) { warn(`counter: HTTP ${res.status}`); return null }
     const data = await res.json()
-    const n = data?.count ?? data?.value ?? data?.data?.count ?? data?.data?.up_count
-    return Number.isFinite(n) && n >= 0 ? n : null
-  } catch {
-    return null   // network down, service gone, CORS, aborted — all the same here
+    return parseCount(data)
+  } catch (e) {
+    // Network down, service gone, CORS, aborted — all the same to the reader.
+    warn('counter: request failed', e?.message)
+    return null
   }
+}
+
+/**
+ * Pull a count out of whatever the service returned.
+ *
+ * Separated so it can be tested without a network, which matters because the
+ * build environment has no route to the counter host. The first version of
+ * this was untestable and wrong in a way testing would have caught instantly:
+ * this API returns `value` as a STRING ("3"), and `Number.isFinite('3')` is
+ * false, so a correct response was being discarded as invalid. Accepting
+ * several response SHAPES was not enough — the value's TYPE was the bug.
+ */
+export function parseCount(data) {
+  const raw = data?.value ?? data?.count ?? data?.data?.count ?? data?.data?.up_count
+  const n = typeof raw === 'string' ? Number(raw.trim()) : raw
+  return Number.isFinite(n) && n >= 0 ? n : null
+}
+
+/**
+ * Failure is invisible to the reader by design, which makes it invisible to
+ * whoever has to fix it. The console is the right place for that: diagnosable
+ * without ever showing anyone a broken number.
+ */
+function warn(...args) {
+  if (typeof console !== 'undefined' && console.warn) console.warn(...args)
 }
 
 /** Compact rendering: a counter that pushes the layout around is a nuisance. */

@@ -315,6 +315,9 @@ service, which is a real privacy cost for a cosmetic number. `Do Not Track` is
 honoured before any request is made, and the request carries nothing but the
 counter key.
 
+It uses a keyless service, because a site with checks asserting no API keys
+ship is not going to ship an API key for a hit counter.
+
 **Failure is silent.** Free counter services die — the one everybody used
 became unreliable and its successors are personal projects. Every failure path
 returns `null` and the header renders nothing at all, because a counter showing
