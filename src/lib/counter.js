@@ -28,7 +28,25 @@
 //
 // Keys are global here; there are no namespaces, so the key is deliberately
 // distinctive to avoid colliding with someone else's counter.
-const ENDPOINT = 'https://countapi.mileshilliard.com/api/v1/hit/abhaybhuva_aichip_fabsim_loads'
+const KEY = 'abhaybhuva_aichip_fabsim_loads'
+const HOST = 'https://countapi.mileshilliard.com/api/v1'
+const ENDPOINT = `${HOST}/hit/${KEY}`
+
+/**
+ * The same counter as an image.
+ *
+ * A `fetch` from a static page is subject to CORS: if the service does not
+ * send an allow-origin header for this domain, the browser blocks the response
+ * and the caller sees a generic failure it cannot distinguish from the service
+ * being down. An `<img>` is not subject to CORS — the browser will load and
+ * display it regardless — so this path works in cases where the fetch cannot.
+ *
+ * It costs styling control, because the service renders the badge. That is the
+ * right trade for a fallback: a slightly foreign-looking number that appears
+ * beats a perfectly-styled one that does not.
+ */
+export const shieldUrl = ({ label = 'page loads', bg = '4a4a52', fg = 'ffffff' } = {}) =>
+  `${HOST}/hit/${KEY}/shield?text=${encodeURIComponent(label)}&bgcolor=${bg}&textcolor=${fg}&style=flat`
 
 /** Respect the browser's stated preference before counting anything. */
 export function doNotTrack() {

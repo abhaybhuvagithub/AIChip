@@ -824,3 +824,7 @@ h3.iconrow { display: flex; gap: 10px; }
 }
 .loadcount-k { opacity: .75; }
 @media (max-width: 640px) { .loadcount-k { display: none; } }
+/* Fallback badge, used when the JSON fetch is blocked by CORS. Rendered by the
+   counter service, so it cannot follow the palette — height-matched to the
+   surrounding controls and left alone otherwise. */
+.loadcount-img { height: 18px; margin-left: 10px; vertical-align: middle; opacity: .85; }

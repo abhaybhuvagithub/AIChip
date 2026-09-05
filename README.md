@@ -318,6 +318,13 @@ counter key.
 It uses a keyless service, because a site with checks asserting no API keys
 ship is not going to ship an API key for a hit counter.
 
+There are two paths. A `fetch` gives a number the site can style, and is
+subject to CORS — a static page cannot make a third party send an allow-origin
+header. When that fails, an `<img>` badge is used instead, because images are
+not CORS-restricted. It costs styling control, which is the right trade for a
+fallback: a slightly foreign-looking number that appears beats a
+perfectly-styled one that does not.
+
 **Failure is silent.** Free counter services die — the one everybody used
 became unreliable and its successors are personal projects. Every failure path
 returns `null` and the header renders nothing at all, because a counter showing

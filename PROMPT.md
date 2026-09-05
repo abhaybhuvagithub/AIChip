@@ -1396,3 +1396,30 @@ which alone would have produced exactly the same symptom: nothing.
   on the word "token" in the prose explaining why no token is used. Comments
   are now stripped before anything is asserted about the code — testing the
   prose is a false positive in both directions.
+
+---
+
+## Forty-third pass: the counter, third attempt
+
+Still not visible. The useful thing this time was proving what I could not
+check rather than guessing again.
+
+- **I cannot reach either endpoint from here.** Curling the live site returns
+  `403 Host not in allowlist` from this container's own egress proxy, and the
+  counter host is equally unreachable. So both previous fixes were shipped
+  blind, and saying "I couldn't test this" twice is not a substitute for making
+  it not require testing.
+- **The most likely remaining cause is CORS, which is unfixable from a static
+  page.** A `fetch` needs the third party to send an allow-origin header for
+  this domain. Nothing in this repository can make that happen, and a failure
+  from CORS is indistinguishable at the call site from the service being down.
+- **So the design changed rather than the endpoint.** An `<img>` is not
+  CORS-restricted: the browser loads and displays it whatever the origin
+  policy. The fetch is still tried first because it yields a number the site
+  can style; when it returns null, a badge image is rendered instead. Two
+  independent mechanisms, one of which does not depend on a header I cannot
+  influence.
+- **The lesson is about the shape of the fix, not the bug.** Three attempts
+  went into an endpoint I could not verify. The one that should work does not
+  need verification, because it does not depend on the part I was unable to
+  test.

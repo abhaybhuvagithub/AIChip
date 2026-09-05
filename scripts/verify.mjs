@@ -3112,7 +3112,25 @@ group('Page-load counter')
   ok('every failure path returns null, none returns zero',
     !/return 0\b/.test(src) && (src.match(/return null/g) || []).length >= 3)
   ok('the header renders the counter only when a value exists',
-    /loads !== null &&/.test(app4))
+    /loads !== null \?/.test(app4))
+
+  // A fetch from a static page is subject to CORS, and a static page cannot
+  // make a third party send an allow-origin header. An image is not
+  // CORS-restricted, so it works where the fetch cannot — at the cost of
+  // styling control, which is the right trade for a fallback.
+  ok('there is an image fallback for when the fetch is blocked',
+    typeof C.shieldUrl === 'function' && /loadcount-img/.test(app4))
+  ok('the fallback only appears after the fetch has actually failed',
+    /if \(n === null\) setUseShield\(true\)/.test(app4))
+  ok('the shield url is absolute, https and carries the same counter key',
+    /^https:\/\//.test(C.shieldUrl()) && C.shieldUrl().includes('abhaybhuva_aichip_fabsim_loads'))
+  ok('the shield is labelled page loads, not viewers',
+    /page(\+|%20)loads/i.test(C.shieldUrl()) && !/viewer/i.test(C.shieldUrl()))
+  ok('a broken image hides itself rather than showing a broken icon',
+    /onError=\{\(\) => setUseShield\(false\)\}/.test(app4))
+  ok('Do Not Track suppresses both paths, not just the fetch',
+    /if \(doNotTrack\(\)\) return undefined/.test(app4))
+  ok('the image carries alt text', /alt="Total page loads"/.test(app4))
 
   // A third-party request per page load is a real privacy cost for a cosmetic
   // number, so the browser's stated preference wins.
