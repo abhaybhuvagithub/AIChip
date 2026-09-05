@@ -296,7 +296,7 @@ export default function AIChips() {
       <div className="row" style={{ marginBottom: 12 }}>
         {ARCHITECTURES.map((x) => (
           <button key={x.id} className={`btn iconrow ${arch === x.id ? 'active' : ''}`} onClick={() => setArch(x.id)}>
-            <Icon name={x.icon} size={20} />{x.name}
+            <Icon name={x.icon} size={20} />{x.short || x.name}
           </button>
         ))}
       </div>
@@ -325,7 +325,7 @@ export default function AIChips() {
       <div className="row" style={{ marginBottom: 12 }}>
         {WORKLOADS.map((x) => (
           <button key={x.id} className={`btn iconrow ${work === x.id ? 'active' : ''}`} onClick={() => setWork(x.id)}>
-            <Icon name={x.icon} size={20} />{x.name}
+            <Icon name={x.icon} size={20} />{x.short || x.name}
           </button>
         ))}
       </div>

@@ -36,7 +36,7 @@ function OpenFor({ items, sel, onPick }) {
             <rect x="0" y={y - 9} width={W} height={rowH - 4} rx="4"
               fill={on ? 'var(--panel2)' : 'transparent'} />
             <text x={PL - 10} y={y + 5} textAnchor="end" fill={on ? 'var(--text)' : 'var(--muted)'}
-              style={{ fontSize: 14.5 }}>{p.name}</text>
+              style={{ fontSize: 14.5 }}>{p.short || p.name}</text>
             <rect x={PL} y={y - 5} width={Math.max(2, x(yrs) - PL)} height="11" rx="3"
               fill={DOMAINS[p.domain].hue} opacity={on ? 0.95 : 0.55} />
             <text x={x(yrs) + 8} y={y + 5} fill={DOMAINS[p.domain].hue}
@@ -190,7 +190,7 @@ export default function Unsolved() {
               <p className="small" style={{ marginTop: 8 }}>{v}</p>
               <div className="row" style={{ marginTop: 8, gap: 6 }}>
                 {PROBLEMS.filter((x) => STATUS[x.status].label === k).slice(0, 4).map((x) => (
-                  <button key={x.id} className="btn sm" onClick={() => setSel(x.id)}>{x.name}</button>
+                  <button key={x.id} className="btn sm" onClick={() => setSel(x.id)}>{x.short || x.name}</button>
                 ))}
               </div>
             </div>

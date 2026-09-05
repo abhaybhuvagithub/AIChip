@@ -202,7 +202,7 @@ export default function Quantum() {
       <div className="row" style={{ marginBottom: 12 }}>
         {MODALITIES.map((x) => (
           <button key={x.id} className={`btn iconrow ${modality === x.id ? 'active' : ''}`} onClick={() => setModality(x.id)}>
-            <Icon name={x.icon} size={20} />{x.name}
+            <Icon name={x.icon} size={20} />{x.short || x.name}
           </button>
         ))}
       </div>

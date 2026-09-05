@@ -12,7 +12,7 @@
 export const LAYERS = [
   {
     id: 'isa', icon: 'ipcore',
-    name: 'Instruction set and IP',
+    name: 'Instruction set and IP', short: 'ISA and IP',
     who: ['Arm', 'RISC-V (open standard)', 'SiFive', 'Imagination'],
     what: 'Sells the design of the processor, not the processor. A licensee gets verified RTL or an architecture licence and builds their own silicon around it.',
     capture: 'Tiny share of chip revenue, enormous share of what gets designed. Arm cores ship in the billions annually without Arm ever owning a fab.',
@@ -20,7 +20,7 @@ export const LAYERS = [
   },
   {
     id: 'eda', icon: 'eda',
-    name: 'Design automation',
+    name: 'Design automation', short: 'EDA',
     who: ['Synopsys', 'Cadence', 'Siemens EDA'],
     what: 'The software without which a modern chip cannot be designed at all — synthesis, place and route, timing closure, verification, and the foundry-certified process design kits.',
     capture: 'A rounding error against foundry revenue, and an absolute chokepoint. Nobody tapes out a leading-edge design without these tools.',
@@ -60,7 +60,7 @@ export const LAYERS = [
   },
   {
     id: 'osat', icon: 'osat',
-    name: 'Assembly and test',
+    name: 'Assembly and test', short: 'Assembly',
     who: ['ASE', 'Amkor', 'JCET', 'TSMC (advanced packaging)'],
     what: 'Dices, packages, bonds and tests. Historically the commodity end of the chain — and no longer, now that packaging is where performance is won.',
     capture: 'Rising fast. Advanced packaging capacity is currently a harder constraint than leading-edge wafer capacity.',
@@ -98,7 +98,7 @@ export const ARM = {
 export const MODELS = [
   {
     id: 'idm',
-    name: 'Integrated device manufacturer',
+    name: 'Integrated device manufacturer', short: 'IDM',
     who: 'Intel, Samsung, Texas Instruments, Micron, SK Hynix',
     how: 'Design and manufacture in the same company. The original model, and still how all memory is made.',
     pro: 'Design and process co-optimised. No margin paid to a foundry, and no queue behind somebody else\'s product.',
@@ -106,7 +106,7 @@ export const MODELS = [
   },
   {
     id: 'fabless', icon: 'fabless',
-    name: 'Fabless plus foundry',
+    name: 'Fabless plus foundry', short: 'Fabless',
     who: 'Apple, NVIDIA, Qualcomm, AMD, and effectively everyone new',
     how: 'Design the chip, buy wafer starts from TSMC or Samsung, buy packaging from an OSAT. Specialise, and let each layer be world-class at one thing.',
     pro: 'No capital risk, access to the best available process without owning it, and the ability to switch nodes and foundries.',
@@ -114,7 +114,7 @@ export const MODELS = [
   },
   {
     id: 'vertical',
-    name: 'Vertical re-integration',
+    name: 'Vertical re-integration', short: 'Vertical',
     who: 'Terafab (Tesla, SpaceX); Intel Foundry, in the other direction',
     how: 'Bring design, logic, memory, packaging and test back under one roof — betting that the specialisation which made the industry efficient has become a liability when capacity itself is the scarce resource.',
     pro: 'Control of supply, and a much shorter design-iteration loop if the chip and the fab are in the same building.',

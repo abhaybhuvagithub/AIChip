@@ -18,21 +18,21 @@
  * teardown and industry reporting — the ratio is the point, not the digits.
  */
 export const LEVERAGE = [
-  { id: 'car', name: 'Mid-range car', icon: 'mcu', chips: 1400, contentUsd: 600, valueUsd: 38000,
+  { id: 'car', name: 'Mid-range car', short: 'Car', icon: 'mcu', chips: 1400, contentUsd: 600, valueUsd: 38000,
     note: 'Over a thousand chips, most of them mature-node parts costing a dollar or two. If one is missing the vehicle cannot ship.' },
-  { id: 'ev', name: 'Electric vehicle', icon: 'power', chips: 2000, contentUsd: 1500, valueUsd: 45000,
+  { id: 'ev', name: 'Electric vehicle', short: 'EV', icon: 'power', chips: 2000, contentUsd: 1500, valueUsd: 45000,
     note: 'Roughly double the content of a combustion car, and the added parts are power devices — silicon carbide, not logic.' },
-  { id: 'phone', name: 'Smartphone', icon: 'soc', chips: 40, contentUsd: 170, valueUsd: 800,
+  { id: 'phone', name: 'Smartphone', short: 'Phone', icon: 'soc', chips: 40, contentUsd: 170, valueUsd: 800,
     note: 'The densest concentration of leading-edge silicon most people own, and still under a quarter of what they paid.' },
-  { id: 'laptop', name: 'Laptop', icon: 'cpu', chips: 60, contentUsd: 300, valueUsd: 1200,
+  { id: 'laptop', name: 'Laptop', short: 'Laptop', icon: 'cpu', chips: 60, contentUsd: 300, valueUsd: 1200,
     note: 'Processor, memory, storage, power management, radios. A quarter of the price, and all of the capability.' },
-  { id: 'washer', name: 'Washing machine', icon: 'mcu', chips: 12, contentUsd: 18, valueUsd: 700,
+  { id: 'washer', name: 'Washing machine', short: 'Appliance', icon: 'mcu', chips: 12, contentUsd: 18, valueUsd: 700,
     note: 'A few microcontrollers and power devices. Nobody thinks of a washing machine as electronics until it will not start.' },
-  { id: 'pacemaker', name: 'Implanted pacemaker', icon: 'ipsec', chips: 8, contentUsd: 60, valueUsd: 25000,
+  { id: 'pacemaker', name: 'Implanted pacemaker', short: 'Pacemaker', icon: 'ipsec', chips: 8, contentUsd: 60, valueUsd: 25000,
     note: 'A handful of parts that must not fail for a decade inside a person. The extreme end of what reliability engineering is for.' },
-  { id: 'airliner', name: 'Airliner', icon: 'ipnoc', chips: 25000, contentUsd: 900000, valueUsd: 110000000,
+  { id: 'airliner', name: 'Airliner', short: 'Airliner', icon: 'ipnoc', chips: 25000, contentUsd: 900000, valueUsd: 110000000,
     note: 'Avionics, engine control, cabin systems. Certified to standards that make automotive qualification look relaxed.' },
-  { id: 'aiserver', name: 'AI training server', icon: 'npu', chips: 120, contentUsd: 280000, valueUsd: 330000,
+  { id: 'aiserver', name: 'AI training server', short: 'AI server', icon: 'npu', chips: 120, contentUsd: 280000, valueUsd: 330000,
     note: 'The one case where the ratio inverts: the chips are not a component of the product, they are essentially the entire product.' },
 ]
 
@@ -55,13 +55,13 @@ export const SHORTAGE = {
  * and hardly at all for most of what a society runs on.
  */
 export const DEPENDENCE = [
-  { id: 'leading', name: 'Needs the leading edge', node: '5 nm and below', icon: 'npu',
+  { id: 'leading', name: 'Needs the leading edge', short: 'Leading edge', node: '5 nm and below', icon: 'npu',
     what: 'AI training and inference, flagship phones, high-end laptops, datacentre CPUs.',
     stakes: 'Real, and narrower than the coverage suggests. If leading-edge supply stopped, this would stall — and the lights would stay on.' },
-  { id: 'mature', name: 'Runs on mature nodes', node: '28 nm to 180 nm', icon: 'mcu',
+  { id: 'mature', name: 'Runs on mature nodes', short: 'Mature nodes', node: '28 nm to 180 nm', icon: 'mcu',
     what: 'Cars, medical devices, industrial control, aerospace, appliances, power grids, water treatment, payment terminals.',
     stakes: 'This is the layer a society actually rests on, it is made on nodes twenty years old, and it is where the 2021 shortage bit.' },
-  { id: 'analog', name: 'Barely a node at all', node: 'Specialised processes', icon: 'power',
+  { id: 'analog', name: 'Barely a node at all', short: 'Specialised', node: 'Specialised processes', icon: 'power',
     what: 'Power conversion, sensors, radio front ends, image sensors.',
     stakes: 'Made in dedicated fabs on processes that do not scale and do not need to. Invisible, unglamorous, and non-substitutable.' },
 ]

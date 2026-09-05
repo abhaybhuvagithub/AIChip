@@ -265,19 +265,19 @@ export const FAB_ROLES = [
 
 /** Share of the design headcount by discipline, for a fabless SoC programme. */
 export const PROJECTS = [
-  { id: 'mcu', name: 'Automotive MCU', node: '40 nm', years: 2.5, icon: 'mcu',
+  { id: 'mcu', name: 'Automotive MCU', short: 'MCU', node: '40 nm', years: 2.5, icon: 'mcu',
     note: 'Mature node, small die, long qualification. Analog and reliability weigh heavier; verification lighter than at the leading edge.',
     tilt: { analog: 1.5, silicon: 1.3, verif: 0.8, sw: 0.7, phys: 0.9 } },
-  { id: 'midsoc', name: 'Mid-range SoC', node: '16 nm', years: 3, icon: 'soc',
+  { id: 'midsoc', name: 'Mid-range SoC', short: 'Mid SoC', node: '16 nm', years: 3, icon: 'soc',
     note: 'The commonest kind of chip programme, and the most balanced team.',
     tilt: {} },
   { id: 'flagship', name: 'Flagship mobile SoC', node: '3 nm', years: 4, icon: 'soc',
     note: 'Everything at once, at the leading edge, on a schedule set by a product launch that will not move.',
     tilt: { verif: 1.1, phys: 1.2, sw: 1.1, analog: 0.9 } },
-  { id: 'accel', name: 'AI accelerator', node: '3 nm', years: 4, icon: 'npu',
+  { id: 'accel', name: 'AI accelerator', short: 'Accelerator', node: '3 nm', years: 4, icon: 'npu',
     note: 'The compiler team rivals the design team. Hardware without software here is a benchmark nobody can reproduce.',
     tilt: { sw: 2.0, arch: 1.4, analog: 1.3, verif: 0.9 } },
-  { id: 'analogic', name: 'Analog / power IC', node: '180 nm', years: 2, icon: 'power',
+  { id: 'analogic', name: 'Analog / power IC', short: 'Analog IC', node: '180 nm', years: 2, icon: 'power',
     note: 'Almost inverted from a digital programme: analog design and layout dominate, and digital verification is a small team.',
     tilt: { analog: 4.5, phys: 0.4, verif: 0.3, sw: 0.2, design: 0.4 } },
 ]

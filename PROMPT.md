@@ -1454,3 +1454,28 @@ in everything!" — so the tab was built to make the opposite impossible.
   any particular policy. I deleted the counterweight to confirm three checks
   fail without it — a "why it matters" page that only celebrates would be
   precisely the writing this site exists to avoid.
+
+---
+
+## Forty-fifth pass: short labels on buttons
+
+Selector rows were carrying full names — "Silicon-carbide power MOSFET",
+"Switching below 60 mV/decade", "A good p-type 2D semiconductor" — which wrap,
+crowd and read badly.
+
+- **A button row is the one place a long name costs something and the only
+  place it buys nothing.** The full name is still in the heading, the table and
+  the detail card, where there is room and where it is doing work. The button
+  gets `short`.
+- **The fallback is what makes it safe.** Buttons render `x.short || x.name`,
+  so an entry without a short label still works. That keeps `short` optional
+  rather than a new required field on seven data files, and a check asserts
+  every affected component keeps the fallback — I removed one to confirm it
+  fires.
+- **Checked the property, not the presence.** "Has a short label" would pass
+  for a short label that is not short. The checks assert every one is under
+  fifteen characters, none is longer than the full name it replaces, and the
+  full name still appears somewhere in the same component — otherwise the
+  shortening has destroyed information rather than saved space.
+- **My own check caught one immediately**: "In-memory compute" was fifteen
+  characters and not short. Shortened to "In-memory".

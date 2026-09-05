@@ -3059,6 +3059,52 @@ group('Against published values')
   })())
 }
 
+group('Button labels')
+{
+  // A button row is the one place a long name costs something and the only
+  // place it buys nothing. Full names stay in headings, tables and detail
+  // cards; buttons carry a short label with the full name as a fallback, so
+  // adding one stays optional rather than becoming a required field.
+  const files = ['data/matters.js', 'data/aichips.js', 'data/teams.js', 'data/unsolved.js',
+    'data/arch3d.js', 'data/value-chain.js', 'lib/quantum.js']
+  let shorts = 0
+  const tooLong = []
+  for (const f of files) {
+    const t = readFileSync(join(root, 'src', f), 'utf8')
+    for (const m of t.matchAll(/short: '([^']+)'/g)) {
+      shorts++
+      if (m[1].length > 14) tooLong.push(`${f}:${m[1]}`)
+    }
+  }
+  ok('short labels exist across the tabs with long names', shorts >= 40, `${shorts} labels`)
+  ok('every short label is actually short', tooLong.length === 0, tooLong.join(', '))
+
+  // The fallback is what makes this safe to adopt piecemeal.
+  const uis = ['Matters', 'AIChips', 'Teams', 'Unsolved', 'Quantum', 'Beyond3D', 'ValueChain']
+  for (const u of uis) {
+    const t = readFileSync(join(root, `src/ui/${u}.jsx`), 'utf8')
+    ok(`${u}: buttons prefer the short label and fall back to the full name`,
+      /\.short \|\| [a-z]\.name/.test(t))
+  }
+
+  // And the full name must still appear somewhere, or the short label has
+  // replaced information rather than saved space.
+  const M2 = await import(join(root, 'src/data/matters.js'))
+  ok('the full name survives in the table, not only the button', (() => {
+    const t = readFileSync(join(root, 'src/ui/Matters.jsx'), 'utf8')
+    return /\{x\.name\}/.test(t) && M2.LEVERAGE.every((l) => l.name)
+  })())
+  ok('no entry has a short label longer than its full name', (() => {
+    for (const f of files) {
+      const t = readFileSync(join(root, 'src', f), 'utf8')
+      for (const m of t.matchAll(/name: '([^']+)', short: '([^']+)'/g)) {
+        if (m[2].length > m[1].length) return false
+      }
+    }
+    return true
+  })())
+}
+
 group('Why it matters')
 {
   const M = await import(join(root, 'src/data/matters.js'))
