@@ -1454,3 +1454,23 @@ in everything!" — so the tab was built to make the opposite impossible.
   any particular policy. I deleted the counterweight to confirm three checks
   fail without it — a "why it matters" page that only celebrates would be
   precisely the writing this site exists to avoid.
+
+---
+
+## Forty-fifth pass: short button labels, tried and reverted
+
+Selector rows were carrying full names — "Silicon-carbide power MOSFET",
+"Switching below 60 mV/decade" — so buttons were given short labels with the
+full name kept in headings, tables and detail cards. It was then reverted on
+request.
+
+Recording it rather than letting it vanish, for two reasons.
+
+- **The next person to think "these buttons are too wide" should know it was
+  already attempted**, and that the objection was to the result rather than the
+  idea. An empty log invites the same work twice.
+- **The revert was a revert, not a force-push.** The commit was already public,
+  and rewriting history to hide a change someone may have pulled is worse than
+  a log entry saying it was undone. The revert also took its own checks with
+  it, which is correct — they asserted a property the site no longer has, and
+  verify went from 1,044 back to 1,033 without anyone editing it.
