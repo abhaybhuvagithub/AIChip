@@ -78,7 +78,7 @@ export const ALGORITHMS = [
 
 export const MODALITIES = [
   {
-    id: 'transmon', icon: 'transmon', name: 'Superconducting transmon', short: 'Transmon', temp: '~15 mK',
+    id: 'transmon', icon: 'transmon', name: 'Superconducting transmon', temp: '~15 mK',
     gate: '20–50 ns', coherence: '100–500 µs',
     fab: 'Closest to a normal fab. Aluminium, niobium or tantalum films on high-resistivity silicon or sapphire, patterned by DUV or e-beam, with Josephson junctions formed by double-angle shadow evaporation through a suspended bridge.',
     hard: 'Junction resistance scatter of even 1–2% shifts qubit frequencies enough to collide with neighbours. On a fixed-frequency chip, collision probability climbs with qubit count — a yield problem that looks nothing like a defect density.',
@@ -86,7 +86,7 @@ export const MODALITIES = [
     con: 'Everything must live in a dilution refrigerator, and every qubit needs its own microwave line out of it.',
   },
   {
-    id: 'ion', icon: 'iontrap', name: 'Trapped ion', short: 'Trapped ion', temp: 'Room-temp trap, laser-cooled ions',
+    id: 'ion', icon: 'iontrap', name: 'Trapped ion', temp: 'Room-temp trap, laser-cooled ions',
     gate: '10–100 µs', coherence: 'Seconds to minutes',
     fab: 'The chip is an ion trap, not a qubit array: patterned electrodes on silicon or sapphire that shape an RF field. The qubits are individual atoms held in vacuum above the surface, so they are identical by physics rather than by process control.',
     hard: 'Scaling means shuttling ions between trap zones or photonically linking modules. The optics and vacuum, not the lithography, set the ceiling.',
@@ -94,7 +94,7 @@ export const MODALITIES = [
     con: 'Gates are a thousand times slower than superconducting, so long algorithms take correspondingly longer.',
   },
   {
-    id: 'atom', icon: 'atomarray', name: 'Neutral atom', short: 'Neutral atom', temp: 'Room-temp chamber, µK atoms',
+    id: 'atom', icon: 'atomarray', name: 'Neutral atom', temp: 'Room-temp chamber, µK atoms',
     gate: '~1 µs', coherence: 'Seconds',
     fab: 'Barely a chip at all. Optical tweezers made by a spatial light modulator hold atoms in arbitrary 2D or 3D arrays; entanglement is mediated by exciting atoms to Rydberg states.',
     hard: 'Atoms are lost from traps and must be reloaded mid-computation. Rydberg gate fidelity is the current limiter.',
@@ -102,7 +102,7 @@ export const MODALITIES = [
     con: 'Mid-circuit measurement and continuous reloading are still being solved.',
   },
   {
-    id: 'spin', icon: 'spinqubit', name: 'Silicon spin', short: 'Silicon spin', temp: '~100 mK–1 K',
+    id: 'spin', icon: 'spinqubit', name: 'Silicon spin', temp: '~100 mK–1 K',
     gate: '~100 ns', coherence: '~1 ms (isotopically purified)',
     fab: 'The one modality that could genuinely reuse a CMOS line. Qubits are single electron spins in quantum dots defined by gate electrodes on isotopically purified silicon-28.',
     hard: 'Device-to-device variability is severe at the scale that matters, and the pitch is so tight that getting control wiring in and out is a routing problem before it is a physics problem.',
@@ -110,7 +110,7 @@ export const MODALITIES = [
     con: 'Furthest behind on qubit count; the field is still in the tens.',
   },
   {
-    id: 'photonic', icon: 'photonic', name: 'Photonic', short: 'Photonic', temp: 'Room temperature (detectors cryogenic)',
+    id: 'photonic', icon: 'photonic', name: 'Photonic', temp: 'Room temperature (detectors cryogenic)',
     gate: 'Speed of light', coherence: 'No decoherence in flight',
     fab: 'Silicon photonics on a standard foundry line: waveguides, beam splitters, phase shifters, plus superconducting nanowire single-photon detectors that do need cooling.',
     hard: 'Photons do not interact, so two-qubit gates are probabilistic and need heavy multiplexing. Loss in the waveguides is the dominant error.',

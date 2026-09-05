@@ -37,7 +37,7 @@ export const STATUS = {
 export const PROBLEMS = [
   // ------------------------------------------------------------ devices --
   {
-    id: 'steep', name: 'Switching below 60 mV/decade', short: 'Sub-60 mV/dec', domain: 'device', status: 'stalled',
+    id: 'steep', name: 'Switching below 60 mV/decade', domain: 'device', status: 'stalled',
     since: 2004, icon: 'planar',
     what: 'Subthreshold swing has a thermodynamic floor of about 60 mV/decade at room temperature — it is the Boltzmann tail, not an engineering limit. Beating it would let supply voltage fall again, and power scales with the square of voltage.',
     tried: 'Tunnel FETs switch by band-to-band tunnelling instead of thermionic emission. Negative-capacitance FETs put a ferroelectric in the gate stack for internal voltage amplification.',
@@ -46,7 +46,7 @@ export const PROBLEMS = [
     costs: 'Supply voltage stays where it is, so power density stays where it is, so clock speed stays where it is. This is the root of the wall the clock tab describes.',
   },
   {
-    id: 'contact', name: 'Contact resistance', short: 'Contacts', domain: 'device', status: 'open',
+    id: 'contact', name: 'Contact resistance', domain: 'device', status: 'open',
     since: 2010, icon: 'metal',
     what: 'Getting current from the metal into a nanometre-scale source and drain. As devices shrink the contact area shrinks with them, and contact resistance is now a leading term in total device resistance rather than a rounding error.',
     tried: 'Silicides, lower Schottky barriers, higher active doping, wrap-around contacts, and contact-over-active-gate layouts to recover area.',
@@ -55,7 +55,7 @@ export const PROBLEMS = [
     costs: 'Drive current stops improving even when the transistor does, so a better device delivers a worse circuit.',
   },
   {
-    id: 'ptype2d', name: 'A good p-type 2D semiconductor', short: 'p-type 2D', domain: 'device', status: 'open',
+    id: 'ptype2d', name: 'A good p-type 2D semiconductor', domain: 'device', status: 'open',
     since: 2011, icon: 'twod',
     what: 'Two-dimensional channels are the leading candidate for when silicon becomes too thick. Molybdenum disulphide works reasonably as an n-type channel. Complementary logic needs a p-type partner of comparable quality, and there is not one.',
     tried: 'Tungsten diselenide, black phosphorus, tellurium, and contact engineering to force p-type behaviour in materials that resist it.',
@@ -64,7 +64,7 @@ export const PROBLEMS = [
     costs: 'No complementary logic means no CMOS, and without CMOS a 2D channel is a laboratory result rather than a successor.',
   },
   {
-    id: 'cnt', name: 'Carbon nanotube logic at scale', short: 'Nanotubes', domain: 'device', status: 'stalled',
+    id: 'cnt', name: 'Carbon nanotube logic at scale', domain: 'device', status: 'stalled',
     since: 1998, icon: 'twod',
     what: 'Carbon nanotubes have close to ideal channel properties: superb mobility, an atomically thin body, and excellent electrostatics. Working processors have been demonstrated.',
     tried: 'Solution-based purification, aligned growth, iterative removal of metallic tubes, and circuit-level design techniques that tolerate the defects rather than eliminating them.',
@@ -74,7 +74,7 @@ export const PROBLEMS = [
   },
 
   {
-    id: 'sram', name: 'SRAM has stopped shrinking', short: 'SRAM scaling', domain: 'device', status: 'open',
+    id: 'sram', name: 'SRAM has stopped shrinking', domain: 'device', status: 'open',
     since: 2020, icon: 'ipmem',
     what: 'Logic density keeps improving roughly as advertised. The SRAM bit cell has very nearly stopped, scaling only a few percent across recent generations. Since cache is a large fraction of a modern die, that drags the density of the whole product down with it.',
     tried: 'Taller cells with more fins, assist circuits to recover margin at lower voltage, moving cache into a separate stacked die on an older node, and denser alternatives such as MRAM and eDRAM.',
@@ -85,7 +85,7 @@ export const PROBLEMS = [
 
   // --------------------------------------------------------- patterning --
   {
-    id: 'stochastic', name: 'EUV stochastic failures', short: 'Stochastics', domain: 'pattern', status: 'contained',
+    id: 'stochastic', name: 'EUV stochastic failures', domain: 'pattern', status: 'contained',
     since: 2016, icon: 'scanner',
     what: 'At extreme ultraviolet doses, the number of photons landing on a small feature is low enough that Poisson noise alone causes some features to fail — no particle, no misprint, just not enough photons happening to arrive there.',
     tried: 'Higher dose, which costs throughput on the most expensive tool in the building. Better resists. Post-processing to smooth the result. Design rules that avoid the most vulnerable configurations.',
@@ -94,7 +94,7 @@ export const PROBLEMS = [
     costs: 'Paid every wafer, in dose and therefore in scanner time, which is the constraint the whole fab is scheduled around.',
   },
   {
-    id: 'metro', name: 'Measuring what you print', short: 'Metrology', domain: 'pattern', status: 'open',
+    id: 'metro', name: 'Measuring what you print', domain: 'pattern', status: 'open',
     since: 2015, icon: 'metrology',
     what: 'Features are now smaller than the wavelength of the light used to inspect them, and buried under layers. Optical inspection can no longer resolve a killer defect, and electron-beam inspection resolves them beautifully but far too slowly to cover a wafer.',
     tried: 'Deep-learning classification of ambiguous optical signals, hybrid optical-plus-ebeam sampling, and inferring defects from electrical test results after the fact.',
@@ -103,7 +103,7 @@ export const PROBLEMS = [
     costs: 'Excursions run longer before detection, so more wafers are damaged by each one.',
   },
   {
-    id: 'highna', name: 'High-NA and the halved reticle', short: 'High-NA field', domain: 'pattern', status: 'partial',
+    id: 'highna', name: 'High-NA and the halved reticle', domain: 'pattern', status: 'partial',
     since: 2023, icon: 'scanner',
     what: 'High-numerical-aperture EUV improves resolution, but its anamorphic optics halve the printable field. Any die larger than the new field must be stitched from two exposures.',
     tried: 'Stitching, which Cerebras already does at wafer scale, and designing around the boundary so nothing critical crosses it.',
@@ -114,7 +114,7 @@ export const PROBLEMS = [
 
   // ---------------------------------------------------- wires and heat --
   {
-    id: 'wires', name: 'A metal better than copper', short: 'Beyond copper', domain: 'wires', status: 'open',
+    id: 'wires', name: 'A metal better than copper', domain: 'wires', status: 'open',
     since: 2005, icon: 'metal',
     what: 'Copper resistivity rises sharply as wires narrow toward its 39 nm electron mean free path, and the barrier needed to contain it takes a fixed slice of every wire. The interconnect is now the limiter rather than the transistor.',
     tried: 'Cobalt, ruthenium and molybdenum, which have shorter mean free paths and may not need a barrier. Graphene and topological semimetals as more speculative options. Backside power delivery to relieve congestion rather than resistivity.',
@@ -123,7 +123,7 @@ export const PROBLEMS = [
     costs: 'Wire delay grows every node, so more of the improvement from a new node is spent getting signals across the die.',
   },
   {
-    id: 'heat3d', name: 'Cooling stacked logic', short: '3D cooling', domain: 'wires', status: 'open',
+    id: 'heat3d', name: 'Cooling stacked logic', domain: 'wires', status: 'open',
     since: 2008, icon: 'stack',
     what: 'Stacking multiplies transistors per unit of footprint and multiplies power per unit of footprint by the same factor, while the surface available to remove heat does not change at all.',
     tried: 'Microfluidic channels etched into the silicon, two-phase cooling, thermally conductive TSVs, and putting only low-power layers on top.',
@@ -134,7 +134,7 @@ export const PROBLEMS = [
 
   // ------------------------------------------------------------ systems --
   {
-    id: 'memwall', name: 'The memory wall', short: 'Memory wall', domain: 'system', status: 'contained',
+    id: 'memwall', name: 'The memory wall', domain: 'system', status: 'contained',
     since: 1994, icon: 'dram',
     what: 'Arithmetic throughput has grown far faster than memory bandwidth for three decades, so accelerators spend most of their time waiting for data rather than computing. Real utilisation on large models sits well below peak.',
     tried: 'Cache hierarchies, HBM stacked beside the compute die, larger on-chip SRAM, and algorithmic work to keep data resident.',
@@ -143,7 +143,7 @@ export const PROBLEMS = [
     costs: 'Most of a modern accelerator is idle most of the time, and the headline throughput figure describes a machine nobody experiences.',
   },
   {
-    id: 'inmem', name: 'Computing in memory', short: 'In-memory', domain: 'system', status: 'stalled',
+    id: 'inmem', name: 'Computing in memory', domain: 'system', status: 'stalled',
     since: 1997, icon: 'ipmem',
     what: 'If moving data costs more than computing on it, compute where the data already is. Analogue in-memory arrays can perform a matrix multiply in one step, at very high efficiency.',
     tried: 'Resistive RAM crossbars, phase-change memory, magnetic RAM, flash-based analogue arrays, and a long line of startups.',
@@ -152,7 +152,7 @@ export const PROBLEMS = [
     costs: 'Nothing directly — but it is the most-cited answer to the memory wall, and it has been for nearly thirty years.',
   },
   {
-    id: 'kgd', name: 'Known-good die for chiplets', short: 'Known-good die', domain: 'system', status: 'partial',
+    id: 'kgd', name: 'Known-good die for chiplets', domain: 'system', status: 'partial',
     since: 2017, icon: 'chiplet',
     what: 'Chiplet economics depend on packaging only good dies. But a die tested at wafer sort is not fully tested — some faults only appear once it is bonded, and by then you have committed several other good dies and an interposer to the same package.',
     tried: 'More thorough wafer-level test, built-in self-test, burn-in before assembly, and repairable or replaceable assembly.',
@@ -163,7 +163,7 @@ export const PROBLEMS = [
 
   // ------------------------------------------------------------ quantum --
   {
-    id: 'qthreshold', name: 'Staying below threshold at scale', short: 'QEC threshold', domain: 'quantum', status: 'open',
+    id: 'qthreshold', name: 'Staying below threshold at scale', domain: 'quantum', status: 'open',
     since: 2012, icon: 'transmon',
     what: 'Error correction works only below roughly a 1% per-operation error rate, and the qubit count needed falls steeply as you go further below it. Small systems have been below threshold. Keeping thousands of qubits there simultaneously has not been shown.',
     tried: 'Better materials and interfaces, improved junction fabrication, dynamical decoupling, and moving to modalities with intrinsically identical qubits.',
@@ -172,7 +172,7 @@ export const PROBLEMS = [
     costs: 'Above threshold, error correction makes things worse and no qubit count helps. This is the gate everything else waits behind.',
   },
   {
-    id: 'qwiring', name: 'Wiring a million qubits', short: 'Qubit wiring', domain: 'quantum', status: 'open',
+    id: 'qwiring', name: 'Wiring a million qubits', domain: 'quantum', status: 'open',
     since: 2015, icon: 'ipnoc',
     what: 'Superconducting qubits need control lines running from room temperature into a dilution refrigerator. A million qubits means a million lines, and the heat load and physical volume of that cabling exceed what any cryostat can take.',
     tried: 'Cryogenic CMOS control chips inside the fridge, frequency multiplexing, and photonic links to replace coaxial cable.',
@@ -181,7 +181,7 @@ export const PROBLEMS = [
     costs: 'A hard ceiling on system size regardless of qubit quality.',
   },
   {
-    id: 'magic', name: 'Magic state overhead', short: 'Magic states', domain: 'quantum', status: 'open',
+    id: 'magic', name: 'Magic state overhead', domain: 'quantum', status: 'open',
     since: 2005, icon: 'atom',
     what: 'The surface code cannot perform T gates directly. They are produced in distillation factories that frequently dominate the chip footprint, and no algorithm of interest avoids needing them in enormous numbers.',
     tried: 'Better distillation protocols, magic state cultivation, alternative codes with different gate sets, and algorithm-level reductions in T count.',
@@ -192,7 +192,7 @@ export const PROBLEMS = [
 
   // --------------------------------------------------------- structural --
   {
-    id: 'nre', name: 'Nobody new can afford to start', short: 'Entry cost', domain: 'structural', status: 'open',
+    id: 'nre', name: 'Nobody new can afford to start', domain: 'structural', status: 'open',
     since: 2015, icon: 'money',
     what: 'Design cost at the leading edge runs into hundreds of millions before first silicon. A startup with a genuinely better architecture cannot reach a leading-edge node, so novel ideas are filtered by capital rather than by merit.',
     tried: 'Multi-project wafer shuttles, open-source EDA and PDKs, chiplet reuse, and government-funded access programmes.',
@@ -201,7 +201,7 @@ export const PROBLEMS = [
     costs: 'The rate of genuinely new architectures being tried, which is not measurable and matters enormously.',
   },
   {
-    id: 'concentration', name: 'Single points of failure', short: 'Chokepoints', domain: 'structural', status: 'open',
+    id: 'concentration', name: 'Single points of failure', domain: 'structural', status: 'open',
     since: 2020, icon: 'foundry',
     what: 'One company makes EUV scanners. Effectively one merchant foundry serves the very top nodes. Several critical materials come from one or two suppliers in one or two countries. Each is a chokepoint with no alternative.',
     tried: 'National subsidy programmes, new fabs on other continents, and second-sourcing where a second source exists.',

@@ -32,7 +32,7 @@ export default function Matters({ goTab }) {
       <div className="row" style={{ marginBottom: 12 }}>
         {LEVERAGE.map((x) => (
           <button key={x.id} className={`btn sm iconrow ${pick === x.id ? 'active' : ''}`} onClick={() => setPick(x.id)}>
-            <Icon name={x.icon} size={18} />{x.short || x.name}
+            <Icon name={x.icon} size={18} />{x.name}
           </button>
         ))}
       </div>

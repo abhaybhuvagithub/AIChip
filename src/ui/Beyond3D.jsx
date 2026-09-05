@@ -147,7 +147,7 @@ export default function Beyond3D({ cfg }) {
       <div className="row" style={{ marginBottom: 12 }}>
         {ARCH.map((x) => (
           <button key={x.id} className={`btn iconrow ${sel === x.id ? 'active' : ''}`} onClick={() => setSel(x.id)}>
-            <Icon name={x.icon} size={20} />{x.short || x.name}
+            <Icon name={x.icon} size={20} />{x.name}
           </button>
         ))}
       </div>

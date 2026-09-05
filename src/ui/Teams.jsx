@@ -81,7 +81,7 @@ export default function Teams({ goTab }) {
       <div className="row" style={{ marginBottom: 12 }}>
         {PROJECTS.map((p) => (
           <button key={p.id} className={`btn iconrow ${proj === p.id ? 'active' : ''}`} onClick={() => setProj(p.id)}>
-            <Icon name={p.icon} size={20} />{p.short || p.name}
+            <Icon name={p.icon} size={20} />{p.name}
           </button>
         ))}
       </div>

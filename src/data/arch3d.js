@@ -50,7 +50,7 @@ export const ARCH = [
   },
   {
     id: 'nanosheet', icon: 'nanosheet',
-    name: 'Gate-all-around nanosheet', short: 'Nanosheet',
+    name: 'Gate-all-around nanosheet',
     era: '2022–',
     gated: 4,
     cellArea: 0.55,
@@ -89,7 +89,7 @@ export const ARCH = [
   },
   {
     id: '2d', icon: 'twod',
-    name: '2D-material channel', short: '2D channel',
+    name: '2D-material channel',
     era: 'Research',
     gated: 4,
     cellArea: 0.2,
@@ -120,7 +120,7 @@ export const BACKSIDE = {
 export const STACKING = [
   {
     id: 'package', icon: 'interposer',
-    name: 'Package-level (2.5D)', short: '2.5D package',
+    name: 'Package-level (2.5D)',
     what: 'Separate dies placed side by side on a silicon interposer. Not stacking at all, strictly, but it is where the industry started going three-dimensional.',
     pitch: '~40–100 µm bumps',
     status: 'production',
@@ -136,7 +136,7 @@ export const STACKING = [
   },
   {
     id: 'hybrid', icon: 'hybrid',
-    name: 'Hybrid bonding', short: 'Hybrid bond',
+    name: 'Hybrid bonding',
     what: 'Copper pads on two dies are pressed into direct contact and annealed until the copper fuses. No solder, no bump, no gap.',
     pitch: '~1–10 µm, heading below 1 µm',
     status: 'production',
@@ -144,7 +144,7 @@ export const STACKING = [
   },
   {
     id: 'sequential', icon: 'cfet',
-    name: 'Sequential (monolithic) 3D', short: 'Sequential 3D',
+    name: 'Sequential (monolithic) 3D',
     what: 'The upper tier of transistors is built directly on top of the lower tier, on the same wafer, rather than bonded from a second wafer.',
     pitch: 'Contact pitch — effectively unlimited density',
     status: 'research',

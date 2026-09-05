@@ -39,7 +39,7 @@ export default function ValueChain({ cfg }) {
       <div className="row" style={{ marginBottom: 12 }}>
         {LAYERS.map((x) => (
           <button key={x.id} className={`btn iconrow ${layer === x.id ? 'active' : ''}`} onClick={() => setLayer(x.id)}>
-            <Icon name={x.icon} size={19} />{x.short || x.name}
+            <Icon name={x.icon} size={19} />{x.name}
           </button>
         ))}
       </div>
