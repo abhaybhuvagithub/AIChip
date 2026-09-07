@@ -184,7 +184,7 @@ export default function App() {
   const [assistantOpen, setAssistantOpen] = useState(false)
   const [navOpen, setNavOpen] = useState(false)
   const [navQuery, setNavQuery] = useState('')
-  // Page loads, fetched once. Null until it arrives and null forever if it
+  // Page views, fetched once. Null until it arrives and null forever if it
   // does not, so a dead counter service renders nothing rather than a zero.
   // Two paths on purpose. The fetch gives a number this site can style; it is
   // also subject to CORS, and a static page cannot control whether a
@@ -333,15 +333,15 @@ export default function App() {
             <button className="side-open btn sm" onClick={() => setNavOpen(true)} aria-label="Open navigation">☰</button>
             <div className="crumb">{TABS.find((t) => t.id === tab)?.label}</div>
             {loads !== null ? (
-              <span className="loadcount" title="Total page loads, counted by a third-party service. Loads, not people — reloads and repeat visits each count once.">
-                {formatCount(loads)} <span className="loadcount-k">page loads</span>
+              <span className="loadcount" title="Total page views, counted by a third-party service. Loads, not people — reloads and repeat visits each count once.">
+                {formatCount(loads)} <span className="loadcount-k">page views</span>
               </span>
             ) : useShield ? (
               <img
                 className="loadcount-img"
                 src={shieldUrl()}
-                alt="Total page loads"
-                title="Total page loads, counted by a third-party service. Loads, not people."
+                alt="Total page views"
+                title="Total page views, counted by a third-party service. Loads, not people."
                 onError={() => setUseShield(false)}
               />
             ) : null}

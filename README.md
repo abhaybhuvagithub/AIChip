@@ -307,7 +307,7 @@ tables with scoped headers.
 
 The header shows a count, and three things about it are worth stating.
 
-It counts **page loads, not viewers** — reloads and repeat visits each
+It counts **page views, not viewers** — reloads and repeat visits each
 increment it. Calling that "viewers" would be a small lie of the kind the rest
 of this site refuses to tell.
 
@@ -330,7 +330,7 @@ perfectly-styled one that does not.
 **Failure is silent.** Free counter services die — the one everybody used
 became unreliable and its successors are personal projects. Every failure path
 returns `null` and the header renders nothing at all, because a counter showing
-a broken value is worse than no counter, and `0 page loads` on a live site is
+a broken value is worse than no counter, and `0 page views` on a live site is
 worse than either. A check asserts no failure path returns zero.
 
 ## Motion

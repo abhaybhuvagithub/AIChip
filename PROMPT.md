@@ -1504,3 +1504,24 @@ arrived in the middle of the manufacturing process.
   plurals and flagged text containing "hundreds of times" as unquantified.
   Both are the same error in miniature: check what you mean, not how it happens
   to be written.
+
+---
+
+## Forty-seventh pass: page loads → page views
+
+A rename, with one thing deliberately left alone.
+
+- **The new word is still accurate, which is why it was fine to take.** In
+  analytics "page views" means loads — it claims nothing about how many people
+  are behind them. "Viewers" would claim unique people, which a hit counter
+  cannot know. The one-word difference is the whole distinction, and the check
+  forbidding "viewers" still means something after the rename because it never
+  meant "views".
+- **The storage key was not renamed and should not be.** It still ends in
+  `_loads`. It is an identifier, not a label: renaming it would start a fresh
+  counter at zero and silently discard everything recorded so far. There is now
+  a check pinning the key precisely so a future tidy-up does not quietly reset
+  the count for the sake of a consistency nobody sees.
+- **One check was still grepping for the old word** and failed, correctly — a
+  renamed label with a check still looking for the previous one is a check
+  asserting nothing.

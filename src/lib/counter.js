@@ -6,7 +6,7 @@
 //   1. IT COUNTS PAGE LOADS, NOT VIEWERS. Every load increments it, including
 //      reloads and repeat visits by the same person. Labelling that "viewers"
 //      would be a small lie of exactly the kind the rest of this site refuses
-//      to tell, so the label says "page loads".
+//      to tell, so the label says "page views".
 //
 //   2. IT IS A THIRD-PARTY REQUEST. The site otherwise makes no external calls
 //      at all. This one sends a request per load to a counter service, which
@@ -16,7 +16,7 @@
 //   3. FREE COUNTER SERVICES DIE. The one everybody used, countapi.xyz, became
 //      unreliable and its successors are personal projects. So failure here is
 //      SILENT: no number, no error, no zero. A counter showing a broken value
-//      is worse than no counter, and "0 page loads" on a live site is worse
+//      is worse than no counter, and "0 page views" on a live site is worse
 //      than either.
 //
 // Everything below follows from those three.
@@ -28,6 +28,9 @@
 //
 // Keys are global here; there are no namespaces, so the key is deliberately
 // distinctive to avoid colliding with someone else's counter.
+// The key ends in "loads" and stays that way even though the label now says
+// "page views". It is an identifier, not a label: renaming it would begin a
+// fresh counter at zero and silently discard every view recorded so far.
 const KEY = 'abhaybhuva_aichip_fabsim_loads'
 const HOST = 'https://countapi.mileshilliard.com/api/v1'
 const ENDPOINT = `${HOST}/hit/${KEY}`
@@ -45,7 +48,7 @@ const ENDPOINT = `${HOST}/hit/${KEY}`
  * right trade for a fallback: a slightly foreign-looking number that appears
  * beats a perfectly-styled one that does not.
  */
-export const shieldUrl = ({ label = 'page loads', bg = '4a4a52', fg = 'ffffff' } = {}) =>
+export const shieldUrl = ({ label = 'page views', bg = '4a4a52', fg = 'ffffff' } = {}) =>
   `${HOST}/hit/${KEY}/shield?text=${encodeURIComponent(label)}&bgcolor=${bg}&textcolor=${fg}&style=flat`
 
 /** Respect the browser's stated preference before counting anything. */

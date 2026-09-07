@@ -3202,7 +3202,7 @@ group('Page-load counter')
     C.formatCount(999) === '999' && C.formatCount(1500) === '1.5k' &&
     C.formatCount(12345) === '12k' && C.formatCount(2.4e6) === '2.4M')
   // The single most important property: a dead counter service must render
-  // nothing, not a zero. "0 page loads" on a live site is worse than silence.
+  // nothing, not a zero. "0 page views" on a live site is worse than silence.
   ok('invalid values return null rather than a number',
     C.formatCount(NaN) === null && C.formatCount(-1) === null && C.formatCount(undefined) === null)
   ok('an unreachable endpoint resolves to null rather than throwing',
@@ -3249,15 +3249,21 @@ group('Page-load counter')
     typeof C.shieldUrl === 'function' && /loadcount-img/.test(app4))
   ok('the fallback only appears after the fetch has actually failed',
     /if \(n === null\) setUseShield\(true\)/.test(app4))
+  // The key still ends in "loads" and deliberately stays that way: it is an
+  // identifier, not a label. Renaming it would start a fresh counter from zero
+  // and silently discard everything recorded so far, which is a real cost for
+  // a cosmetic consistency nobody sees.
+  ok('the counter key is unchanged by the label rename',
+    C.shieldUrl().includes('abhaybhuva_aichip_fabsim_loads'))
   ok('the shield url is absolute, https and carries the same counter key',
     /^https:\/\//.test(C.shieldUrl()) && C.shieldUrl().includes('abhaybhuva_aichip_fabsim_loads'))
-  ok('the shield is labelled page loads, not viewers',
-    /page(\+|%20)loads/i.test(C.shieldUrl()) && !/viewer/i.test(C.shieldUrl()))
+  ok('the shield is labelled page views, not viewers',
+    /page(\+|%20)views/i.test(C.shieldUrl()) && !/viewer/i.test(C.shieldUrl()))
   ok('a broken image hides itself rather than showing a broken icon',
     /onError=\{\(\) => setUseShield\(false\)\}/.test(app4))
   ok('Do Not Track suppresses both paths, not just the fetch',
     /if \(doNotTrack\(\)\) return undefined/.test(app4))
-  ok('the image carries alt text', /alt="Total page loads"/.test(app4))
+  ok('the image carries alt text', /alt="Total page views"/.test(app4))
 
   // A third-party request per page load is a real privacy cost for a cosmetic
   // number, so the browser's stated preference wins.
@@ -3272,8 +3278,10 @@ group('Page-load counter')
     /signal/.test(src) && /AbortController/.test(app4))
 
   // Label honestly: these are loads, not people.
-  ok('it is labelled page loads rather than viewers',
-    /page loads/i.test(app4) && !/\bviewers\b/i.test(app4))
+  // "Views" is loads; "viewers" would be people. The counter cannot know the
+  // second, so the second must not appear.
+  ok('it is labelled page views rather than viewers',
+    /page views/i.test(app4) && !/\bviewers?\b(?! would)/i.test(app4.replace(/\/\/.*$/gm, '')))
   ok('the tooltip says what is actually being counted',
     /reloads and repeat visits each count once/i.test(app4))
   ok('the module states its own caveats', (() => {
