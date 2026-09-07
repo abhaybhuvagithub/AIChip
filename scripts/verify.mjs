@@ -3182,6 +3182,84 @@ group('The guide')
   })())
 }
 
+group('Fab economics')
+{
+  const FE = await import(join(root, 'src/lib/fabecon.js'))
+  const n3 = FE.FAB_PRESETS.find((f) => f.id === 'n3')
+
+  ok('every fab preset is costed for its own node',
+    FE.FAB_PRESETS.length >= 4 && FE.FAB_PRESETS.every((f) =>
+      f.capexUsd > 0 && f.wspm > 0 && f.waferPriceUsd > 0 &&
+      f.variablePerWaferUsd > 0 && f.fixedOpexPerWaferOfCapacity > 0))
+  // Using leading-edge variable costs for a mature fab produced a 73% loss on
+  // every wafer, which is a modelling error rather than a finding.
+  ok('older nodes cost less to run, not the same',
+    FE.FAB_PRESETS.every((f, i) => i === 0 || f.variablePerWaferUsd <= FE.FAB_PRESETS[i - 1].variablePerWaferUsd))
+  ok('every preset is viable at high utilisation',
+    FE.FAB_PRESETS.every((f) => FE.fabMargin({ ...f, utilisation: 0.9 }).grossMargin > 0),
+    FE.FAB_PRESETS.filter((f) => FE.fabMargin({ ...f, utilisation: 0.9 }).grossMargin <= 0).map((f) => f.id).join(', ') || 'all viable')
+
+  // The fact the section exists to make.
+  ok('depreciation dominates the cost of a new leading-edge wafer',
+    FE.costPerWafer({ ...n3, utilisation: 0.9 }).depShare > 0.6,
+    (FE.costPerWafer({ ...n3, utilisation: 0.9 }).depShare * 100).toFixed(0) + '% of cost')
+  ok('cost per wafer rises sharply as utilisation falls', (() => {
+    const full = FE.costPerWafer({ ...n3, utilisation: 1 }).total
+    const half = FE.costPerWafer({ ...n3, utilisation: 0.5 }).total
+    return half > full * 1.6
+  })())
+  ok('variable cost per wafer does not move with utilisation',
+    FE.costPerWafer({ ...n3, utilisation: 1 }).variablePerWafer ===
+    FE.costPerWafer({ ...n3, utilisation: 0.5 }).variablePerWafer)
+  ok('an idle fab has infinite cost per wafer rather than zero',
+    FE.costPerWafer({ ...n3, utilisation: 0 }).total === Infinity)
+
+  // The first question anyone asks about a fab, which the model could not
+  // previously express.
+  ok('a written-off fab carries no capital charge',
+    FE.costPerWafer({ ...n3, utilisation: 0.9, ageYears: 8 }).depPerWafer === 0)
+  ok('writing the tools off transforms the margin on an identical process', (() => {
+    const young = FE.fabMargin({ ...n3, utilisation: 0.9, ageYears: 0 }).grossMargin
+    const old = FE.fabMargin({ ...n3, utilisation: 0.9, ageYears: 8 }).grossMargin
+    return old > young + 0.3
+  })(), (() => {
+    const young = FE.fabMargin({ ...n3, utilisation: 0.9, ageYears: 0 }).grossMargin
+    const old = FE.fabMargin({ ...n3, utilisation: 0.9, ageYears: 8 }).grossMargin
+    return `${(young * 100).toFixed(0)}% → ${(old * 100).toFixed(0)}%`
+  })())
+  ok('the mature fab is modelled as already depreciated',
+    FE.FAB_PRESETS.find((f) => f.id === 'mature').ageYears >= FE.DEPRECIATION_YEARS)
+
+  ok('breakeven utilisation is a real fraction for every preset',
+    FE.FAB_PRESETS.every((f) => {
+      const b = FE.breakevenUtilisation(f)
+      return b > 0 && b < 1
+    }), FE.FAB_PRESETS.map((f) => `${f.id}:${(FE.breakevenUtilisation(f) * 100).toFixed(0)}%`).join(' '))
+  ok('a fab below breakeven loses money and above it does not', (() => {
+    const b = FE.breakevenUtilisation(n3)
+    return FE.fabMargin({ ...n3, utilisation: b - 0.05 }).grossUsd < 0 &&
+      FE.fabMargin({ ...n3, utilisation: b + 0.05 }).grossUsd > 0
+  })())
+  ok('a cheaper wafer price raises the breakeven utilisation',
+    FE.breakevenUtilisation({ ...n3, waferPriceUsd: 12000 }) > FE.breakevenUtilisation(n3))
+
+  // Validated against a public figure, with the gap explained rather than tuned.
+  ok('a new leading-edge fab lands below the reported fleet margin', (() => {
+    const m = FE.fabMargin({ ...n3, utilisation: 1, ageYears: 0 }).grossMargin
+    return m > 0.35 && m < FE.MARGIN_CHECK.fleetReported[0]
+  })(), (FE.fabMargin({ ...n3, utilisation: 1, ageYears: 0 }).grossMargin * 100).toFixed(1) + '%')
+  ok('the validation explains the gap rather than hiding it',
+    /blend across its whole fleet|dilute by construction/i.test(
+      readFileSync(join(root, 'src/lib/fabecon.js'), 'utf8')))
+
+  ok('the cost stack separates fixed from variable',
+    FE.costStack({ ...n3, utilisation: 0.9 }).filter((c) => c.fixed).length === 2)
+  ok('the section reached the economics tab', (() => {
+    const ui = readFileSync(join(root, 'src/ui/Economics.jsx'), 'utf8')
+    return /Where the wafer price comes from/.test(ui) && /Breakeven utilisation/.test(ui)
+  })())
+}
+
 group('Why it matters')
 {
   const M = await import(join(root, 'src/data/matters.js'))

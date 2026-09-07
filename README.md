@@ -64,6 +64,11 @@ Five tabs:
 - **Staffing** — headcount per discipline from the node's engineer-year figure,
   tilted per project archetype and renormalised, with peak distinguished from
   average.
+- **Fab economics** — cost per wafer built from capex, capacity, utilisation and
+  depreciation age rather than taken as an input; breakeven utilisation; and
+  the cost stack split into fixed and variable. Validated against TSMC's
+  reported gross margin, with the gap between a single new fab and a blended
+  fleet explained rather than tuned away.
 - **Business case** — NRE built up from mask set, engineer-years, EDA and IP
   by node; break-even volume; an S-curve ramp with annual price erosion and
   yield learning; and quarter-by-quarter cumulative cash flow to a payback

@@ -1555,3 +1555,38 @@ was, and I should not have needed telling.
   checks assert the guide does not claim most chips fail, that it agrees with
   its own closing paragraph, and that the drawn map stays consistent with the
   yield model. I restored the wrong sentence to confirm they fire.
+
+---
+
+## Forty-ninth pass: the fab P&L
+
+Asked to make this something a semiconductor executive would notice. The honest
+answer was to find the thing that would make one dismiss it, and the economics
+tab took `waferCost` as an *input*. That is the tell. A wafer price is not
+looked up; it is an output of capital, capacity, utilisation and yield, and the
+first three are fixed the moment the building exists.
+
+- **The one fact the section exists for.** Depreciation is around seventy per
+  cent of the cost of a leading-edge wafer, and it arrives whether or not a
+  wafer runs. Drop utilisation from 100% to 50% and cost per wafer rises by
+  eighty per cent with nothing about the process changing. That single line
+  explains take-or-pay contracts, customer prepayments, why foundries chase
+  volume commitments years ahead, and most of the industry's cyclicality.
+- **Two errors caught by running the model rather than admiring it.** Applying
+  leading-edge variable costs to a mature fab produced a *negative 73% margin* —
+  a modelling error, not a finding about mature nodes. And the model had no way
+  to express the first question anyone asks about a fab: **is it depreciated
+  yet?** Adding age turns the same 3 nm fab from 46% margin to 83% the year its
+  tools are written off, which is why mature nodes compete on price and why a
+  node's profitability climbs for years after the process stops changing.
+- **A validation whose gap is the point.** TSMC reported 60–67% gross margin
+  through 2025–26; this model gives about 51% for a brand-new 3 nm fab at full
+  utilisation. Those agree: a company's margin is blended across a fleet that is
+  largely depreciated, so a fab opened last year is the *worst* margin in the
+  building. TSMC has said as much itself — overseas expansion dilutes margin by
+  two to three points, because new fabs dilute by construction. I wrote the gap
+  into the model's comments rather than tuning the inputs until it matched.
+- **My first validation attempt was junk and I threw it away.** I tried to
+  reproduce a 2005 foundry's filed 75% breakeven and got 399%, because I did
+  not have reliable figures for its cost structure. Presenting a validation
+  tuned until it agreed would have been worse than not validating.
