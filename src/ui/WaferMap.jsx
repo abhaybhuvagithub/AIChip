@@ -81,6 +81,13 @@ export default function WaferMap({ cfg, showDefects = true, clustered = true, se
         <path className="wafer-edge" d={`M ${-R * 0.055} ${R} A ${R} ${R} 0 0 0 ${R * 0.055} ${R} L 0 ${R * 0.945} Z`} fill="var(--bg)" />
       </svg>
       <div className="wafer-legend">
+        <span className="wafer-tally">
+          <b>{fmt.n(dies.length - dead.size)}</b> good
+          {' · '}
+          <b style={{ color: 'var(--bad)' }}>{fmt.n(dead.size)}</b> killed
+          {' · '}
+          {fmt.pct(dies.length ? dead.size / dies.length : 0, 1)} lost to defects
+        </span>
         {colorBy === 'speed' ? (
           <>
             {BINS.map((b) => <span key={b.id}><i style={{ background: b.hue }} />{b.label}</span>)}

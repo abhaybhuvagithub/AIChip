@@ -27,9 +27,9 @@ export default function Guide({ goTab }) {
         <p>
           A chip is a slice of extremely pure silicon with a pattern printed onto it — about seventy
           times over, each layer lined up with the last to within a few atoms. The pattern makes tens
-          of billions of tiny switches. It takes around seven hundred steps and three months, most of
-          the chips come out broken, and the ones that work are sorted and sold. Everything difficult
-          about this industry comes from one of those facts.
+          of billions of tiny switches. It takes around seven hundred steps and three months, a few
+          of the chips come out broken, and the rest are sorted and sold. Everything difficult about
+          this industry comes from one of those facts.
         </p>
       </div>
 

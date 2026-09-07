@@ -58,7 +58,7 @@ export const STEPS = [
   {
     n: 8, title: 'Find out which ones work', icon: 'prober',
     what: 'Needles touch down on each chip while it is still part of the wafer, and test it electrically.',
-    detail: 'Some fail. A single misplaced speck can kill one, and bigger chips are bigger targets — which is why a large chip is far more likely to be faulty than a small one, and why that fact shapes almost every decision in the industry.',
+    detail: 'Most pass — a good process makes eight or nine out of ten work. The ones that fail usually failed because a single speck landed in the wrong place, and bigger chips are bigger targets, so a large chip fails far more often than a small one. That one fact shapes almost every decision in this industry.',
   },
   {
     n: 9, title: 'Cut them out and package them', icon: 'dicer',

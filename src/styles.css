@@ -349,7 +349,10 @@ p.lede { color: var(--muted); font-size: var(--fs-lede); line-height: 1.6; max-w
 }
 .wafer-stage svg { width: 100%; height: auto; max-height: 62vh; display: block; }
 .die-good { fill: var(--accent); fill-opacity: .26; stroke: var(--accent); stroke-opacity: .5; stroke-width: .06; }
-.die-dead { fill: var(--bad); fill-opacity: .55; stroke: var(--bad); stroke-opacity: .8; stroke-width: .06; }
+/* Dead dies were filled at 55% opacity, which made a 3% loss look like a
+   catastrophe — red dominates visually far beyond the area it covers. Toned
+   down so the picture matches the number printed beside it. */
+.die-dead { fill: var(--bad); fill-opacity: .34; stroke: var(--bad); stroke-opacity: .6; stroke-width: .05; }
 .die-partial { fill: var(--muted); fill-opacity: .1; stroke: var(--muted); stroke-opacity: .25; stroke-width: .05; }
 .wafer-edge { fill: none; stroke: var(--border); stroke-width: 1.2; }
 .wafer-body { fill: var(--panel); fill-opacity: .5; }
@@ -886,3 +889,7 @@ h3.iconrow { display: flex; gap: 10px; }
 .gn-want { display: block; font-size: var(--fs-prose); line-height: 1.45; }
 .gn-why { display: block; font-size: var(--fs-label); color: var(--muted); margin-top: 6px; line-height: 1.5; }
 .gn-tab { display: block; font-family: var(--font-mono); font-size: var(--fs-label); color: var(--accent); margin-top: 9px; }
+
+/* Count beside the wafer legend, so the map is read rather than felt. */
+.wafer-tally { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--muted); margin-right: 6px; }
+.wafer-tally b { color: var(--text); }

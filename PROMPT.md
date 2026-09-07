@@ -1525,3 +1525,33 @@ A rename, with one thing deliberately left alone.
 - **One check was still grepping for the old word** and failed, correctly — a
   renamed label with a check still looking for the previous one is a check
   asserting nothing.
+
+---
+
+## Forty-eighth pass: a wrong claim, caught by the reader
+
+Reported that "most of the chips come out broken" in the guide was wrong. It
+was, and I should not have needed telling.
+
+- **The page contradicted itself two paragraphs apart.** The opening said most
+  chips come out broken; the closing said "most of it works". Both were on the
+  same screen. A page that disagrees with itself is worse than one that is
+  merely wrong, because it proves nobody read it end to end — including me.
+- **And the model underneath said 88%.** The default configuration yields
+  eighty-eight per cent and the drawn wafer map kills 3.3% of dies. The site
+  computes the correct answer on the next tab and the prose asserted the
+  opposite. Every yield number here is calculated; the one place I wrote one in
+  words, I wrote it from vibes.
+- **The overstatement was also hiding the interesting fact.** The point is not
+  that chips fail — it is that failures land at random and area is what decides
+  how often, so a large die fails far more often than a small one. "Most come
+  out broken" buries that under a wrong headline. It now says eight or nine out
+  of ten pass, which is both true and sets up the thing that matters.
+- **The map was being read by feel rather than by count.** Red at 55% fill made
+  eighteen dead dies out of five hundred look like a catastrophe. It now prints
+  the tally beside the legend in both colour modes, and the fill is toned down
+  so the picture agrees with the number next to it.
+- **Prose claims are now checked against the model that computes them.** New
+  checks assert the guide does not claim most chips fail, that it agrees with
+  its own closing paragraph, and that the drawn map stays consistent with the
+  yield model. I restored the wrong sentence to confirm they fire.

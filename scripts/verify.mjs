@@ -3059,6 +3059,61 @@ group('Against published values')
   })())
 }
 
+group('Yield claims agree with the model')
+{
+  // The guide said "most of the chips come out broken" while its own closing
+  // paragraph said "most of it works", and the model says 88%. A page that
+  // contradicts itself in two paragraphs is worse than one that is merely
+  // wrong, and neither line was checked against the arithmetic underneath.
+  const G2 = await import(join(root, 'src/data/guide.js'))
+  const gui = readFileSync(join(root, 'src/ui/Guide.jsx'), 'utf8')
+  const cfg2 = {
+    waferDia: 300, dieX: 10.5, dieY: 10.5, scribe: 0.08, edgeExclusion: 3,
+    d0: 0.07, model: 'negbinom', alpha: 2.5, lineYield: 0.98, testYield: 0.97,
+    packageYield: 0.995, waferCost: 20000, asp: 120, packageCost: 6,
+  }
+  const run2 = computeRun(cfg2)
+  ok('the default configuration yields well over half',
+    run2.dieYield > 0.6, `${(run2.dieYield * 100).toFixed(1)}% die yield`)
+  ok('the guide does not claim most chips fail',
+    !/most of the chips come out broken/i.test(gui + JSON.stringify(G2.STEPS)))
+  ok('the guide and its own closing paragraph agree',
+    /most of it works/i.test(G2.CLOSING) && !/most[^.]{0,30}broken/i.test(gui))
+  ok('the guide states a yield figure consistent with the model', (() => {
+    const step = G2.STEPS.find((x) => /which ones work/i.test(x.title))
+    return step && /eight or nine out of ten/i.test(step.detail)
+  })())
+  ok('the guide still keeps the fact that matters — area drives failure',
+    G2.STEPS.some((x) => /bigger chips are bigger targets/i.test(x.detail)))
+
+  // The map was being read by feel: red at high opacity made a 3% loss look
+  // like a catastrophe.
+  const wm = readFileSync(join(root, 'src/ui/WaferMap.jsx'), 'utf8')
+  const css4 = readFileSync(join(root, 'src/styles.css'), 'utf8')
+  ok('the wafer map prints how many died, not just which',
+    /wafer-tally/.test(wm) && /lost to defects/.test(wm))
+  ok('the tally appears in both colour modes, not inside one branch', (() => {
+    const legend = wm.slice(wm.indexOf('className="wafer-legend"'))
+    const tally = legend.indexOf('wafer-tally')
+    const branch = legend.indexOf("colorBy === 'speed' ?")
+    return tally > -1 && branch > -1 && tally < branch
+  })())
+  ok('dead dies are not filled so heavily that they overstate the loss', (() => {
+    const m = css4.match(/\.die-dead \{[^}]*fill-opacity: ([\d.]+)/)
+    return m && parseFloat(m[1]) <= 0.4
+  })())
+  ok('the drawn map roughly agrees with the yield model', (() => {
+    const geo = layoutDies(cfg2)
+    const dead = killDies(geo.dies, scatterDefects({ waferDia: 300, d0: 0.07, alpha: 2.5, clustered: true, seed: 7 }))
+    const drawn = dead.size / geo.dies.length
+    return drawn < 0.15
+  })(), (() => {
+    const geo = layoutDies(cfg2)
+    const dead = killDies(geo.dies, scatterDefects({ waferDia: 300, d0: 0.07, alpha: 2.5, clustered: true, seed: 7 }))
+    return `${((dead.size / geo.dies.length) * 100).toFixed(1)}% drawn dead`
+  })())
+}
+
 group('The guide')
 {
   const G = await import(join(root, 'src/data/guide.js'))
