@@ -828,3 +828,61 @@ h3.iconrow { display: flex; gap: 10px; }
    counter service, so it cannot follow the palette — height-matched to the
    surrounding controls and left alone otherwise. */
 .loadcount-img { height: 18px; margin-left: 10px; vertical-align: middle; opacity: .85; }
+
+/* ---------- Guide ----------
+   Set for reading rather than scanning: a narrower measure, larger body text
+   and more room between things than the analytical tabs use. */
+.guide { max-width: 78ch; }
+.guide p { font-size: var(--fs-prose); line-height: 1.68; }
+.guide .lede { max-width: 66ch; }
+.guide-tldr { border-color: var(--accent); margin-top: 18px; }
+.guide-tldr p { font-size: 19px; line-height: 1.65; margin-top: 8px; }
+
+.guide-steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.guide-steps > li { margin: 0; }
+.guide-steps button {
+  display: flex; gap: 14px; align-items: flex-start; width: 100%; text-align: left;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+  padding: 15px 16px; cursor: pointer; font-family: inherit; color: var(--text);
+  transition: border-color .16s, background .16s;
+}
+.guide-steps button:hover { border-color: var(--accent); }
+.guide-steps > li.on button { border-color: var(--accent); background: var(--panel2); }
+.gs-n {
+  flex: 0 0 auto; width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center; font-family: var(--font-mono);
+  font-size: var(--fs-label); background: var(--panel2); color: var(--accent);
+  border: 1px solid var(--border);
+}
+.guide-steps > li.on .gs-n { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.gs-body { min-width: 0; display: block; }
+.gs-title {
+  display: flex; align-items: center; gap: 9px;
+  font-family: var(--font-display); font-size: 20px; letter-spacing: -.02em; margin-bottom: 5px;
+}
+.gs-what { display: block; font-size: var(--fs-note); line-height: 1.62; }
+.gs-detail {
+  display: block; font-size: var(--fs-note); line-height: 1.62; color: var(--muted);
+  margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--border);
+}
+.gs-more { margin-left: auto; color: var(--muted); font-family: var(--font-mono); font-size: 18px; }
+
+.guide-words { display: grid; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.guide-word { display: grid; grid-template-columns: 130px 1fr; gap: 14px; background: var(--panel); padding: 11px 15px; }
+.guide-word b { font-family: var(--font-mono); font-size: var(--fs-data); color: var(--accent); }
+.guide-word span { font-size: var(--fs-note); line-height: 1.55; }
+@media (max-width: 560px) { .guide-word { grid-template-columns: 1fr; gap: 4px; } }
+
+.guide-close { margin-top: 22px; border-color: var(--accent); }
+.guide-close p { font-size: 19px; line-height: 1.65; }
+
+.guide-next { display: grid; gap: 9px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.guide-nextcard {
+  display: block; text-align: left; background: var(--panel); border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px 15px; cursor: pointer; font-family: inherit; color: var(--text);
+  transition: border-color .16s;
+}
+.guide-nextcard:hover { border-color: var(--accent); }
+.gn-want { display: block; font-size: var(--fs-prose); line-height: 1.45; }
+.gn-why { display: block; font-size: var(--fs-label); color: var(--muted); margin-top: 6px; line-height: 1.5; }
+.gn-tab { display: block; font-family: var(--font-mono); font-size: var(--fs-label); color: var(--accent); margin-top: 9px; }

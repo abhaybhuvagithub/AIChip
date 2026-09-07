@@ -1474,3 +1474,33 @@ Recording it rather than letting it vanish, for two reasons.
   a log entry saying it was undone. The revert also took its own checks with
   it, which is correct — they asserted a property the site no longer has, and
   verify went from 1,044 back to 1,033 without anyone editing it.
+
+---
+
+## Forty-sixth pass: the guide
+
+The site had twenty-five tabs of dense material and no way in. Reading paths
+point; they do not explain. This is the page that decides whether anyone gets
+past the front door, so it is now the landing tab — a newcomer previously
+arrived in the middle of the manufacturing process.
+
+- **Three rules applied to every sentence.** No unexplained jargon: a technical
+  word is either absent or defined in the same breath, with no third option
+  where the reader looks it up. Plain is not vague: removing the numbers would
+  have made it easier to write and useless to read, so they stay, given in
+  things a person can picture — four thousand transistors across a human hair,
+  nine-nines purity as a teaspoon in a swimming pool. And no analogy that would
+  need un-teaching later.
+- **Length is a feature and is checked.** 947 words, about five minutes. A
+  check enforces 600–1,600 words, because a guide that grows past one sitting
+  has stopped being a guide and become another tab.
+- **The jargon rule is enforced, not just stated.** A check scans the body for
+  eleven terms a newcomer would have to look up. I put "anisotropic dielectric
+  etch" into step six to confirm it fires.
+- **Two of my own checks tested formatting rather than the property.** I
+  asserted each section contained a digit — but the prose deliberately spells
+  numbers out, because "seven hundred steps" reads better than "700 steps". The
+  check was measuring the representation. Then the corrected version missed
+  plurals and flagged text containing "hundreds of times" as unquantified.
+  Both are the same error in miniature: check what you mean, not how it happens
+  to be written.

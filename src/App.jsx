@@ -30,6 +30,7 @@ const Acronyms = lazy(() => import('./ui/Acronyms.jsx'))
 const Sources = lazy(() => import('./ui/Sources.jsx'))
 const Trace = lazy(() => import('./ui/Trace.jsx'))
 const Matters = lazy(() => import('./ui/Matters.jsx'))
+const Guide = lazy(() => import('./ui/Guide.jsx'))
 const Operate = lazy(() => import('./ui/Operate.jsx'))
 const AIChips = lazy(() => import('./ui/AIChips.jsx'))
 
@@ -46,6 +47,8 @@ const TABS = [
   // entry carries a description because a sidebar of twenty-three items where
   // half the labels are single words — Clock, Trace, Nodes — is a list, not
   // navigation.
+  { id: 'guide', label: 'Start here', icon: 'book', group: 'Orientation',
+    desc: 'How a chip is made, in about five minutes, assuming no background at all.' },
   { id: 'god', label: 'God view', icon: 'spark', group: 'Orientation',
     desc: 'The whole pipeline on one screen, live. Every node clicks through.' },
   { id: 'matters', label: 'Why it matters', icon: 'atom', group: 'Orientation',
@@ -73,16 +76,16 @@ const TABS = [
 
   { id: 'silicon', label: 'Silicon', icon: 'soc', group: 'What it becomes',
     desc: 'Twenty real chips drawn to true relative scale on one wafer.' },
-  { id: 'compute', label: 'Compute', icon: 'chart', group: 'What it becomes',
+  { id: 'compute', label: 'Compute', icon: 'gpu', group: 'What it becomes',
     desc: 'Transistors to operations per second, and what precision does to the number.' },
   { id: 'ai', label: 'AI chips', icon: 'npu', group: 'What it becomes',
     desc: 'The roofline model, and why a thousand-teraflop chip delivers three.' },
 
   { id: 'chain', label: 'Value chain', icon: 'route', group: 'The industry',
     desc: 'Seven layers from instruction sets to packaging, and where the chokepoints are.' },
-  { id: 'economics', label: 'Economics', icon: 'money', group: 'The industry',
+  { id: 'economics', label: 'Economics', icon: 'chart', group: 'The industry',
     desc: 'Cost per good die, wafer to product, across eight real product shapes.' },
-  { id: 'business', label: '0 → market', icon: 'iplicense', group: 'The industry',
+  { id: 'business', label: '0 → market', icon: 'money', group: 'The industry',
     desc: 'Four years and half a billion dollars, and the one calculation that decides it.' },
   { id: 'teams', label: 'Teams & roles', icon: 'ipnoc', group: 'The industry',
     desc: 'Who builds it — eight disciplines, 25 roles, and a headcount model.' },
@@ -96,7 +99,7 @@ const TABS = [
   { id: 'unsolved', label: 'Open problems', icon: 'flask', group: 'The frontier',
     desc: 'Eighteen things nobody has solved, and how long each has been open.' },
 
-  { id: 'acronyms', label: 'Acronyms', icon: 'book', group: 'Reference',
+  { id: 'acronyms', label: 'Acronyms', icon: 'iplicense', group: 'Reference',
     desc: '172 abbreviations, each with what it actually means rather than just what it stands for.' },
   { id: 'sources', label: 'Sources', icon: 'quartzite', group: 'Reference',
     desc: 'Where the numbers come from — thirty citations, weighted by kind, and what is still unsourced.' },
@@ -160,7 +163,7 @@ export default function App() {
   // as the link being broken. Aliases are cheap; keep them when an id changes.
   const TAB_ALIASES = { javy: 'operate' }
   const wanted = TAB_ALIASES[hash?.tab] || hash?.tab
-  const [tab, setTab] = useState(wanted && TABS.some((t) => t.id === wanted) ? wanted : 'sand')
+  const [tab, setTab] = useState(wanted && TABS.some((t) => t.id === wanted) ? wanted : 'guide')
   const [palette, setPalette] = useState(() => {
     const saved = localStorage.getItem('fabsim.palette')
     // Migrate the old flat theme names, so an existing visitor's choice is
@@ -370,6 +373,7 @@ export default function App() {
         {tab === 'god' && <GodView cfg={cfg} snap={snap} goTab={go} />}
         {tab === 'trace' && <Trace goTab={go} />}
         {tab === 'matters' && <Matters goTab={go} />}
+        {tab === 'guide' && <Guide goTab={go} />}
         {tab === 'operate' && <Operate goTab={go} />}
         {tab === 'run' && <FabRun cfg={cfg} onSnapshot={setSnap} />}
         {tab === 'wafer' && <YieldLab cfg={cfg} patch={patch} />}

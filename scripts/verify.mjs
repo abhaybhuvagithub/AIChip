@@ -3059,6 +3059,74 @@ group('Against published values')
   })())
 }
 
+group('The guide')
+{
+  const G = await import(join(root, 'src/data/guide.js'))
+  const ui = readFileSync(join(root, 'src/ui/Guide.jsx'), 'utf8')
+
+  ok('the whole process is covered in ten steps',
+    G.STEPS.length === 10 && G.STEPS.every((x) => x.title && x.icon && x.what && x.detail))
+  ok('the steps run from sand to sale', (() => {
+    const first = G.STEPS[0], last = G.STEPS[G.STEPS.length - 1]
+    return /sand/i.test(first.title) && /sell/i.test(last.title)
+  })())
+  // The guide spells numbers out — "seven hundred steps", "twenty nanometres" —
+  // because that reads better in prose. A check for digit characters therefore
+  // tested the formatting rather than the property, and failed on text that
+  // was full of quantities. This looks for the quantity instead.
+  const hasQuantity = (t) => /\d/.test(t) || new RegExp(
+    '\\b(one|two|three|four|five|six|seven|eight|nine|ten|twelve|twenty|thirty|forty|fifty|' +
+    'sixty|seventy|eighty|ninety|hundreds?|thousands?|millions?|billions?)\\b', 'i').test(t)
+
+  ok('five reasons it is hard, each with a quantity in it',
+    G.HARD.length === 5 && G.HARD.every((h) => h.k && h.icon && h.what.length > 120 && hasQuantity(h.what)),
+    G.HARD.filter((h) => !hasQuantity(h.what)).map((h) => h.k).join(', ') || 'all quantified')
+  ok('the glossary covers the unavoidable words',
+    G.WORDS.length >= 12 &&
+    ['Wafer', 'Die', 'Fab', 'Yield', 'Transistor', 'Node', 'Lithography', 'EUV']
+      .every((w) => G.WORDS.some((x) => x.w === w)))
+  ok('every glossary entry is a plain-English sentence',
+    G.WORDS.every((x) => x.d.length > 25 && x.d.length < 260))
+
+  // The point of the page is that it can be read in one sitting. If it grows
+  // past that it has stopped being a guide and become another tab.
+  const body = [...G.STEPS.map((x) => `${x.what} ${x.detail}`), ...G.HARD.map((x) => x.what), G.CLOSING].join(' ')
+  const words = body.split(/\s+/).length
+  ok('it can be read in one go', words > 600 && words < 1600, `${words} words, about ${Math.round(words / 200)} minutes`)
+
+  // The rule the page is written to: no term a newcomer would have to look up.
+  ok('no unexplained jargon in the body', (() => {
+    const banned = ['photolithography', 'CMOS', 'MOSFET', 'epitaxial', 'planarisation',
+      'dielectric', 'anneal', 'reticle', 'substrate', 'doping', 'metrology']
+    return !banned.some((b) => new RegExp(`\\b${b}\\b`, 'i').test(body))
+  })(), (() => {
+    const banned = ['photolithography', 'CMOS', 'MOSFET', 'epitaxial', 'planarisation',
+      'dielectric', 'anneal', 'reticle', 'substrate', 'doping', 'metrology']
+    return banned.filter((b) => new RegExp(`\\b${b}\\b`, 'i').test(body)).join(', ') || 'none'
+  })())
+  // Plain is not the same as vague: removing the numbers would make it easier
+  // to write and useless to read.
+  ok('the steps keep concrete quantities rather than hand-waving',
+    G.STEPS.filter((x) => hasQuantity(`${x.what} ${x.detail}`)).length >= 8,
+    `${G.STEPS.filter((x) => hasQuantity(`${x.what} ${x.detail}`)).length} of ${G.STEPS.length}`)
+  ok('it names the yield problem as the one idea to keep',
+    /yield problem/i.test(G.CLOSING) && /bigger chips fail more often/i.test(G.CLOSING))
+  ok('it admits to simplifying without claiming to be wrong',
+    /simplified but not[\s\S]{0,40}made wrong/i.test(ui))
+
+  ok('onward links are described by what a reader wants, not by tab name',
+    G.NEXT.length >= 5 && G.NEXT.every((n) => n.tab && /^I want/i.test(n.want) && n.why))
+  ok('every onward link points at a real tab', (() => {
+    const app5 = readFileSync(join(root, 'src/App.jsx'), 'utf8')
+    return G.NEXT.every((n) => app5.includes(`id: '${n.tab}'`))
+  })())
+  // Landing a newcomer in the middle of the process was the previous default.
+  ok('a first-time visitor lands on the guide', (() => {
+    const app5 = readFileSync(join(root, 'src/App.jsx'), 'utf8')
+    return /\? wanted : 'guide'\)/.test(app5)
+  })())
+}
+
 group('Why it matters')
 {
   const M = await import(join(root, 'src/data/matters.js'))
