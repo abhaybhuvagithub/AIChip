@@ -1107,7 +1107,7 @@ group('Travel path')
 
 group('Assistant')
 {
-  const { ask, SUGGESTIONS, suggestionsFor } = await import(join(root, 'src/lib/assistant.js'))
+  const { ask, suggestionsFor } = await import(join(root, 'src/lib/assistant.js'))
   const { buildJourney } = await import(join(root, 'src/lib/journey.js'))
   const cfg = { waferDia: 300, dieX: 10.5, dieY: 10.5, scribe: 0.08, edgeExclusion: 3, d0: 0.07,
     model: 'negbinom', alpha: 2.5, waferCost: 20000, lineYield: 0.98, testYield: 0.97,
