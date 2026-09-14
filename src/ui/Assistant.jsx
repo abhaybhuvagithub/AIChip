@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { ask, SUGGESTIONS } from '../lib/assistant.js'
+import { ask, suggestionsFor } from '../lib/assistant.js'
 import { speak, stopSpeaking, canSpeak, canListen, listenOnce } from '../lib/speech.js'
 
 const MISS = "I don't have a grounded answer for that. I only answer from what this app can compute — the running line, your die, the yield and cost models, the material chain and the process steps. I'd rather say that than invent something. Try one of the suggestions below."
@@ -86,7 +86,7 @@ export default function Assistant({ cfg, snap, journey, goTab, open, setOpen }) 
       {err && <div className="small" style={{ color: 'var(--warn)', padding: '0 12px 6px' }}>{err}</div>}
 
       <div className="assistant-chips">
-        {SUGGESTIONS.slice(0, log.length ? 3 : 6).map((s) => (
+        {suggestionsFor({ cfg, snap, journey }).slice(0, log.length ? 3 : 6).map((s) => (
           <button key={s} className="btn sm" onClick={() => submit(s)}>{s}</button>
         ))}
       </div>

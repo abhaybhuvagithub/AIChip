@@ -1652,3 +1652,38 @@ numbers.
   Both things are true: the requirement is still enormous, and it has moved
   twentyfold. A check asserts the caveat keeps both halves, and I deleted the
   older estimate to confirm the history check fires.
+
+---
+
+## Fifty-second pass: the assistant's questions
+
+Six static suggestions, and the trouble was not that the answers were wrong —
+they were fine — but that they showcased the wrong thing.
+
+- **"What is CMP?" is a dictionary lookup the acronym glossary does better**,
+  with 172 entries instead of one. What this assistant can do that nothing else
+  on the site can is answer from the configuration in front of you. So
+  suggestions are now generated from live state: a running line is asked what
+  is jamming it, a stopped one what would jam it, a 26 mm die is asked about
+  the reticle limit and a 10 mm die is not.
+- **Generated means they can be guaranteed.** A static list cannot promise its
+  questions are answerable in the state you are in; a generator checked against
+  that same state can. Every suggestion is now verified answerable in the
+  context that produced it, across three different states.
+- **Three real bugs surfaced by testing rather than reading.** `ask()` threw on
+  a missing journey instead of declining. The running-state branch keyed off
+  `snap.running`, a field that has never existed — `running` is per tool group
+  inside `metrics.groups` — so that whole branch was dead code that looked
+  right. And one of my own new suggestions, "how many operations per second",
+  matched no handler and returned null.
+- **The worst failure was the subtlest.** Guarding the journey handler made
+  "how many steps from sand to silicon" fall through to the rock-mass handler,
+  because the question contains "sand". It answered confidently about grams of
+  quartzite to a question about step counts. Answering an adjacent question
+  well is worse than declining the asked one, so the handler now claims its
+  question either way and says what it needs.
+- **And one in the checks themselves.** My new group called `ask` bare, but
+  `ask` is destructured inside a different group's block — a ReferenceError
+  that my own try/catch converted into "unanswerable". A swallowed error
+  reported as a data problem is the worst kind of check failure, because it
+  sends you to fix the wrong thing.

@@ -32,7 +32,10 @@ const has = (q, ...words) => words.some((w) => q.includes(w))
 export function ask(q0, ctx) {
   const q = String(q0 || '').toLowerCase().trim()
   if (!q) return null
-  const { cfg, snap, journey } = ctx
+  // An absent journey used to throw rather than decline — a library should not
+  // crash because an optional part of its context was not supplied.
+  const { cfg, snap, journey } = ctx || {}
+  if (!cfg) return null
   const run = computeRun(cfg)
   const area = cfg.dieX * cfg.dieY
 
@@ -101,6 +104,9 @@ export function ask(q0, ctx) {
 
   // --- the journey --------------------------------------------------------
   if (has(q, 'journey', 'travel', 'how many steps', 'path', 'sand to silicon', 'from sand')) {
+    if (!journey) {
+      return { text: 'I need the full journey built before I can count its steps. Open the Fab run tab, which constructs it.', tab: 'run' }
+    }
     const t = journeyTotals(journey)
     return {
       text: `${fmt.n(t.steps)} process steps from quartz rock to a shipped part. ${fmt.n(t.hours)} hours of pure process time — ${fmt.n(t.days, 0)} days — and the wafer travels ${fmt.n(t.km, 1)} km inside the fab on ceiling rails without ever leaving the building. It passes through lithography ${t.lithoVisits} times and peaks at ${t.peakTemp} °C.`,
@@ -171,11 +177,54 @@ export function ask(q0, ctx) {
   return null
 }
 
-export const SUGGESTIONS = [
-  'What is the bottleneck?',
-  'Why is my yield low?',
-  'How many steps from sand to silicon?',
-  'What does one die cost?',
-  'How much rock per chip?',
-  'What is CMP?',
-]
+/**
+ * Suggested questions, chosen from the live state rather than fixed.
+ *
+ * The old list was six static strings, and the problem with it was not that
+ * the answers were wrong — they were fine — but that it showcased the wrong
+ * thing. "What is CMP?" is a dictionary lookup the acronym glossary does
+ * better and with more entries. What this assistant can do that nothing else
+ * here can is answer from the configuration you are actually looking at: your
+ * die, your yield, your running simulation.
+ *
+ * So suggestions are now generated. A stopped line offers different questions
+ * from a running one; a reticle-busting die offers a question a small die does
+ * not. Every one is phrased the way somebody would actually ask it, and every
+ * one is answerable in the state that produced it — which is checked.
+ */
+export function suggestionsFor(ctx = {}) {
+  const { cfg, snap } = ctx
+  const out = []
+
+  // State-specific first: these are the ones that prove the thing is grounded.
+  // A snapshot exists only once the line has been started, so its presence is
+  // the signal — there is no top-level `running` flag, and an earlier version
+  // of this checked for one that never existed.
+  if (snap && snap.metrics) {
+    out.push('What is jamming the line right now?')
+    if (snap.metrics.avgCycleDays > 0) out.push('How long is a lot taking end to end?')
+    if (snap.metrics.toolsDown > 0) out.push('Which tools are down?')
+  } else {
+    out.push('What would be the bottleneck if I started the line?')
+  }
+  if (snap && Array.isArray(snap.events) && snap.events.length) out.push('What went wrong?')
+
+  if (cfg) {
+    const area = (cfg.dieX || 0) * (cfg.dieY || 0)
+    out.push(`Why is my yield what it is on a ${cfg.dieX} × ${cfg.dieY} mm die?`)
+    if (area > 600) out.push('Is my die past the reticle limit?')
+    else out.push('What happens to yield if I double the die area?')
+    out.push('What does one good die actually cost me?')
+    if ((cfg.d0 || 0) > 0.08) out.push('Is my defect density realistic?')
+  }
+
+  // Then the ones that reach into the rest of the site.
+  out.push('How much rock does one chip take?')
+  out.push('Which yield model should I trust?')
+  out.push('How much compute would this die actually give?')
+
+  return out.slice(0, 6)
+}
+
+/** Fallback for callers with no state yet. */
+export const SUGGESTIONS = suggestionsFor({})

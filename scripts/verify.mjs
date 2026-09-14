@@ -1107,18 +1107,23 @@ group('Travel path')
 
 group('Assistant')
 {
-  const { ask, SUGGESTIONS } = await import(join(root, 'src/lib/assistant.js'))
+  const { ask, SUGGESTIONS, suggestionsFor } = await import(join(root, 'src/lib/assistant.js'))
   const { buildJourney } = await import(join(root, 'src/lib/journey.js'))
   const cfg = { waferDia: 300, dieX: 10.5, dieY: 10.5, scribe: 0.08, edgeExclusion: 3, d0: 0.07,
     model: 'negbinom', alpha: 2.5, waferCost: 20000, lineYield: 0.98, testYield: 0.97,
     packageCost: 6, packageYield: 0.995, asp: 120 }
   const ctx = { cfg, snap: null, journey: buildJourney(70) }
 
+  // Suggestions are generated from state now, so check the generated set in
+  // this state rather than the static fallback — and guard the answer before
+  // reading it, since an unanswerable suggestion should fail this check by
+  // name rather than crash the whole run on a null.
+  const suggHere = suggestionsFor(ctx)
   ok('every suggested question is actually answerable',
-    SUGGESTIONS.every((q) => ask(q, ctx) !== null),
-    SUGGESTIONS.filter((q) => !ask(q, ctx)).join(' | '))
+    suggHere.every((q) => ask(q, ctx) !== null),
+    suggHere.filter((q) => !ask(q, ctx)).join(' | ') || 'all answerable')
   ok('answers are substantial, not one-liners',
-    SUGGESTIONS.every((q) => ask(q, ctx).text.length > 80))
+    suggHere.every((q) => { const a = ask(q, ctx); return a && a.text.length > 80 }))
 
   // The whole point of a grounded assistant is that it refuses rather than
   // inventing. If this check ever fails, it has started making things up.
@@ -3179,6 +3184,77 @@ group('The guide')
   ok('a first-time visitor lands on the guide', (() => {
     const app5 = readFileSync(join(root, 'src/App.jsx'), 'utf8')
     return /\? wanted : 'guide'\)/.test(app5)
+  })())
+}
+
+group('Assistant suggestions')
+{
+  const A = await import(join(root, 'src/lib/assistant.js'))
+  const FE2 = await import(join(root, 'src/lib/fabengine.js'))
+  const J2 = await import(join(root, 'src/lib/journey.js'))
+  const cfgA = { ...PRODUCTS[0], waferDia: 300, scribe: 0.08, edgeExclusion: 3,
+    model: 'negbinom', alpha: 2.5, lineYield: 0.98, testYield: 0.97,
+    packageYield: 0.995, clustered: true, seed: 7 }
+  const journeyA = J2.buildJourney(cfgA)
+  const fabA = FE2.createFab({ seed: 3 })
+  for (let i = 0; i < 6000; i++) FE2.tick(fabA)
+  const snapA = FE2.snapshot(fabA)
+
+  const states = [
+    ['stopped', { cfg: cfgA, snap: null, journey: journeyA }],
+    ['running', { cfg: { ...cfgA, dieX: 26, dieY: 26, d0: 0.12 }, snap: snapA, journey: journeyA }],
+    ['no journey', { cfg: cfgA, snap: null, journey: null }],
+  ]
+
+  // The point of generating them: a suggestion must be answerable in the very
+  // state that produced it. A static list cannot promise that.
+  for (const [name, ctx] of states) {
+    const sugg = A.suggestionsFor(ctx)
+    ok(`${name}: offers a full set of suggestions`, sugg.length >= 4 && sugg.length <= 6, `${sugg.length}`)
+    ok(`${name}: every suggestion is answerable in this state`, sugg.every((q) => {
+      try { return A.ask(q, ctx) !== null } catch { return false }
+    }), sugg.filter((q) => { try { return A.ask(q, ctx) === null } catch { return true } }).join(' | ') || 'all answerable')
+  }
+
+  // Grounded means the questions change with the state.
+  ok('a running line is offered different questions from a stopped one', (() => {
+    const a = A.suggestionsFor(states[0][1]).join('|')
+    const b = A.suggestionsFor(states[1][1]).join('|')
+    return a !== b
+  })())
+  ok('a running line is asked about the line, not about hypotheticals',
+    A.suggestionsFor(states[1][1]).some((q) => /right now/i.test(q)) &&
+    !A.suggestionsFor(states[1][1]).some((q) => /if I started/i.test(q)))
+  ok('suggestions quote the configuration back',
+    A.suggestionsFor(states[1][1]).some((q) => /26 × 26/.test(q)))
+  ok('a reticle-busting die is asked about the reticle',
+    A.suggestionsFor(states[1][1]).some((q) => /reticle/i.test(q)))
+  ok('a small die is not asked about the reticle',
+    !A.suggestionsFor(states[0][1]).some((q) => /reticle/i.test(q)))
+
+  // The old list led with a dictionary lookup the glossary does better.
+  ok('suggestions do not lead with a definition lookup',
+    !/^What is [A-Z]{2,4}\?$/.test(A.suggestionsFor(states[0][1])[0]))
+  ok('every suggestion is phrased as a question',
+    states.every(([, ctx]) => A.suggestionsFor(ctx).every((q) => q.trim().endsWith('?'))))
+
+  // A library should decline rather than throw on a missing optional context.
+  ok('a missing context is declined rather than thrown', (() => {
+    try { return A.ask('what is the bottleneck', null) === null } catch { return false }
+  })())
+  // It must answer the question that was asked or say it cannot — never fall
+  // through to an adjacent handler. "Sand to silicon" also contains "sand",
+  // so a missing journey previously produced a confident answer about rock
+  // mass to a question about step count.
+  ok('a missing journey is reported, not answered with a different topic', (() => {
+    try {
+      const a = A.ask('how many steps from sand to silicon', { cfg: cfgA })
+      return a !== null && /journey/i.test(a.text) && !/quartzite/i.test(a.text)
+    } catch { return false }
+  })())
+  ok('the UI generates suggestions from the same state it answers from', (() => {
+    const ui = readFileSync(join(root, 'src/ui/Assistant.jsx'), 'utf8')
+    return /suggestionsFor\(\{ cfg, snap, journey \}\)/.test(ui)
   })())
 }
 
