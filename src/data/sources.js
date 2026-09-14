@@ -117,6 +117,21 @@ export const SOURCES = {
     author: 'A. Fowler et al.', venue: 'Physical Review Letters (and later Phys. Rev. A 86, 032324, 2012)', year: 2012,
     supports: 'Surface-code overhead and the threshold on the quantum tab.',
   },
+  gidney2019: {
+    kind: 'paper',
+    title: 'How to factor 2048 bit RSA integers in 8 hours using 20 million noisy qubits',
+    author: 'C. Gidney, M. Ekerå', venue: 'Quantum 5, 433 (arXiv:1905.09749)', year: 2021,
+    url: 'https://quantum-journal.org/papers/q-2021-04-15-433/',
+    supports: 'The canonical resource estimate for breaking RSA-2048, and the baseline the 2025 revision is measured against.',
+  },
+  gidney2025: {
+    kind: 'paper',
+    title: 'How to factor 2048 bit RSA integers with less than a million noisy qubits',
+    author: 'C. Gidney', venue: 'arXiv:2505.15917', year: 2025,
+    url: 'https://arxiv.org/abs/2505.15917',
+    supports: 'The twentyfold reduction in the RSA-2048 qubit requirement, on identical physical assumptions to the 2019 estimate.',
+    caveat: 'A preprint. The author states he sees no way to remove another order of magnitude under the same assumptions, which is worth quoting alongside the headline.',
+  },
   bravyi2005: {
     kind: 'paper',
     title: 'Universal quantum computation with ideal Clifford gates and noisy ancillas',

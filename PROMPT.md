@@ -1623,3 +1623,32 @@ containment and recovery. It never said what recovery costs.
   pushed, and only the one uncommitted file had to be rewritten. Commit
   frequency is a backup strategy that costs nothing until the day it is
   everything.
+
+---
+
+## Fifty-first pass: quantum, two additions
+
+The tab costed logical qubits and compared the two kinds of fab. It was missing
+the constraint that actually decides the field, and the honesty about its own
+numbers.
+
+- **Qubit count is the headline; cooling power is the constraint.** A dilution
+  refrigerator's capacity at the mixing chamber is measured in microwatts and
+  every control line carries heat down with it. The model is calibrated by
+  agreement rather than assertion: a thousand-microwatt budget at half a
+  microwatt per line supports about a thousand qubits, which is roughly where
+  the largest single-refrigerator machines actually sit. A million qubits — what
+  the algorithms want — needs a thousand times the cooling and ten square metres
+  of coaxial cable entering a vessel the size of a small room. Neither of those
+  is a schedule.
+- **The RSA-2048 estimate moved twentyfold in six years and the tab said
+  nothing about it.** Twenty million noisy qubits in 2019, under a million in
+  2025, on identical physical assumptions — no hardware improved, the
+  algorithms and error correction did. Quoting a qubit requirement as though it
+  were a constant of nature is quoting a research result with a date on it.
+- **The caveat has to cut both ways or it becomes a press release.** The same
+  author states he sees no route to another order of magnitude under those
+  assumptions, and endorses deprecating vulnerable cryptosystems after 2030.
+  Both things are true: the requirement is still enormous, and it has moved
+  twentyfold. A check asserts the caveat keeps both halves, and I deleted the
+  older estimate to confirm the history check fires.

@@ -3182,6 +3182,63 @@ group('The guide')
   })())
 }
 
+group('Quantum: cryogenics and moving estimates')
+{
+  const Q = await import(join(root, 'src/lib/quantum.js'))
+  const SR5 = await import(join(root, 'src/data/sources.js'))
+
+  // Qubit count is the headline; cooling power is the constraint.
+  ok('heat scales with the number of control lines',
+    near(Q.cryoBudget({ qubits: 2000 }).heatUw / Q.cryoBudget({ qubits: 1000 }).heatUw, 2, 1e-9))
+  ok('fewer lines per qubit means less heat',
+    Q.cryoBudget({ qubits: 1000, linesPerQubit: 1 }).heatUw <
+    Q.cryoBudget({ qubits: 1000, linesPerQubit: 3 }).heatUw)
+  // Calibration: the largest single-fridge machines sit near a thousand
+  // qubits, and the model should agree without being told to.
+  ok('the budget supports roughly a thousand qubits, as real machines do', (() => {
+    const m = Q.cryoBudget({ qubits: 1000 }).maxQubits
+    return m > 500 && m < 3000
+  })(), Q.cryoBudget({ qubits: 1000 }).maxQubits.toFixed(0) + ' qubits')
+  ok('a thousand qubits fits and a million does not',
+    Q.cryoBudget({ qubits: 1000 }).fits && !Q.cryoBudget({ qubits: 1e6 }).fits)
+  ok('a million qubits is orders of magnitude over budget',
+    Q.cryoBudget({ qubits: 1e6 }).overBudgetBy > 100,
+    Q.cryoBudget({ qubits: 1e6 }).overBudgetBy.toFixed(0) + 'x over')
+  ok('the cable bundle becomes physically absurd before the physics does',
+    Q.cryoBudget({ qubits: 1e6 }).bundleAreaM2 > 1,
+    Q.cryoBudget({ qubits: 1e6 }).bundleAreaM2.toFixed(1) + ' m²')
+  ok('zero heat per line does not divide by zero',
+    Q.cryoBudget({ qubits: 1000, heatPerLineUw: 0 }).maxQubits === Infinity)
+  ok('every route out of the wall states its catch',
+    Q.CRYO_ROUTES.length >= 4 && Q.CRYO_ROUTES.every((r) => r.k && r.what.length > 60 && r.limit.length > 60))
+
+  // Resource estimates are research results with dates, not constants.
+  ok('the RSA estimate history is recorded with both figures',
+    Q.RSA_ESTIMATES.length >= 2 && Q.RSA_ESTIMATES.every((r) =>
+      r.year && r.qubits > 0 && r.runtime && SR5.SOURCES[r.source] && r.note.length > 60))
+  ok('the estimate fell by about twentyfold', (() => {
+    const [a, b] = Q.RSA_ESTIMATES
+    return b.qubits < a.qubits && a.qubits / b.qubits > 10
+  })(), `${(Q.RSA_ESTIMATES[0].qubits / Q.RSA_ESTIMATES[1].qubits).toFixed(0)}x`)
+  ok('the revision traded runtime for qubits, and says so',
+    /trades runtime for qubits/i.test(Q.RSA_ESTIMATES[1].note))
+  ok('both papers are cited with links',
+    SR5.SOURCES.gidney2019.url && SR5.SOURCES.gidney2025.url &&
+    SR5.SOURCES.gidney2025.kind === 'paper')
+  ok('the preprint is flagged as a preprint',
+    /preprint/i.test(SR5.SOURCES.gidney2025.caveat || ''))
+  // The caveat must cut both ways or the tab becomes a press release.
+  ok('the caveat reports the limit as well as the progress',
+    /no way to take\s*\n?\s*another order of magnitude|another order of magnitude/i.test(Q.RSA_CAVEAT) &&
+    /still enormous/i.test(Q.RSA_CAVEAT))
+  ok('the Shor entry no longer quotes a stale range',
+    /moved/i.test(Q.ALGORITHMS.find((a) => a.id === 'shor').note))
+  ok('the sections reached the quantum tab', (() => {
+    const ui = readFileSync(join(root, 'src/ui/Quantum.jsx'), 'utf8')
+    return /wall nobody puts in the headline/i.test(ui) && /moved by twenty times/i.test(ui)
+  })())
+}
+
 group('Disaster recovery')
 {
   const D = await import(join(root, 'src/lib/disaster.js'))

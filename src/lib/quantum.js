@@ -72,7 +72,7 @@ export function estimateResources({ p, logicalQubits, tGates, factoryOverhead = 
 export const ALGORITHMS = [
   { id: 'demo', name: 'Textbook demonstration', logical: 20, t: 1e4, note: 'Small enough to run today if the qubits were perfect. They are not, which is the entire field.' },
   { id: 'chem', name: 'FeMoco ground state', logical: 2000, t: 1e10, note: 'Nitrogen fixation catalysis — a molecule classical simulation genuinely cannot handle. The canonical "why bother" example.' },
-  { id: 'shor', name: 'Shor, RSA-2048', logical: 6200, t: 3e9, note: 'The famous one. Published estimates for the physical footprint range from a few million to tens of millions of qubits depending on assumptions.' },
+  { id: 'shor', name: 'Shor, RSA-2048', logical: 6200, t: 3e9, note: 'The famous one, and the clearest case of an estimate that moved: twenty million noisy qubits in 2019, under one million in 2025, on identical physical assumptions.' },
   { id: 'grover', name: 'Grover, AES-128 key search', logical: 3000, t: 1e15, note: 'Quadratic speedup only. The T-gate count is so large the runtime, not the qubit count, is what kills it.' },
 ]
 
@@ -166,3 +166,82 @@ export const SHARED = [
   'Cleanroom discipline, metrology, and statistical process control',
   'Flip-chip bonding, now used to separate qubits from their control wiring',
 ]
+
+// ============================================ THE CRYOGENIC WALL =========
+//
+// Qubit count is the headline and cooling power is the constraint.
+//
+// A dilution refrigerator's cooling capacity at the mixing chamber is measured
+// in microwatts. Every control line running from room temperature down to the
+// qubits carries heat with it, and the budget is spent long before the
+// interesting qubit counts are reached. This is not a materials problem or a
+// fidelity problem — it is a thermodynamics problem with a number attached,
+// and it is why "we will just add more qubits" is not a plan.
+
+/** Cooling capacity at the mixing chamber, in microwatts. */
+export const FRIDGE_BUDGET_UW = 1000
+
+/**
+ * Heat delivered to the mixing chamber per control line, in microwatts.
+ *
+ * Passive conduction down the coax plus dissipation in the attenuators that
+ * make the control pulses quiet enough to use. Well-engineered superconducting
+ * lines get this below a microwatt; the figure is the whole ballgame.
+ */
+export const HEAT_PER_LINE_UW = 0.5
+
+export function cryoBudget({
+  qubits, linesPerQubit = 2, heatPerLineUw = HEAT_PER_LINE_UW,
+  budgetUw = FRIDGE_BUDGET_UW,
+}) {
+  const lines = qubits * linesPerQubit
+  const heatUw = lines * heatPerLineUw
+  const maxLines = heatPerLineUw > 0 ? budgetUw / heatPerLineUw : Infinity
+  return {
+    lines, heatUw, maxLines,
+    maxQubits: maxLines / linesPerQubit,
+    overBudgetBy: budgetUw > 0 ? heatUw / budgetUw : Infinity,
+    fits: heatUw <= budgetUw,
+    // A 2.2 mm coaxial line needs about 5 mm² once you allow for routing.
+    bundleAreaM2: lines * 5e-6,
+  }
+}
+
+export const CRYO_ROUTES = [
+  { k: 'Cryogenic control electronics', icon: 'ipcore',
+    what: 'Put the control circuitry inside the fridge so the lines carry digital signals over a short distance instead of analogue microwave from room temperature.',
+    limit: 'The control chip must then dissipate almost nothing at millikelvin, which is a brutal constraint on any circuit and rules out most of what CMOS does naturally.' },
+  { k: 'Frequency multiplexing', icon: 'ipphy',
+    what: 'Drive many qubits down one line on different frequencies, as radio does.',
+    limit: 'Trades directly against crosstalk and control fidelity — and fidelity is the other unsolved problem, so this borrows from the thing it is trying to enable.' },
+  { k: 'Photonic interconnect', icon: 'photonic',
+    what: 'Carry control and readout on optical fibre, which conducts far less heat than coaxial cable.',
+    limit: 'Converting between microwave and optical at millikelvin, without adding noise, is itself an open research problem.' },
+  { k: 'Modular fridges', icon: 'chiplet',
+    what: 'Give up on one machine and link several, each within its own thermal budget.',
+    limit: 'Entangling qubits between refrigerators is slower and noisier than entangling them inside one, so the interconnect becomes the error source.' },
+]
+
+/**
+ * How the cost of a landmark calculation has moved.
+ *
+ * This is the honest part of quantum resource estimation and it is usually
+ * left out: the numbers are not fixed. The canonical estimate for factoring
+ * RSA-2048 fell twenty-fold in six years — not because hardware improved, but
+ * because the algorithms and the error correction around them did.
+ *
+ * Both directions matter. Anyone quoting a qubit requirement as though it were
+ * a constant of nature is quoting a research result with a date on it.
+ */
+export const RSA_ESTIMATES = [
+  { year: 2019, qubits: 20e6, runtime: '8 hours', source: 'gidney2019',
+    note: 'Gidney and Ekerå, assuming a square grid of nearest-neighbour qubits, 0.1% gate error, a 1 µs surface code cycle and 10 µs reaction time.' },
+  { year: 2025, qubits: 1e6, runtime: 'under a week', source: 'gidney2025',
+    note: 'Gidney, on identical physical assumptions. The reduction comes from approximate residue arithmetic, yoked surface codes for idle qubits, and magic state cultivation rather than distillation — and it trades runtime for qubits.' },
+]
+
+export const RSA_CAVEAT = `The author of both estimates says plainly that he sees no way to take
+another order of magnitude off under the same assumptions, and that he cannot claim RSA-2048 falls
+to a hundred thousand noisy qubits. He also notes the cryptographic maxim that attacks always get
+better, and endorses deprecating vulnerable systems after 2030. Two things are true at once: the
+requirement is still enormous, and it has moved twentyfold in six years.`

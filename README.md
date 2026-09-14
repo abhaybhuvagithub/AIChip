@@ -64,6 +64,9 @@ Five tabs:
 - **Staffing** — headcount per discipline from the node's engineer-year figure,
   tilted per project archetype and renormalised, with peak distinguished from
   average.
+- **Cryogenics** — control-line heat against a dilution refrigerator's
+  microwatt cooling budget, calibrated by the fact that it lands near the
+  thousand-qubit size of real single-fridge machines.
 - **Disaster recovery** — recovery time as the slower of two clocks, refilling
   a three-month pipeline or replacing tools with quarter-long lead times, with
   the output ramp and revenue lost. Calibrated against the documented Renesas

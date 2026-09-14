@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import {
   estimateResources, physicalPerLogical, logicalErrorRate, requiredDistance,
   THRESHOLD, ALGORITHMS, MODALITIES, FAB_DIFFERENCES, SHARED,
+  cryoBudget, CRYO_ROUTES, RSA_ESTIMATES, RSA_CAVEAT, FRIDGE_BUDGET_UW,
 } from '../lib/quantum.js'
 import { fmt } from '../lib/fab.js'
 import Icon from './Icon.jsx'
@@ -39,7 +40,22 @@ function Lattice({ d }) {
   )
 }
 
+/** Local slider, matching the other tabs. */
+function Slider({ label, value, set, min, max, step = 1, unit = '', hint, fmtV }) {
+  return (
+    <div className="ctl">
+      <label><span>{label}</span><b>{fmtV ? fmtV(value) : value}{unit}</b></label>
+      <input type="range" min={min} max={max} step={step} value={value}
+        onChange={(e) => set(parseFloat(e.target.value))} aria-label={label} />
+      {hint && <div className="hint">{hint}</div>}
+    </div>
+  )
+}
+
 export default function Quantum() {
+  const [cryoQ, setCryoQ] = useState(1000)
+  const [linesPer, setLinesPer] = useState(2)
+  const cryo = cryoBudget({ qubits: cryoQ, linesPerQubit: linesPer })
   const [p, setP] = useState(0.001)
   const [algo, setAlgo] = useState('shor')
   const [factory, setFactory] = useState(1.5)
@@ -197,6 +213,136 @@ export default function Quantum() {
         rate approaches threshold, and past it there is no number of qubits that works. Hardware quality
         is not one input among many; it decides whether the machine can exist at all.
       </p>
+
+
+      {/* ------------------------------------------------ the cryogenic wall */}
+      <h2 className="sec">The wall nobody puts in the headline</h2>
+      <p className="small" style={{ marginBottom: 14, maxWidth: '68ch' }}>
+        Qubit count is what gets announced. Cooling power is what decides. A dilution refrigerator's
+        capacity at the mixing chamber is measured in <b>microwatts</b>, and every control line
+        running from room temperature down to the qubits brings heat with it. This is not a materials
+        problem or a fidelity problem — it is thermodynamics, with a number attached.
+      </p>
+      <div className="grid" style={{ gridTemplateColumns: 'minmax(0,1fr) minmax(280px,340px)' }}>
+        <div>
+          <div className="grid g3">
+            <div className="stat">
+              <div className="k">Control lines</div>
+              <div className="v" style={{ fontSize: 24 }}>{fmt.n(cryo.lines)}</div>
+              <div className="sub">{linesPer} per qubit</div>
+            </div>
+            <div className={`stat ${cryo.fits ? 'ok' : 'bad'}`}>
+              <div className="k">Heat into the fridge</div>
+              <div className="v" style={{ fontSize: 24 }}>{fmt.n(cryo.heatUw, 0)}<span style={{ fontSize: 15 }}> µW</span></div>
+              <div className="sub">
+                {cryo.fits
+                  ? `within the ${FRIDGE_BUDGET_UW} µW budget`
+                  : `${fmt.n(cryo.overBudgetBy, 0)}× the ${FRIDGE_BUDGET_UW} µW budget`}
+              </div>
+            </div>
+            <div className="stat hi">
+              <div className="k">Cable cross-section</div>
+              <div className="v" style={{ fontSize: 24 }}>
+                {cryo.bundleAreaM2 < 1
+                  ? `${fmt.n(cryo.bundleAreaM2 * 1e4, 0)} cm²`
+                  : `${fmt.n(cryo.bundleAreaM2, 1)} m²`}
+              </div>
+              <div className="sub">of coaxial cable, before routing</div>
+            </div>
+          </div>
+          <div className="tbl-wrap" style={{ marginTop: 12 }}>
+            <table className="tbl">
+              <thead><tr><th>Qubits</th><th>Lines</th><th>Heat</th><th>Against budget</th><th>Cable bundle</th></tr></thead>
+              <tbody>
+                {[100, 1000, 10000, 100000, 1000000].map((q) => {
+                  const c = cryoBudget({ qubits: q, linesPerQubit: linesPer })
+                  return (
+                    <tr key={q} style={{ cursor: 'pointer', background: q === cryoQ ? 'var(--panel2)' : undefined }}
+                      onClick={() => setCryoQ(q)}>
+                      <td className="num"><b>{fmt.n(q)}</b></td>
+                      <td className="num">{fmt.n(c.lines)}</td>
+                      <td className="num">{fmt.n(c.heatUw, 0)} µW</td>
+                      <td className="num" style={{ color: c.fits ? 'var(--ok)' : 'var(--bad)' }}>
+                        {c.fits ? 'fits' : `${fmt.n(c.overBudgetBy, 0)}× over`}
+                      </td>
+                      <td className="num">
+                        {c.bundleAreaM2 < 1 ? `${fmt.n(c.bundleAreaM2 * 1e4, 0)} cm²` : `${fmt.n(c.bundleAreaM2, 1)} m²`}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="small" style={{ marginTop: 10, maxWidth: '68ch' }}>
+            Around a thousand qubits fills the budget, which is roughly where the largest
+            single-refrigerator machines actually sit — the model is calibrated by that agreement
+            rather than by assertion. A million qubits, the number the algorithms below want, needs a
+            thousand times the cooling capacity and ten square metres of coaxial cable entering a
+            vessel the size of a small room. Neither of those is an engineering schedule. They are
+            the reason the wiring problem appears on the open problems tab.
+          </p>
+        </div>
+        <div className="card" style={{ alignSelf: 'start' }}>
+          <Slider label="Qubits" value={Math.log10(cryoQ)} set={(v) => setCryoQ(Math.round(Math.pow(10, v)))}
+            min={2} max={6} step={0.1} fmtV={(v) => fmt.n(Math.round(Math.pow(10, v)))} />
+          <Slider label="Lines per qubit" value={linesPer} set={setLinesPer} min={1} max={4} step={0.5}
+            hint="Drive, flux and readout. Multiplexing reduces this and costs control fidelity, which is the other unsolved problem." />
+          <p className="hint" style={{ marginTop: 8 }}>
+            Budget {FRIDGE_BUDGET_UW} µW at the mixing chamber and half a microwatt per line — generous
+            figures for a large, well-engineered system.
+          </p>
+        </div>
+      </div>
+
+      <h2 className="sec">Four ways out, each with a catch</h2>
+      <div className="grid g2">
+        {CRYO_ROUTES.map((r) => (
+          <div className="card" key={r.k}>
+            <div className="iconrow" style={{ marginBottom: 6 }}>
+              <Icon name={r.icon} size={24} style={{ color: 'var(--accent)' }} />
+              <span className="eyebrow" style={{ margin: 0 }}>{r.k}</span>
+            </div>
+            <p className="small" style={{ marginTop: 4 }}>{r.what}</p>
+            <p className="why" style={{ marginTop: 8 }}>{r.limit}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* --------------------------------------------- estimates move */}
+      <h2 className="sec">The number moved by twenty times in six years</h2>
+      <div className="grid" style={{ gridTemplateColumns: 'minmax(0,1fr) minmax(280px,340px)' }}>
+        <div className="tbl-wrap">
+          <table className="tbl">
+            <thead><tr><th>Estimate</th><th>Physical qubits</th><th>Runtime</th><th style={{ width: '48%' }}>What changed</th></tr></thead>
+            <tbody>
+              {RSA_ESTIMATES.map((r) => (
+                <tr key={r.year}>
+                  <td><b>{r.year}</b></td>
+                  <td className="num" style={{ color: 'var(--accent)' }}>{fmt.n(r.qubits / 1e6, r.qubits >= 1e7 ? 0 : 1)}M</td>
+                  <td className="num">{r.runtime}</td>
+                  <td className="small">{r.note}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="card" style={{ alignSelf: 'start' }}>
+          <div className="stat hi">
+            <div className="k">Reduction</div>
+            <div className="v">{fmt.n(RSA_ESTIMATES[0].qubits / RSA_ESTIMATES[1].qubits, 0)}×</div>
+            <div className="sub">in {RSA_ESTIMATES[1].year - RSA_ESTIMATES[0].year} years, same hardware assumptions</div>
+          </div>
+          <p className="small" style={{ marginTop: 10 }}>
+            No hardware improved between these two rows. The algorithms and the error correction
+            around them did.
+          </p>
+        </div>
+      </div>
+      <div className="card" style={{ marginTop: 12, borderColor: 'var(--warn)' }}>
+        <div className="eyebrow" style={{ color: 'var(--warn)' }}>Read both directions</div>
+        <p style={{ marginTop: 8, fontSize: 'var(--fs-prose)', lineHeight: 1.62 }}>{RSA_CAVEAT}</p>
+      </div>
 
       <h2 className="sec">Five ways to build one</h2>
       <div className="row" style={{ marginBottom: 12 }}>
