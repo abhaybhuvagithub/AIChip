@@ -3182,6 +3182,84 @@ group('The guide')
   })())
 }
 
+group('Disaster recovery')
+{
+  const D = await import(join(root, 'src/lib/disaster.js'))
+  const SR4 = await import(join(root, 'src/data/sources.js'))
+  const base = { wafersPerDay: 1700, cycleTimeDays: 90, waferPriceUsd: 6000 }
+
+  ok('every event class is described with both what and why',
+    D.EVENTS.length >= 6 && D.EVENTS.every((e) =>
+      e.name && e.icon && e.what.length > 80 && e.why.length > 80 &&
+      e.downtimeDays >= 0 && e.wipLossFraction >= 0 && e.wipLossFraction <= 1))
+
+  // The point of the whole section: downtime is the small number.
+  ok('recovery always takes longer than the downtime',
+    D.EVENTS.every((e) => recoveryOf(e).daysToFull >= e.downtimeDays))
+  ok('a fire takes several times its downtime to recover', (() => {
+    const f = D.EVENTS.find((e) => e.id === 'fire')
+    return recoveryOf(f).daysToFull > f.downtimeDays * 3
+  })(), (() => {
+    const f = D.EVENTS.find((e) => e.id === 'fire')
+    return `${f.downtimeDays}d down → ${recoveryOf(f).daysToFull.toFixed(0)}d full`
+  })())
+  ok('an event that damages nothing can still stop the fab', (() => {
+    const sup = D.EVENTS.find((e) => e.id === 'supply')
+    return sup.downtimeDays === 0 && recoveryOf(sup).daysToFull > 30
+  })())
+  ok('a deeper pipeline makes the same incident worse', (() => {
+    const e = D.EVENTS.find((x) => x.id === 'power')
+    const shallow = D.recovery({ ...base, cycleTimeDays: 40, ...e })
+    const deep = D.recovery({ ...base, cycleTimeDays: 120, ...e })
+    return deep.daysToFull > shallow.daysToFull && deep.wafersLost > shallow.wafersLost
+  })())
+  ok('the binding constraint is identified, not assumed',
+    D.EVENTS.some((e) => recoveryOf(e).bindingConstraint === 'tool replacement') &&
+    D.EVENTS.some((e) => recoveryOf(e).bindingConstraint === 'refilling the line'))
+  ok('work in progress lost scales with the loss fraction', (() => {
+    const e = { downtimeDays: 5, wipLossFraction: 0.5, toolLeadDays: 0 }
+    const r = D.recovery({ ...base, ...e })
+    return near(r.wipDestroyed, 1700 * 90 * 0.5, 1)
+  })())
+  ok('the recovery curve starts at zero and reaches one', (() => {
+    const e = D.EVENTS.find((x) => x.id === 'fire')
+    const c = D.recoveryCurve({ ...base, ...e }, 200)
+    return c[0].output === 0 && c[c.length - 1].output === 1 &&
+      c.every((p2, i) => i === 0 || p2.output >= c[i - 1].output)
+  })())
+
+  // The model is calibrated against a real, documented recovery.
+  ok('a modelled fire lands near the Renesas recovery of about 100 days', (() => {
+    const f = D.EVENTS.find((e) => e.id === 'fire')
+    const d = recoveryOf(f).daysToFull
+    return d > 80 && d < 160
+  })(), recoveryOf(D.EVENTS.find((e) => e.id === 'fire')).daysToFull.toFixed(0) + ' days')
+
+  ok('both cases are real, dated and sourced',
+    D.CASES.length >= 2 && D.CASES.every((c) =>
+      c.date && SR4.SOURCES[c.source] && c.what.length > 100 &&
+      c.recovery.length > 100 && c.cost && c.lesson.length > 80))
+  ok('the concentration lesson is stated with its number',
+    /0\.2%/.test(D.CASES.find((c) => c.id === 'renesas').lesson))
+  ok('a recoverable disaster is shown alongside an unrecoverable one',
+    /made up/i.test(D.CASES.find((c) => c.id === 'tsmcresist').recovery))
+  ok('vendor accounts of their own incidents are flagged as such',
+    SR4.SOURCES.renesas2021.kind === 'vendor' &&
+    /own account of its own incident/i.test(SR4.SOURCES.renesas2021.caveat))
+  ok('the unconfirmed wafer count is marked as an estimate',
+    /not confirmed/i.test(SR4.SOURCES.tsmc2019.caveat))
+
+  // Defences must state what they cannot do, or they are a shopping list.
+  ok('every defence names its own limit',
+    D.DEFENCES.length >= 6 && D.DEFENCES.every((x) => x.k && x.what.length > 40 && x.limit.length > 60))
+  ok('the section reached the discipline tab', (() => {
+    const ui = readFileSync(join(root, 'src/ui/Ethics.jsx'), 'utf8')
+    return /not in control at all/i.test(ui) && /Days to full output/.test(ui)
+  })())
+
+  function recoveryOf(e) { return D.recovery({ ...base, ...e }) }
+}
+
 group('Fab economics')
 {
   const FE = await import(join(root, 'src/lib/fabecon.js'))

@@ -1590,3 +1590,36 @@ first three are fixed the moment the building exists.
   reproduce a 2005 foundry's filed 75% breakeven and got 399%, because I did
   not have reliable figures for its cost structure. Presenting a validation
   tuned until it agreed would have been worse than not validating.
+
+---
+
+## Fiftieth pass: when it is not in control
+
+The discipline tab argued that failure is certain and the goal is detection,
+containment and recovery. It never said what recovery costs.
+
+- **The thing outsiders get wrong is not the damage.** A fab is a pipeline
+  three months deep, so you lose the days it was down *plus* the time to refill
+  a pipeline that is now empty. A cleanroom fire is thirty days down and about
+  a hundred and twenty days to full output — four times the number anyone
+  quotes. Modelling only the downtime is what makes a fire look survivable.
+- **Two clocks, and the slower one wins.** Refilling the line, or replacing
+  tools whose lead times run to quarters. The model reports which one is
+  binding rather than assuming, and for a fire it is the tools — which is
+  exactly what Renesas reported: production resumed in four weeks and full
+  capacity took about a hundred days, paced by the last CMP tool arriving.
+- **Calibrated against a real recovery, not invented.** The model gives 120
+  days for a fire against Renesas' documented ~100, which is close enough to be
+  useful and conservative in the right direction. Every figure in both case
+  studies comes from company statements, a Ford 10-Q or contemporaneous
+  reporting, and the vendor sources are flagged as vendors describing their own
+  incidents.
+- **The best line in the whole section is a ratio.** Renesas N3 made about 0.2%
+  of the world's 300 mm wafers, and Ford wrote it into an SEC filing.
+  Concentration risk is not about how big a fab is — it is about whether anyone
+  else makes the part.
+- **The container was wiped mid-pass.** The working copy vanished between two
+  commands; everything was recoverable from the remote because each pass is
+  pushed, and only the one uncommitted file had to be rewritten. Commit
+  frequency is a backup strategy that costs nothing until the day it is
+  everything.

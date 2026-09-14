@@ -6,6 +6,8 @@ import {
 } from '../lib/rigor.js'
 import { fmt } from '../lib/fab.js'
 import Icon from './Icon.jsx'
+import { EVENTS, CASES, DEFENCES, recovery } from '../lib/disaster.js'
+import { SOURCES } from '../data/sources.js'
 
 const money = (v) => {
   if (v >= 1e6) return `$${(v / 1e6).toFixed(0)}M`
@@ -14,6 +16,13 @@ const money = (v) => {
 }
 
 export default function Ethics() {
+  const [evt, setEvt] = useState('fire')
+  const [caseId, setCaseId] = useState('renesas')
+  const [cycle, setCycle] = useState(90)
+  const disaster = EVENTS.find((x) => x.id === evt)
+  const base = { wafersPerDay: 1700, cycleTimeDays: cycle, waferPriceUsd: 6000 }
+  const rec = recovery({ ...base, ...disaster })
+  const kase = CASES.find((c) => c.id === caseId)
   const [steps, setSteps] = useState(700)
   const [target, setTarget] = useState(0.99)
   const [disc, setDisc] = useState('copy')
@@ -228,6 +237,137 @@ export default function Ethics() {
       </div>
 
       {/* --------------------------------------------------------- ethics */}
+
+      {/* ------------------------------------------- when it is not in control */}
+      <h2 className="sec">And when it is not in control at all</h2>
+      <p className="small" style={{ marginBottom: 14, maxWidth: '68ch' }}>
+        Everything above is about keeping a line in control. This is what happens when it goes out of
+        control entirely — and the part outsiders consistently underestimate is not the damage. It is
+        that a fab is a pipeline three months deep, so you lose the days it was down <i>plus</i> the
+        time to refill a pipeline that is now empty. After a full restart the first wafer arrives one
+        cycle time later, and nothing makes that faster.
+      </p>
+
+      <div className="row" style={{ marginBottom: 12 }}>
+        {EVENTS.map((x) => (
+          <button key={x.id} className={`btn sm iconrow ${evt === x.id ? 'active' : ''}`} onClick={() => setEvt(x.id)}>
+            <Icon name={x.icon} size={18} />{x.name}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid" style={{ gridTemplateColumns: 'minmax(0,1fr) minmax(280px,340px)' }}>
+        <div>
+          <div className="grid g3">
+            <div className="stat">
+              <div className="k">Days down</div>
+              <div className="v" style={{ fontSize: 24 }}>{disaster.downtimeDays}</div>
+              <div className="sub">the number everyone quotes</div>
+            </div>
+            <div className="stat bad">
+              <div className="k">Days to full output</div>
+              <div className="v" style={{ fontSize: 24 }}>{Math.round(rec.daysToFull)}</div>
+              <div className="sub">
+                {disaster.downtimeDays > 0
+                  ? `${(rec.daysToFull / disaster.downtimeDays).toFixed(1)}× the downtime`
+                  : 'nothing was damaged at all'}
+              </div>
+            </div>
+            <div className="stat hi">
+              <div className="k">Output lost</div>
+              <div className="v" style={{ fontSize: 24 }}>{fmt.n(rec.wafersLost / 1000, 0)}k</div>
+              <div className="sub">wafers, worth {fmt.usd(rec.revenueLostUsd)}</div>
+            </div>
+          </div>
+          <div className="card" style={{ marginTop: 12 }}>
+            <p style={{ fontSize: 'var(--fs-prose)', lineHeight: 1.62 }}>{disaster.what}</p>
+            <p className="why" style={{ marginTop: 10 }}>{disaster.why}</p>
+            <p className="small" style={{ marginTop: 10 }}>
+              Recovery here is paced by <b>{rec.bindingConstraint}</b>. Downtime is only{' '}
+              {fmt.pct(rec.downtimeShare, 0)} of the time to full output.
+            </p>
+          </div>
+          <div className="tbl-wrap" style={{ marginTop: 12 }}>
+            <table className="tbl">
+              <thead><tr><th>Event</th><th>Down</th><th>To full output</th><th>Work in progress lost</th><th>Paced by</th></tr></thead>
+              <tbody>
+                {EVENTS.map((x) => {
+                  const r = recovery({ ...base, ...x })
+                  return (
+                    <tr key={x.id} style={{ cursor: 'pointer', background: x.id === evt ? 'var(--panel2)' : undefined }}
+                      onClick={() => setEvt(x.id)}>
+                      <td><b className="iconrow"><Icon name={x.icon} size={20} />{x.name}</b></td>
+                      <td className="num">{x.downtimeDays} d</td>
+                      <td className="num" style={{ color: 'var(--bad)' }}>{Math.round(r.daysToFull)} d</td>
+                      <td className="num">{fmt.pct(x.wipLossFraction, 0)}</td>
+                      <td className="small">{r.bindingConstraint}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div className="card" style={{ alignSelf: 'start' }}>
+          <div className="ctl">
+            <label><span>Cycle time</span><b>{cycle} days</b></label>
+            <input type="range" min="30" max="150" step="5" value={cycle}
+              onChange={(e) => setCycle(+e.target.value)} aria-label="Cycle time" />
+            <div className="hint">
+              How deep the pipeline is. A longer cycle time means a longer refill, so the same
+              incident costs more at the leading edge than on a mature line — the fab that takes
+              three months to make anything takes three months to start making it again.
+            </div>
+          </div>
+          <p className="hint" style={{ marginTop: 8 }}>
+            Modelled on a 50,000-wafer-a-month fab at $6,000 a wafer. The ramp is treated as linear,
+            which is optimistic — real restarts are lumpier than this.
+          </p>
+        </div>
+      </div>
+
+      <h2 className="sec">Two that actually happened</h2>
+      <div className="row" style={{ marginBottom: 12 }}>
+        {CASES.map((c) => (
+          <button key={c.id} className={`btn iconrow ${caseId === c.id ? 'active' : ''}`} onClick={() => setCaseId(c.id)}>
+            <Icon name={c.icon} size={20} />{c.name}
+          </button>
+        ))}
+      </div>
+      <div className="detail">
+        <div className="card">
+          <div className="eyebrow">{kase.date}</div>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 23, letterSpacing: '-.02em', marginTop: 4 }}>{kase.name}</h3>
+          <p style={{ marginTop: 8 }}>{kase.what}</p>
+          <p style={{ marginTop: 10 }}>{kase.recovery}</p>
+        </div>
+        <div className="card">
+          <dl className="kv">
+            <dt>What it cost</dt><dd style={{ color: 'var(--warn)' }}>{kase.cost}</dd>
+            <dt>What it shows</dt><dd style={{ color: 'var(--accent)' }}>{kase.lesson}</dd>
+            <dt>Source</dt><dd className="small">{SOURCES[kase.source].author}, {SOURCES[kase.source].venue}.</dd>
+          </dl>
+        </div>
+      </div>
+
+      <h2 className="sec">What is actually done about it</h2>
+      <p className="small" style={{ marginBottom: 12, maxWidth: '68ch' }}>
+        Every one of these works, and every one has a limit that is usually the reason it was not in
+        place when it was needed.
+      </p>
+      <div className="grid g2">
+        {DEFENCES.map((d) => (
+          <div className="card" key={d.k}>
+            <div className="iconrow" style={{ marginBottom: 6 }}>
+              <Icon name={d.icon} size={24} style={{ color: 'var(--accent)' }} />
+              <span className="eyebrow" style={{ margin: 0 }}>{d.k}</span>
+            </div>
+            <p className="small" style={{ marginTop: 4 }}>{d.what}</p>
+            <p className="why" style={{ marginTop: 8 }}>{d.limit}</p>
+          </div>
+        ))}
+      </div>
+
       <h2 className="sec">Eight places the judgement is real</h2>
       <div className="row" style={{ marginBottom: 12 }}>
         {ETHICS.map((x) => (

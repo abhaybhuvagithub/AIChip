@@ -64,6 +64,10 @@ Five tabs:
 - **Staffing** — headcount per discipline from the node's engineer-year figure,
   tilted per project archetype and renormalised, with peak distinguished from
   average.
+- **Disaster recovery** — recovery time as the slower of two clocks, refilling
+  a three-month pipeline or replacing tools with quarter-long lead times, with
+  the output ramp and revenue lost. Calibrated against the documented Renesas
+  Naka recovery.
 - **Fab economics** — cost per wafer built from capex, capacity, utilisation and
   depreciation age rather than taken as an input; breakeven utilisation; and
   the cost stack split into fixed and variable. Validated against TSMC's

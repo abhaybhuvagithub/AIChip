@@ -223,6 +223,22 @@ export const SOURCES = {
     url: 'https://www.semiconductors.org/',
     supports: 'Market sizes, capital expenditure and regional capacity shares.',
   },
+  renesas2021: {
+    kind: 'vendor',
+    title: 'Notices regarding the Naka Factory fire and production capacity recovery',
+    author: 'Renesas Electronics', venue: 'Company statements, March–June 2021', year: 2021,
+    url: 'https://www.renesas.com/en/about/press-room/update-9-notice-regarding-semiconductor-manufacturing-factory-naka-factory-fire-production-capacity',
+    supports: 'The 2021 Naka fire timeline on the discipline tab — burned area, equipment damaged, resumption on 17 April, 88% capacity by end of May, and roughly 100 days to full restoration.',
+    caveat: 'The company\u2019s own account of its own incident. The recovery dates are precise and verifiable; the framing is theirs. Ford\u2019s 10-Q for Q2 2021 corroborates the effect on automotive supply independently.',
+  },
+  tsmc2019: {
+    kind: 'vendor',
+    title: 'TSMC details impact of Fab 14B photoresist material incident, updates 1Q19 guidance',
+    author: 'TSMC', venue: 'Company press release, 2019', year: 2019,
+    url: 'https://pr.tsmc.com/english/news/1984',
+    supports: 'The 2019 photoresist contamination: about $550 million of first-quarter revenue, 2.6 points of gross margin, and recovery of the scrapped output in the following quarter.',
+    caveat: 'The wafer count — reported elsewhere as around 30,000 — was not confirmed by TSMC and is an estimate.',
+  },
   samsung2018: {
     kind: 'press',
     title: 'Samsung apology and compensation agreement for semiconductor and display workers',
