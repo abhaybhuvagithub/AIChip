@@ -5,6 +5,7 @@ import {
   naturalLength, shortChannel, copperResistivity, rcDelay,
   blackMttf, accelerationFactor,
   LEAKAGE_PATHS, STRAIN,
+  modelsByKind,
   landauerJ, reliableFloorJ, energyHeadroom, REVERSIBILITY,
   CORNERS, cornerDelay, cornerSpread,
   fermiPotential, depletionWidth, thresholdVoltage, junctionLeakageRatio,
@@ -1290,6 +1291,47 @@ export default function Science() {
           </div>
         </div>
       </div>
+
+
+      {/* ------------------------------- what kind of model is each of these */}
+      <h2 className="sec">What kind of claim is each of these?</h2>
+      <p className="small" style={{ marginBottom: 14, maxWidth: '68ch' }}>
+        The first thing anyone with a physics background wants to know about a page like this is not
+        whether the arithmetic is right — it is what they are looking at. A conservation law, an
+        empirical fit and a first-order approximation deserve very different amounts of trust, and
+        setting them in identical typography hides that. So every model above is classified, given
+        the range it holds over, and made to say what breaks it.
+      </p>
+      {modelsByKind().map((g) => (
+        <div key={g.kind} style={{ marginBottom: 16 }}>
+          <div className="iconrow" style={{ marginBottom: 6 }}>
+            <span className="badge" style={{ color: g.hue, borderColor: g.hue }}>{g.label}</span>
+            <span className="small" style={{ color: 'var(--muted)' }}>{g.note}</span>
+          </div>
+          <div className="tbl-wrap">
+            <table className="tbl">
+              <thead><tr><th>Model</th><th>§</th><th style={{ width: '22%' }}>Valid over</th><th style={{ width: '26%' }}>What it gets right</th><th style={{ width: '32%' }}>Where it fails</th></tr></thead>
+              <tbody>
+                {g.models.map((m) => (
+                  <tr key={m.id}>
+                    <td><b>{m.name}</b></td>
+                    <td className="num">{m.section}</td>
+                    <td className="small">{m.range}</td>
+                    <td className="small">{m.holds}</td>
+                    <td className="small" style={{ color: 'var(--warn)' }}>{m.breaks}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ))}
+      <p className="small" style={{ marginTop: 4, maxWidth: '68ch' }}>
+        Note where the honest weak spots are. The corner model in section 20 uses coefficients that
+        are this site's own, chosen to show the behaviour rather than to predict a timing closure —
+        and the yield models in section 6 disagree with each other, which is the finding rather than
+        a defect.
+      </p>
 
       {/* ------------------------------------------------------ constants */}
       <h2 className="sec">The numbers themselves</h2>

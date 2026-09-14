@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Journey from './Journey.jsx'
 import {
   createFab, tick, snapshot, defectDensity, TOOL_GROUPS, LOT_SIZE,
+  SIM_CALIBRATION, SIM_OMISSIONS,
 } from '../lib/fabengine.js'
 import { computeRun, fmt } from '../lib/fab.js'
 
@@ -383,6 +384,43 @@ export default function FabRun({ cfg, onSnapshot }) {
           onRestart={() => { setRunning(false); setGeneration((g) => g + 1) }}
         />
       )}
+
+      {/* --------------------------------- what this simulation is and is not */}
+      <h2 className="sec">What this simulation is, and what it is not</h2>
+      <p className="small" style={{ marginBottom: 14, maxWidth: '68ch' }}>
+        The predictable question about any fab simulator is whether it is anchored to anything real
+        or is just plausible-looking motion. Both are respectable answers; pretending the second is
+        the first is not. Four of these behaviours are pinned to published industry figures and two
+        are this site&rsquo;s own choices, marked as such.
+      </p>
+      <div className="tbl-wrap">
+        <table className="tbl">
+          <thead><tr><th>Behaviour</th><th>Anchored?</th><th style={{ width: '30%' }}>What the model does</th><th style={{ width: '40%' }}>Why</th></tr></thead>
+          <tbody>
+            {SIM_CALIBRATION.map((c) => (
+              <tr key={c.k}>
+                <td><b>{c.k}</b></td>
+                <td className="small" style={{ color: c.anchored ? 'var(--ok)' : 'var(--warn)' }}>
+                  {c.anchored ? 'Published figures' : "The site's own"}
+                </td>
+                <td className="small">{c.what}</td>
+                <td className="small">{c.why}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="card" style={{ marginTop: 12, borderColor: 'var(--warn)' }}>
+        <div className="eyebrow" style={{ color: 'var(--warn)' }}>And what is missing entirely</div>
+        <ul className="small" style={{ marginTop: 8, lineHeight: 1.7, paddingLeft: 18 }}>
+          {SIM_OMISSIONS.map((o) => <li key={o}>{o}</li>)}
+        </ul>
+        <p className="small" style={{ marginTop: 8 }}>
+          Any one of these would change the numbers. Several would make the line harder to run, not
+          easier — so read the output as the shape of the problem rather than as a forecast.
+        </p>
+      </div>
+
     </div>
   )
 }

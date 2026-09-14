@@ -3248,6 +3248,65 @@ group('The guide')
   })())
 }
 
+group('Provenance of the models')
+{
+  const FE3 = await import(join(root, 'src/lib/fabengine.js'))
+  const P3 = await import(join(root, 'src/lib/physics.js'))
+
+  // A law, a fit and an approximation deserve different amounts of trust, and
+  // identical typography hides the difference.
+  ok('every model is classified by what kind of claim it is',
+    P3.MODELS.length >= 12 && P3.MODELS.every((m) => P3.MODEL_KINDS[m.kind]))
+  ok('every model states its validity range and what breaks it',
+    P3.MODELS.every((m) => m.range.length > 15 && m.holds.length > 30 && m.breaks.length > 40))
+  ok('every kind is explained rather than just named',
+    Object.values(P3.MODEL_KINDS).every((k) => k.label && k.hue && k.note.length > 80))
+  ok('all four kinds are actually used',
+    ['law', 'derived', 'fit', 'approx'].every((k) => P3.MODELS.some((m) => m.kind === k)),
+    [...new Set(P3.MODELS.map((m) => m.kind))].join(', '))
+  // The classification has to be honest in both directions.
+  ok('the thermodynamic bounds are classified as laws',
+    P3.MODELS.find((m) => m.id === 'landauer').kind === 'law' &&
+    P3.MODELS.find((m) => m.id === 'sswing').kind === 'law')
+  ok('the fitted models are not passed off as laws',
+    ['caughey', 'black', 'cuwire', 'pelgrom'].every((id) =>
+      P3.MODELS.find((m) => m.id === id).kind === 'fit'))
+  ok("the site's own coefficients are marked as approximations",
+    P3.MODELS.find((m) => m.id === 'corners').kind === 'approx' &&
+    /site.s own/i.test(P3.MODELS.find((m) => m.id === 'corners').breaks))
+  ok('every classified model points at a real section',
+    P3.MODELS.every((m) => m.section >= 1 && m.section <= 20))
+  ok('grouping preserves every model',
+    P3.modelsByKind().reduce((n, g) => n + g.models.length, 0) === P3.MODELS.length)
+  ok('the classification reached the science tab', (() => {
+    const ui = readFileSync(join(root, 'src/ui/Science.jsx'), 'utf8')
+    return /What kind of claim is each of these/i.test(ui) && /Where it fails/i.test(ui)
+  })())
+
+  // The same question, asked of the simulator.
+  ok('the simulation says what it is anchored to',
+    FE3.SIM_CALIBRATION.length >= 5 &&
+    FE3.SIM_CALIBRATION.every((c) => c.k && c.what.length > 30 && c.why.length > 50))
+  ok('anchored and unanchored behaviours are both present and distinguished',
+    FE3.SIM_CALIBRATION.some((c) => c.anchored) && FE3.SIM_CALIBRATION.some((c) => !c.anchored))
+  ok('the cycle-time and bottleneck behaviours are the anchored ones',
+    FE3.SIM_CALIBRATION.find((c) => /cycle time/i.test(c.k)).anchored &&
+    FE3.SIM_CALIBRATION.find((c) => /lithography/i.test(c.k)).anchored)
+  ok('the invented rates are admitted as invented',
+    FE3.SIM_CALIBRATION.find((c) => /excursion/i.test(c.k)).anchored === false)
+  // Naming what is missing is the part that pre-empts the question.
+  ok('the simulation lists what it leaves out entirely',
+    FE3.SIM_OMISSIONS.length >= 6 && FE3.SIM_OMISSIONS.every((o) => o.length > 40))
+  ok('the omissions include the ones a practitioner would ask about first',
+    FE3.SIM_OMISSIONS.some((o) => /hot lot/i.test(o)) &&
+    FE3.SIM_OMISSIONS.some((o) => /maintenance/i.test(o)) &&
+    FE3.SIM_OMISSIONS.some((o) => /reticle|mask/i.test(o)))
+  ok('the panel reached the fab run tab', (() => {
+    const ui = readFileSync(join(root, 'src/ui/FabRun.jsx'), 'utf8')
+    return /what it is not/i.test(ui) && /missing entirely/i.test(ui)
+  })())
+}
+
 group('Assistant suggestions')
 {
   const A = await import(join(root, 'src/lib/assistant.js'))

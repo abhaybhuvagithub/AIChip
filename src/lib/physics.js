@@ -839,3 +839,97 @@ export function cornerSpread({ voltV = 0.75, nomV = 0.75, tempLo = -40, tempHi =
   const min = Math.min(...all), max = Math.max(...all)
   return { min, max, ratio: max / min, spreadPct: (max - min) / ((max + min) / 2) }
 }
+
+// ========================================= WHAT KIND OF MODEL IS THIS ====
+//
+// The first question anyone with a physics background asks about a page like
+// this is not "is the arithmetic right". It is "what am I looking at" — because
+// a conservation law, an empirical fit and a first-order approximation deserve
+// very different amounts of trust, and rendering them in identical typography
+// hides the difference.
+//
+// So every model on the science tab is classified, given the range it is valid
+// over, and told to say what breaks outside it. Where the site's own
+// simplification is the weak link, that is stated rather than buried.
+
+export const MODEL_KINDS = {
+  law: {
+    label: 'Physical law', hue: '#31c48d',
+    note: 'Follows from conservation, thermodynamics or quantum mechanics. No fitted parameters, and no exceptions within its stated domain.',
+  },
+  derived: {
+    label: 'Derived result', hue: '#4dd6e8',
+    note: 'Follows algebraically from a law plus stated idealisations — an abrupt junction, a uniform field, a perfect capacitor. Exact given its assumptions, and the assumptions are the fragile part.',
+  },
+  fit: {
+    label: 'Empirical fit', hue: '#ffb020',
+    note: 'A functional form chosen to match measurements, with parameters extracted from data. Reliable inside the range it was fitted over and meaningless outside it.',
+  },
+  approx: {
+    label: 'First-order approximation', hue: '#f6685e',
+    note: 'Deliberately simplified to be computable and explanatory. Gets the trend and the order of magnitude right; do not use it for design.',
+  },
+}
+
+export const MODELS = [
+  { id: 'landauer', name: 'Landauer limit', kind: 'law', section: 19,
+    range: 'Any temperature, any technology',
+    holds: 'kT·ln2 per bit erased, from the entropy of information itself.',
+    breaks: 'Nothing breaks it. It does not apply to computation that erases nothing, which is why reversible logic is discussed at all.' },
+  { id: 'sswing', name: 'Subthreshold swing floor', kind: 'law', section: 2,
+    range: 'Any thermally-driven switch',
+    holds: '60 mV/decade at 300 K, from the Boltzmann distribution of carrier energies.',
+    breaks: 'Only by not using thermal injection — tunnel FETs and negative-capacitance devices aim exactly here, and none has shipped in volume.' },
+  { id: 'boltzmann', name: 'Carrier statistics', kind: 'law', section: 1,
+    range: 'Non-degenerate semiconductors',
+    holds: 'Exponential occupation of energy states.',
+    breaks: 'Heavy doping makes the semiconductor degenerate and Fermi-Dirac statistics are needed instead; this tab assumes you are not there.' },
+  { id: 'thresh', name: 'Threshold voltage', kind: 'derived', section: 12,
+    range: 'Long-channel, uniformly doped, abrupt depletion',
+    holds: 'V_FB + 2φ_F + γ√(2φ_F), exactly, given those idealisations.',
+    breaks: 'Every one of those idealisations fails in a modern device. The terms are still the right way to think about where the threshold comes from; the number is not a design value.' },
+  { id: 'rayleigh', name: 'Rayleigh resolution', kind: 'derived', section: 4,
+    range: 'Diffraction-limited projection optics',
+    holds: 'k₁λ/NA, straight from wave optics — shorter light or a bigger lens resolves finer features.',
+    breaks: 'k₁ is not a constant — it absorbs illumination shape, mask tricks and resist behaviour, and the industry spent thirty years pushing it from 0.8 to below 0.3.' },
+  { id: 'elmore', name: 'Elmore RC delay', kind: 'approx', section: 10,
+    range: 'Distributed RC lines, first-order',
+    holds: 'The scaling: delay grows with the square of length.',
+    breaks: 'Ignores inductance, signal slope and the driver entirely. Real extraction differs by tens of per cent, and that matters at the corners in section 20.' },
+  { id: 'caughey', name: 'Mobility versus doping', kind: 'fit', section: 8,
+    range: 'Roughly 10¹⁴ to 10²⁰ cm⁻³, bulk silicon, near room temperature',
+    holds: 'A smooth interpolation between lattice-limited and impurity-limited mobility.',
+    breaks: 'Outside that doping range, and in thin bodies where surface scattering dominates — which is most modern devices.' },
+  { id: 'black', name: "Black's equation", kind: 'fit', section: 11,
+    range: 'Accelerated electromigration testing',
+    holds: 'Lifetime against current density and temperature, with a fitted exponent.',
+    breaks: 'The exponent n is not universal and depends on the failure mode. Extrapolating decades of field life from weeks of stress is the standard practice and the standard argument.' },
+  { id: 'cuwire', name: 'Copper resistivity in thin wires', kind: 'fit', section: 10,
+    range: 'Widths comparable to the electron mean free path',
+    holds: 'Surface and grain-boundary scattering, each with a fitted specularity or reflection coefficient.',
+    breaks: 'Those coefficients are process-dependent and are measured, not predicted. The trend is solid; the absolute number is a fit.' },
+  { id: 'yieldmodels', name: 'Defect yield models', kind: 'fit', section: 6,
+    range: 'Random point defects with clustering',
+    holds: 'Four different functional forms, which is itself the finding — nobody agrees.',
+    breaks: 'Systematic and design-dependent failures, which at leading-edge nodes are a large share of real loss and are not defects at all.' },
+  { id: 'pelgrom', name: "Pelgrom's law", kind: 'fit', section: 15,
+    range: 'Devices large enough to average over many dopants',
+    holds: 'Mismatch as one over the square root of area.',
+    breaks: 'At the smallest devices the assumptions behind the averaging get thin, and the coefficient is per-process and measured.' },
+  { id: 'selfheat', name: 'Self-heating', kind: 'approx', section: 18,
+    range: 'One-dimensional conduction along a thin channel',
+    holds: 'That thin bodies conduct heat far worse than bulk, and roughly how much worse.',
+    breaks: 'Real thermal paths are three-dimensional and go through contacts and the surrounding dielectric. Treat the number as a warning, not a temperature.' },
+  { id: 'corners', name: 'Corner delay', kind: 'approx', section: 20,
+    range: 'Illustrative sensitivity to voltage and temperature',
+    holds: 'The direction and rough magnitude of each effect, including the low-voltage temperature inversion.',
+    breaks: 'Real corner models are per-process, per-library and come from silicon. These coefficients are the site\u2019s own and are chosen to show the behaviour, not to predict a timing closure.' },
+]
+
+/** Grouped for display, strongest evidence first. */
+export function modelsByKind() {
+  return Object.keys(MODEL_KINDS).map((k) => ({
+    kind: k, ...MODEL_KINDS[k],
+    models: MODELS.filter((m) => m.kind === k),
+  })).filter((g) => g.models.length)
+}

@@ -362,3 +362,42 @@ export function snapshot(fab) {
     capex: toolCapex(fab.groups),
   }
 }
+
+// ================================= WHAT THIS SIMULATION IS AND IS NOT ====
+//
+// The predictable question about any fab simulator is whether it is calibrated
+// to anything real or is simply plausible-looking motion. Both answers are
+// respectable; pretending the second is the first is not. So this states which
+// behaviours are anchored to published industry figures, which are the site's
+// own choices, and what has been left out entirely.
+
+export const SIM_CALIBRATION = [
+  { k: 'Cycle time and X-factor', anchored: true,
+    what: 'Lots take 80–140 days against roughly 40 days of actual process time — an X-factor of 2 to 3.',
+    why: 'Real 300 mm logic lines run X-factors in that band. If this simulation produced 1.1 it would be wrong.' },
+  { k: 'Lithography as the constraint', anchored: true,
+    what: 'Scanners run at 85–99% utilisation and are almost always the bottleneck.',
+    why: 'EUV tools cost roughly $200M each, so nobody buys spare capacity. Queueing at the most expensive tool is the expected state, not a fault.' },
+  { k: 'Layer count and revisits', anchored: true,
+    what: 'A wafer visits the same tool groups seventy-odd times on a leading-edge route.',
+    why: 'Matches published layer counts. It is also why a fab is a re-entrant flow rather than a production line, which is the thing that makes it hard to schedule.' },
+  { k: 'Queueing behaviour', anchored: true,
+    what: 'Queues grow non-linearly as utilisation approaches one.',
+    why: 'Standard queueing theory, and the reason a fab run at 95% feels completely different from one at 85%.' },
+  { k: 'Tool counts and group mix', anchored: false,
+    what: 'Eight tool groups with chosen tool counts.',
+    why: 'A real fab has hundreds of distinct tool types. Eight is enough to show re-entrant flow and a moving bottleneck, and is the site\u2019s own simplification.' },
+  { k: 'Excursion rates and durations', anchored: false,
+    what: 'Tools go down and drift at rates chosen to make the effect visible.',
+    why: 'Real rates are confidential and vary hugely by tool. These are set for legibility, not fidelity.' },
+]
+
+export const SIM_OMISSIONS = [
+  'Reticle and mask management, which constrains real scheduling heavily.',
+  'Operator and technician availability — this line runs as if fully staffed at all times.',
+  'Preventive maintenance windows, which are planned rather than random.',
+  'Hot lots and priority classes, which every real fab runs and which disrupt everything.',
+  'Batch tools like furnaces, which wait to fill and change the queueing behaviour.',
+  'Metrology sampling decisions, which trade cycle time against how fast you detect a problem.',
+  'Yield learning over time — this fab never gets better at its job.',
+]

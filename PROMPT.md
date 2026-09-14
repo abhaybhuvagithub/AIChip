@@ -1720,3 +1720,41 @@ express at all rather than things it covered thinly.
   edit matched nothing and the build told me. Then my assertion against
   re-importing scanned the whole file and tripped on the new section's own
   usage — the guard has to be scoped to the block it is guarding, not the file.
+
+---
+
+## Fifty-fourth pass: answering the question before it is asked
+
+Asked to improve these two so far that nobody asks questions. Worth saying
+plainly that a page nobody asks about is either perfect or unread — the
+achievable goal is to pre-empt the *predictable* questions, so the ones that
+remain are good ones.
+
+- **The predictable question about the science tab was never answered.** It is
+  not "is the arithmetic right" — the build checks that. It is "what am I
+  looking at". A conservation law, an empirical fit and a first-order
+  approximation deserve very different amounts of trust, and setting them in
+  identical typography hides the difference completely. All thirteen models are
+  now classified, given the range they hold over, and made to say what breaks
+  them.
+- **The classification has to be honest in both directions, and is checked
+  that way.** Landauer and the 60 mV floor are laws. Caughey-Thomas, Black's
+  equation, thin-wire copper and Pelgrom are fits with parameters extracted
+  from data. The corner model's coefficients are the site's own, chosen to show
+  behaviour rather than predict a timing closure, and it says so. I promoted a
+  fit to a law to confirm the check catches it.
+- **The predictable question about the simulator was different**: is this
+  anchored to anything, or is it plausible-looking motion? Both are respectable
+  answers; pretending the second is the first is not. Four behaviours are
+  pinned to published figures — X-factor of 2 to 3, lithography as the
+  constraint, seventy-odd revisits, non-linear queueing — and two are admitted
+  as the site's own. Then seven omissions are named, including hot lots,
+  maintenance windows and reticle management, which are the first things a
+  practitioner would ask about.
+- **A third scope error in one session.** My new check group used `P` from
+  another group's block. Each group is its own block and must import what it
+  uses; I have now made this mistake three times and it fails loudly each time,
+  which is the only reason it is cheap.
+- **And my own check caught a terse entry** — the Rayleigh model's description
+  was twenty-five characters where the check demanded thirty. Expanded rather
+  than lowering the bar.
