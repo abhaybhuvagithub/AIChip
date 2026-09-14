@@ -702,3 +702,140 @@ export function selfHeating({ powerUw, thicknessNm, lengthNm, widthNm }) {
   const rth = areaM2 > 0 ? lenM / (k * areaM2) : Infinity
   return { kEff: k, rthKperW: rth, deltaTK: (powerUw * 1e-6) * rth }
 }
+
+// ====================================== THE ENERGY OF COMPUTATION ========
+//
+// Every other limit on this tab is an engineering one that someone might get
+// around. This one is thermodynamics.
+//
+// Landauer's principle: erasing one bit of information in a system at
+// temperature T must dissipate at least kT·ln2 of energy. Not because our
+// switches are imperfect — because information has entropy, and destroying it
+// has to put that entropy somewhere. At room temperature the number is about
+// three zeptojoules, and it is the floor under everything a computer does.
+//
+// The interesting part is not the bound. It is the distance to it.
+
+/** Landauer limit — minimum energy to erase one bit, in joules. */
+export const landauerJ = (T = 300) => K.kB_J * T * Math.LN2
+
+/**
+ * The practical floor, which is well above Landauer and often left out.
+ *
+ * A switch operating at exactly kT·ln2 would be wrong about as often as it was
+ * right. To be reliable the signal energy has to sit far enough above the
+ * thermal noise that errors are astronomically rare, and the required margin
+ * grows only logarithmically with how rare you need them to be — which is
+ * merciful, but it still puts the usable floor around a hundred times the
+ * Landauer bound rather than at it.
+ */
+export function reliableFloorJ({ errorRate = 1e-18, T = 300 }) {
+  const margin = Math.log(1 / errorRate)      // in units of kT
+  return K.kB_J * T * margin
+}
+
+/** Energy to switch a capacitive node once: ½CV². */
+export const switchingEnergyJ = ({ capFF, voltV }) => 0.5 * (capFF * 1e-15) * voltV * voltV
+
+/**
+ * How far above the floor a real operation sits.
+ *
+ * Returns the ratio to the Landauer bound and to the reliability floor, which
+ * are very different numbers and get conflated constantly. There is real
+ * headroom here — several orders of magnitude of it — and it is nothing like
+ * the unlimited headroom sometimes implied by quoting Landauer alone.
+ */
+export function energyHeadroom({ capFF, voltV, bitsErased = 1, T = 300, errorRate = 1e-18 }) {
+  const actual = switchingEnergyJ({ capFF, voltV })
+  const landauer = landauerJ(T) * bitsErased
+  const floor = reliableFloorJ({ errorRate, T }) * bitsErased
+  return {
+    actualJ: actual, landauerJ: landauer, floorJ: floor,
+    vsLandauer: actual / landauer,
+    vsFloor: actual / floor,
+    floorVsLandauer: floor / landauer,
+  }
+}
+
+/**
+ * Reversible computation is the only way under the bound, and the reason it
+ * stays a research topic rather than a product.
+ *
+ * Landauer's principle applies to ERASING information. A computation that
+ * never discards anything is not bound by it at all. The catch is that you
+ * must keep every intermediate result, so the memory grows with the
+ * computation, and the machine must run slowly enough to stay near
+ * equilibrium — which trades the energy you saved for time you do not have.
+ */
+export const REVERSIBILITY = [
+  { k: 'Irreversible, as built today', icon: 'planar',
+    what: 'Every AND gate destroys a bit: two inputs, one output, and the discarded input pays kT·ln2.',
+    cost: 'Energy per operation has a hard floor, and we sit four to six orders of magnitude above it anyway.' },
+  { k: 'Reversible logic', icon: 'ipcore',
+    what: 'Gates that can be run backwards discard nothing, so Landauer does not apply to them.',
+    cost: 'Every intermediate must be kept, so memory grows with the length of the computation. You trade energy for storage.' },
+  { k: 'Adiabatic switching', icon: 'power',
+    what: 'Charge the node slowly through a ramped supply instead of dumping it through a resistance.',
+    cost: 'Energy saved falls with switching speed. Going slower to use less energy per operation is not obviously a win.' },
+  { k: 'Lower temperature', icon: 'transmon',
+    what: 'The bound is proportional to T, so a colder machine has a lower floor.',
+    cost: 'Refrigeration costs far more energy than it saves at any temperature worth having — see the cryogenic wall on the quantum tab.' },
+]
+
+// ========================================== PROCESS CORNERS ==============
+//
+// Nothing on this tab so far explains why a chip that works is not the same as
+// a chip that works. Every parameter here — threshold, mobility, oxide
+// thickness, wire resistance — varies wafer to wafer, die to die and hour to
+// hour. A design is not signed off at the typical value of anything. It is
+// signed off at the corners, and it has to work at all of them at once.
+
+export const CORNERS = [
+  { id: 'tt', name: 'Typical', nmos: 0, pmos: 0, speed: 1.00,
+    what: 'Where the process is centred, and where nothing is ever guaranteed to be.' },
+  { id: 'ss', name: 'Slow-slow', nmos: -1, pmos: -1, speed: 0.72,
+    what: 'Both device types slow. Combined with low voltage and high temperature this is the setup-time corner — the one that decides your maximum frequency.' },
+  { id: 'ff', name: 'Fast-fast', nmos: 1, pmos: 1, speed: 1.31,
+    what: 'Both fast. Combined with high voltage and low temperature this is the hold-time corner, where signals arrive before they are wanted and the chip breaks by being too quick.' },
+  { id: 'sf', name: 'Slow-fast', nmos: -1, pmos: 1, speed: 0.94,
+    what: 'One device type slow, the other fast. Skews every logic gate\u2019s rise and fall asymmetrically, which wrecks anything that assumed they matched.' },
+  { id: 'fs', name: 'Fast-slow', nmos: 1, pmos: -1, speed: 0.96,
+    what: 'The mirror image, and it has to be checked separately because the circuits that break are different ones.' },
+]
+
+/**
+ * Delay across a corner, with voltage and temperature.
+ *
+ * Voltage dominates: delay rises steeply as supply falls, which is why the
+ * worst-case corner is always low voltage. Temperature is more interesting —
+ * at older nodes hot meant slow, but with low supply voltages the threshold
+ * falls faster than mobility does, so hot can mean FAST. That sign flip is
+ * called temperature inversion and it caught a generation of designers who
+ * knew the old rule.
+ */
+export function cornerDelay({ corner, voltV = 0.75, nomV = 0.75, tempC = 25 }) {
+  const c = CORNERS.find((x) => x.id === corner) || CORNERS[0]
+  const vFactor = Math.pow(nomV / voltV, 1.3)
+  // Below about 0.6 V the threshold shift wins and hot silicon runs faster.
+  const inverted = voltV < 0.6
+  const tFactor = inverted
+    ? 1 - (tempC - 25) * 0.0007
+    : 1 + (tempC - 25) * 0.0012
+  return {
+    relDelay: (1 / c.speed) * vFactor * tFactor,
+    inverted,
+    corner: c,
+  }
+}
+
+/** The spread a design has to tolerate, across every corner. */
+export function cornerSpread({ voltV = 0.75, nomV = 0.75, tempLo = -40, tempHi = 125 }) {
+  const all = []
+  for (const c of CORNERS) {
+    for (const t of [tempLo, tempHi]) {
+      all.push(cornerDelay({ corner: c.id, voltV, nomV, tempC: t }).relDelay)
+    }
+  }
+  const min = Math.min(...all), max = Math.max(...all)
+  return { min, max, ratio: max / min, spreadPct: (max - min) / ((max + min) / 2) }
+}

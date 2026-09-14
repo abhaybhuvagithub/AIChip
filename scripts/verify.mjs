@@ -1538,6 +1538,67 @@ group('Physics')
     return thin < thick && kThin < kThick
   })())
 
+  // ---- the energy of computation ----
+  // Every other limit on the science tab is an engineering problem. This one
+  // is thermodynamics, and two numbers get conflated constantly.
+  ok('the Landauer limit is 2.87 zJ at 300 K',
+    near(P.landauerJ(300) * 1e21, 2.87, 0.02), (P.landauerJ(300) * 1e21).toFixed(3) + ' zJ')
+  ok('the bound is proportional to temperature',
+    near(P.landauerJ(600) / P.landauerJ(300), 2, 1e-9))
+  // The nuance usually left out: you cannot actually operate at the bound.
+  ok('the reliable floor sits well above the Landauer bound',
+    P.reliableFloorJ({}) > P.landauerJ(300) * 20,
+    (P.reliableFloorJ({}) / P.landauerJ(300)).toFixed(0) + 'x Landauer')
+  ok('demanding fewer errors raises the floor only logarithmically', (() => {
+    const a = P.reliableFloorJ({ errorRate: 1e-9 })
+    const b = P.reliableFloorJ({ errorRate: 1e-18 })
+    return b > a && b < a * 2.5
+  })())
+  ok('switching energy goes as the square of voltage',
+    near(P.switchingEnergyJ({ capFF: 1, voltV: 2 }) / P.switchingEnergyJ({ capFF: 1, voltV: 1 }), 4, 1e-9))
+  ok('a modern gate sits thousands of times above the bound, not millions', (() => {
+    const h = P.energyHeadroom({ capFF: 0.1, voltV: 0.75 })
+    return h.vsLandauer > 1e3 && h.vsLandauer < 1e5
+  })(), P.energyHeadroom({ capFF: 0.1, voltV: 0.75 }).vsLandauer.toExponential(1) + 'x')
+  ok('headroom against the usable floor is far smaller than against Landauer', (() => {
+    const h = P.energyHeadroom({ capFF: 0.1, voltV: 0.75 })
+    return h.vsFloor < h.vsLandauer / 20
+  })())
+  ok('newer nodes sit closer to the floor than older ones',
+    P.energyHeadroom({ capFF: 0.1, voltV: 0.75 }).vsFloor <
+    P.energyHeadroom({ capFF: 1.0, voltV: 1.1 }).vsFloor)
+  ok('every route under the bound names what it costs',
+    P.REVERSIBILITY.length >= 4 && P.REVERSIBILITY.every((r) => r.k && r.what.length > 50 && r.cost.length > 50))
+
+  // ---- process corners ----
+  ok('five corners, each explained', P.CORNERS.length === 5 &&
+    P.CORNERS.every((c) => c.name && c.speed > 0 && c.what.length > 60))
+  ok('slow-slow is slower than typical and fast-fast is faster',
+    P.CORNERS.find((c) => c.id === 'ss').speed < 1 && P.CORNERS.find((c) => c.id === 'ff').speed > 1)
+  ok('lower voltage means more delay',
+    P.cornerDelay({ corner: 'tt', voltV: 0.6 }).relDelay > P.cornerDelay({ corner: 'tt', voltV: 0.9 }).relDelay)
+  ok('the corner spread is substantial enough to matter', (() => {
+    const sp = P.cornerSpread({})
+    return sp.ratio > 1.5 && sp.ratio < 4
+  })(), P.cornerSpread({}).ratio.toFixed(2) + 'x')
+  // Temperature inversion: the old rule reverses at low supply voltage.
+  ok('hot is slow at high voltage and fast at low voltage', (() => {
+    const hi = P.cornerDelay({ corner: 'tt', voltV: 0.9, tempC: 125 }).relDelay >
+               P.cornerDelay({ corner: 'tt', voltV: 0.9, tempC: -40 }).relDelay
+    const lo = P.cornerDelay({ corner: 'tt', voltV: 0.5, tempC: 125 }).relDelay <
+               P.cornerDelay({ corner: 'tt', voltV: 0.5, tempC: -40 }).relDelay
+    return hi && lo
+  })())
+  ok('the inversion is reported, not left implicit',
+    P.cornerDelay({ corner: 'tt', voltV: 0.5 }).inverted === true &&
+    P.cornerDelay({ corner: 'tt', voltV: 0.9 }).inverted === false)
+  ok('an unknown corner falls back rather than throwing',
+    P.cornerDelay({ corner: 'nonsense' }).corner.id === 'tt')
+  ok('the tab explains that fast is also a failure mode', (() => {
+    const ui = readFileSync(join(root, 'src/ui/Science.jsx'), 'utf8')
+    return /hold-time failure/i.test(ui) && /too quick/i.test(ui)
+  })())
+
   // ---- materials ----
   ok('material table is populated and complete', P.MATERIALS.length >= 6 && P.MATERIALS.every((m) =>
     m.name && m.eg > 0 && m.muE > 0 && m.ebd > 0 && m.kth > 0 && m.note.length > 60))

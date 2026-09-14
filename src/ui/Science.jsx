@@ -5,6 +5,8 @@ import {
   naturalLength, shortChannel, copperResistivity, rcDelay,
   blackMttf, accelerationFactor,
   LEAKAGE_PATHS, STRAIN,
+  landauerJ, reliableFloorJ, energyHeadroom, REVERSIBILITY,
+  CORNERS, cornerDelay, cornerSpread,
   fermiPotential, depletionWidth, thresholdVoltage, junctionLeakageRatio,
   thermalNoiseV, shotNoiseA, ktcNoiseV, pelgromMismatch,
   confinementEnergyEv, electricalEot, thinFilmConductivity, selfHeating,
@@ -149,6 +151,11 @@ export default function Science() {
   const [confT, setConfT] = useState(5)
   const [shPower, setShPower] = useState(2)
   const [shThick, setShThick] = useState(5)
+  const [eCap, setECap] = useState(0.1)
+  const [eVolt, setEVolt] = useState(0.75)
+  const [corner, setCorner] = useState('ss')
+  const [cornerV, setCornerV] = useState(0.75)
+  const [cornerT, setCornerT] = useState(125)
 
   const d = DIELECTRICS.find((x) => x.id === diel)
   const cox = oxideCap(tox, d.k)
@@ -173,6 +180,9 @@ export default function Science() {
   const sh = selfHeating({ powerUw: shPower, thicknessNm: shThick, lengthNm: 20, widthNm: 50 })
   const eEot = electricalEot({ eotNm, inversionNm: 0.4, polyDepletionNm: 0 })
   const eEotPoly = electricalEot({ eotNm, inversionNm: 0.4, polyDepletionNm: 0.4 })
+  const head = energyHeadroom({ capFF: eCap, voltV: eVolt })
+  const cd = cornerDelay({ corner, voltV: cornerV, tempC: cornerT })
+  const spread = cornerSpread({ voltV: cornerV })
   const cRun = carriers(1e17, 'n', T)
 
   return (
@@ -1124,6 +1134,160 @@ export default function Science() {
           <Slider label="Body thickness" value={shThick} set={setShThick} min={3} max={150} step={1} unit=" nm" />
           <Slider label="Device power" value={shPower} set={setShPower} min={0.2} max={20} step={0.2} unit=" µW"
             hint="A single device while switching. Multiply by billions and you get the chip-level problem on the 3D tab — but this is the local one, inside one channel." />
+        </div>
+      </div>
+
+
+      {/* --------------------------------- 19. the energy of computation */}
+      <h2 className="sec">19 · The one limit nobody engineers around</h2>
+      <p className="small" style={{ marginBottom: 12, maxWidth: '68ch' }}>
+        Every other limit on this page is an engineering problem someone might solve. This one is
+        thermodynamics. Erasing a bit of information has to dissipate at least <b>kT·ln2</b> — not
+        because switches are imperfect, but because information has entropy and destroying it puts
+        that entropy somewhere.
+      </p>
+      <div className="grid" style={{ gridTemplateColumns: 'minmax(0,1fr) minmax(280px,340px)' }}>
+        <div>
+          <div className="grid g3">
+            <div className="stat">
+              <div className="k">Landauer limit, 300 K</div>
+              <div className="v" style={{ fontSize: 22 }}>{(landauerJ() * 1e21).toFixed(2)}<span style={{ fontSize: 14 }}> zJ</span></div>
+              <div className="sub">per bit erased, and nothing goes below it</div>
+            </div>
+            <div className="stat hi">
+              <div className="k">Reliable floor</div>
+              <div className="v" style={{ fontSize: 22 }}>{(reliableFloorJ({}) * 1e21).toFixed(0)}<span style={{ fontSize: 14 }}> zJ</span></div>
+              <div className="sub">{(head.floorVsLandauer).toFixed(0)}× Landauer, for one error in 10¹⁸</div>
+            </div>
+            <div className="stat bad">
+              <div className="k">This switching event</div>
+              <div className="v" style={{ fontSize: 22 }}>{(head.actualJ * 1e18).toFixed(1)}<span style={{ fontSize: 14 }}> aJ</span></div>
+              <div className="sub">{sci(head.vsLandauer, 1)}× the bound</div>
+            </div>
+          </div>
+          <p className="small" style={{ marginTop: 12, maxWidth: '68ch' }}>
+            Two numbers get conflated constantly and they are not the same. The <b>Landauer bound</b>{' '}
+            is 2.87 zeptojoules and is a statement about entropy. The <b>reliable floor</b> is about
+            sixty times higher, because a switch operating at the bound would be wrong roughly as
+            often as it was right — the signal has to sit far enough above thermal noise that errors
+            are astronomically rare. Quoting Landauer alone implies six orders of headroom. The real
+            figure against the usable floor is{' '}
+            <b>{sci(head.vsFloor, 1)}×</b>, which is a great deal and not an infinity.
+          </p>
+          <div className="tbl-wrap" style={{ marginTop: 12 }}>
+            <table className="tbl">
+              <thead><tr><th>Operation</th><th>Energy</th><th>Against Landauer</th><th>Against the reliable floor</th></tr></thead>
+              <tbody>
+                {[['A 3 nm gate transition', 0.1, 0.75, 1], ['A 7 nm gate transition', 0.25, 0.85, 1],
+                  ['A 45 nm gate transition', 1.0, 1.1, 1], ['A 32-bit add at 45 nm', 180, 1.1, 32]].map(([n2, c, v, b]) => {
+                  const h = energyHeadroom({ capFF: c, voltV: v, bitsErased: b })
+                  return (
+                    <tr key={n2}>
+                      <td><b>{n2}</b></td>
+                      <td className="num">{h.actualJ * 1e18 > 1000 ? `${(h.actualJ * 1e15).toFixed(1)} fJ` : `${(h.actualJ * 1e18).toFixed(1)} aJ`}</td>
+                      <td className="num" style={{ color: 'var(--warn)' }}>{sci(h.vsLandauer, 1)}×</td>
+                      <td className="num" style={{ color: 'var(--accent)' }}>{sci(h.vsFloor, 1)}×</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="small" style={{ marginTop: 10, maxWidth: '68ch' }}>
+            Newer nodes are closer to the floor, which is the whole story of efficiency gains — and
+            the gap is closing, so those gains get harder rather than easier from here.
+          </p>
+        </div>
+        <div className="card" style={{ alignSelf: 'start' }}>
+          <Slider label="Node capacitance" value={eCap} set={setECap} min={0.02} max={2} step={0.01} unit=" fF"
+            hint="Gate plus wire. Wire is most of it at modern nodes, which is why section 10 matters to section 19." />
+          <Slider label="Supply voltage" value={eVolt} set={setEVolt} min={0.3} max={1.2} step={0.01} unit=" V"
+            hint="Energy goes as V². Halving the supply quarters the energy, which is why voltage scaling was worth so much — and why its end in section 6 hurt so much." />
+        </div>
+      </div>
+
+      <h2 className="sec">Four ways under the bound, and why none has shipped</h2>
+      <div className="grid g2">
+        {REVERSIBILITY.map((r) => (
+          <div className="card" key={r.k}>
+            <div className="iconrow" style={{ marginBottom: 6 }}>
+              <Icon name={r.icon} size={24} style={{ color: 'var(--accent)' }} />
+              <span className="eyebrow" style={{ margin: 0 }}>{r.k}</span>
+            </div>
+            <p className="small" style={{ marginTop: 4 }}>{r.what}</p>
+            <p className="why" style={{ marginTop: 8 }}>{r.cost}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* --------------------------------- 20. process corners */}
+      <h2 className="sec">20 · Why a chip that works is not a chip that works</h2>
+      <p className="small" style={{ marginBottom: 12, maxWidth: '68ch' }}>
+        Every parameter on this page varies — wafer to wafer, die to die, hour to hour. A design is
+        never signed off at the typical value of anything. It is signed off at the <i>corners</i>,
+        and it has to work at all of them simultaneously.
+      </p>
+      <div className="row" style={{ marginBottom: 12 }}>
+        {CORNERS.map((c) => (
+          <button key={c.id} className={`btn sm ${corner === c.id ? 'active' : ''}`} onClick={() => setCorner(c.id)}>
+            {c.name}
+          </button>
+        ))}
+      </div>
+      <div className="grid" style={{ gridTemplateColumns: 'minmax(0,1fr) minmax(280px,340px)' }}>
+        <div>
+          <div className="grid g3">
+            <div className="stat">
+              <div className="k">Relative delay</div>
+              <div className="v" style={{ fontSize: 22 }}>{cd.relDelay.toFixed(3)}×</div>
+              <div className="sub">against typical at nominal conditions</div>
+            </div>
+            <div className="stat bad">
+              <div className="k">Spread across every corner</div>
+              <div className="v" style={{ fontSize: 22 }}>{spread.ratio.toFixed(2)}×</div>
+              <div className="sub">slowest to fastest, −40 to 125 °C</div>
+            </div>
+            <div className={`stat ${cd.inverted ? 'hi' : ''}`}>
+              <div className="k">Temperature behaviour</div>
+              <div className="v" style={{ fontSize: 20 }}>{cd.inverted ? 'Inverted' : 'Conventional'}</div>
+              <div className="sub">{cd.inverted ? 'hot silicon runs faster here' : 'hot silicon runs slower'}</div>
+            </div>
+          </div>
+          <div className="card" style={{ marginTop: 12 }}>
+            <p style={{ fontSize: 'var(--fs-prose)', lineHeight: 1.62 }}>{cd.corner.what}</p>
+          </div>
+          <p className="small" style={{ marginTop: 12, maxWidth: '68ch' }}>
+            The fast corner is not the safe one. A chip can fail by being <b>too quick</b>: if a
+            signal arrives before the clock edge that was supposed to capture the previous value, the
+            data is gone. That is a hold-time failure, it shows up at fast-fast, high voltage and low
+            temperature, and unlike a setup failure you cannot fix it by slowing the clock down. It
+            is the reason a design has to be checked at both ends rather than at the bad one.
+          </p>
+          <p className="small" style={{ marginTop: 10, maxWidth: '68ch', color: 'var(--warn)' }}>
+            And below about 0.6 V the old rule reverses. Hot silicon used to mean slow silicon,
+            because mobility falls with temperature. At low supply voltages the threshold voltage
+            falls faster than mobility does, so hot silicon is <i>fast</i> silicon. Temperature
+            inversion caught a generation of designers who knew the rule and not the reason for it.
+          </p>
+        </div>
+        <div className="card" style={{ alignSelf: 'start' }}>
+          <Slider label="Supply voltage" value={cornerV} set={setCornerV} min={0.4} max={1.1} step={0.01} unit=" V"
+            hint="Take it below 0.6 V and watch the temperature behaviour flip." />
+          <Slider label="Junction temperature" value={cornerT} set={setCornerT} min={-40} max={125} step={5} unit=" °C" />
+          <div className="tbl-wrap" style={{ marginTop: 8 }}>
+            <table className="tbl">
+              <thead><tr><th>Corner</th><th>Delay</th></tr></thead>
+              <tbody>
+                {CORNERS.map((c) => (
+                  <tr key={c.id} style={{ cursor: 'pointer', background: c.id === corner ? 'var(--panel2)' : undefined }}
+                    onClick={() => setCorner(c.id)}>
+                    <td>{c.name}</td>
+                    <td className="num">{cornerDelay({ corner: c.id, voltV: cornerV, tempC: cornerT }).relDelay.toFixed(3)}×</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 

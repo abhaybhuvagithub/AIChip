@@ -1687,3 +1687,36 @@ they were fine — but that they showcased the wrong thing.
   that my own try/catch converted into "unanswerable". A swallowed error
   reported as a data problem is the worst kind of check failure, because it
   sends you to fix the wrong thing.
+
+---
+
+## Fifty-third pass: the science, two more
+
+Eighteen sections to twenty. Both additions are things the tab could not
+express at all rather than things it covered thinly.
+
+- **Section 19 is the only limit on the page nobody engineers around.**
+  Landauer: erasing a bit must dissipate kT·ln2, about 2.87 zeptojoules at room
+  temperature, because information has entropy. Everything else on that tab is
+  an engineering problem someone might solve; this one is thermodynamics.
+- **And the number people quote is the wrong one.** The Landauer bound implies
+  four to six orders of headroom. But a switch operating at the bound would be
+  wrong about as often as it was right — the signal has to sit far enough above
+  thermal noise for errors to be astronomically rare, which puts the usable
+  floor around sixty times higher. A 3 nm gate transition is ten thousand times
+  Landauer and only a hundred and sixty times the floor that actually binds.
+  The headroom is real and it is not infinite, and the section says both.
+- **Section 20 explains why a chip that works is not a chip that works.** No
+  design is signed off at the typical value of anything; it is signed off at
+  five corners across voltage and temperature, a 2.2× delay spread. The
+  non-obvious half is that a chip can fail by being **too quick** — a hold-time
+  failure at fast-fast, high voltage, low temperature, which unlike a setup
+  failure cannot be fixed by slowing the clock.
+- **And the old rule reverses.** Hot silicon used to mean slow silicon. Below
+  about 0.6 V the threshold falls faster than mobility does and hot means fast.
+  The model reports that inversion as a flag rather than leaving it implicit,
+  and a check asserts the sign flips in the right direction on both sides.
+- **A silent no-op replace, again, and a guard that was too broad.** The import
+  edit matched nothing and the build told me. Then my assertion against
+  re-importing scanned the whole file and tripped on the new section's own
+  usage — the guard has to be scoped to the block it is guarding, not the file.
