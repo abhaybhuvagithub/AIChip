@@ -1758,3 +1758,34 @@ remain are good ones.
 - **And my own check caught a terse entry** — the Rayleigh model's description
   was twenty-five characters where the check demanded thirty. Expanded rather
   than lowering the bar.
+
+---
+
+## Fifty-fifth pass: your case
+
+The site had a dozen independently verified models and no way to point them at
+one real part. Every tab aimed one or two at an example; none let a reader ask
+about their own product.
+
+- **Nothing here is a new model.** It composes the existing ones, which is the
+  point — if a number is wrong it is wrong on the tab it came from too, rather
+  than being a thirteenth model that agrees with nobody.
+- **The output that matters is not the cost, it is which constraint binds.**
+  Six of them, each reachable and each checked to be reachable: the die will not
+  fit in a reticle field, every unit loses money, it cannot meet the quality
+  bar, it never earns back the design cost, capacity is the real negotiation,
+  or nothing obvious binds. Most chip ideas do not fail on the thing their
+  authors were worried about.
+- **Composition is where seams show, and four bugs surfaced immediately.**
+  `DPPM_TARGETS` keys markets by display name, not by a slug, so my lookup on
+  `.id` silently fell back to consumer and the automotive gate could never
+  fail. `breakEvenUnits` returns `{ units, margin }`, not a number, so the
+  volume comparison was always false. `totalNre` returns `total`, not
+  `totalUsd`, so the design cost was `NaN`. All three were assumed field names.
+- **The fourth was conceptual and worse.** I fed yield loss into the escape
+  model, which made every market unreachable. A die that fails wafer test is
+  discarded — it never ships and so can never escape. What escapes is the much
+  smaller population that passes test carrying a latent defect. Getting that
+  wrong made automotive look impossible when in reality it is reachable with
+  enough test coverage, which is exactly the trade the discipline tab is about.
+  Restoring the bug now fails four checks.

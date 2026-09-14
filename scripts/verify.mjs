@@ -3248,6 +3248,76 @@ group('The guide')
   })())
 }
 
+group('Your case')
+{
+  const U = await import(join(root, 'src/lib/usecase.js'))
+  const soc = U.ARCHETYPES.find((a) => a.id === 'consumer')
+
+  ok('every archetype is complete and explained',
+    U.ARCHETYPES.length >= 4 && U.ARCHETYPES.every((a) =>
+      a.dieX > 0 && a.dieY > 0 && a.node && a.unitsPerYear > 0 && a.priceUsd > 0 &&
+      a.market && a.note.length > 60))
+  ok('every archetype is viable as configured',
+    U.ARCHETYPES.every((a) => U.bindingConstraint(U.evaluate(a)).id === 'none'),
+    U.ARCHETYPES.filter((a) => U.bindingConstraint(U.evaluate(a)).id !== 'none')
+      .map((a) => `${a.id}:${U.bindingConstraint(U.evaluate(a)).id}`).join(', ') || 'all viable')
+
+  // Every constraint must be reachable, or it is decoration.
+  const pushes = [
+    ['reticle', { dieX: 40, dieY: 40 }],
+    ['margin', { priceUsd: 8 }],
+    ['quality', { market: 'automotive', testCoverage: 0.95 }],
+    ['volume', { unitsPerYear: 200e3 }],
+    ['capacity', { unitsPerYear: 3e9 }],
+  ]
+  for (const [want, over] of pushes) {
+    const got = U.bindingConstraint(U.evaluate({ ...soc, ...over })).id
+    ok(`the ${want} constraint is reachable`, got === want, `got ${got}`)
+  }
+  ok('every constraint explains itself and offers a way out',
+    pushes.every(([, over]) => {
+      const b = U.bindingConstraint(U.evaluate({ ...soc, ...over }))
+      return b.what.length > 60 && b.fix.length > 40
+    }))
+
+  // The four integration bugs this layer surfaced, pinned so they stay fixed.
+  ok('the market lookup resolves a real row, not a fallback', (() => {
+    const auto = U.evaluate({ ...soc, market: 'automotive' })
+    return auto.marketRow.dppm === 1
+  })())
+  ok('break-even is a number, not the object the model returns',
+    typeof U.evaluate(soc).breakEven === 'number' && Number.isFinite(U.evaluate(soc).breakEven))
+  ok('design cost resolves rather than coming out NaN',
+    Number.isFinite(U.evaluate(soc).nre.total) && U.evaluate(soc).nre.total > 0)
+  // A die that fails wafer test is discarded and cannot escape to a customer.
+  ok('escapes are computed from latent defects, not from yield loss', (() => {
+    const r = U.evaluate(soc)
+    return r.dppm < (1 - r.run.dieYield) * 1e6 / 10
+  })(), U.evaluate(soc).dppm.toFixed(1) + ' DPPM')
+  ok('better test coverage lowers escapes',
+    U.evaluate({ ...soc, testCoverage: 0.9999 }).dppm < U.evaluate({ ...soc, testCoverage: 0.99 }).dppm)
+  ok('automotive is reachable with enough coverage and not without it',
+    U.evaluate({ ...soc, market: 'automotive', testCoverage: 0.999999 }).gatePasses &&
+    !U.evaluate({ ...soc, market: 'automotive', testCoverage: 0.95 }).gatePasses)
+
+  // Composition must agree with the tabs it composes.
+  ok('a bigger die yields fewer good dies',
+    U.evaluate({ ...soc, dieX: 20, dieY: 20 }).goodPerWafer < U.evaluate(soc).goodPerWafer)
+  ok('more volume needs more wafer starts',
+    U.evaluate({ ...soc, unitsPerYear: 60e6 }).wspmNeeded > U.evaluate(soc).wspmNeeded)
+  ok('a newer node costs more to design',
+    U.evaluate({ ...soc, node: '2 nm' }).nre.total > U.evaluate({ ...soc, node: '40 nm' }).nre.total)
+
+  ok('the assumptions are stated rather than implied',
+    U.ASSUMPTIONS.length >= 5 && U.ASSUMPTIONS.every((a) => a.length > 50))
+  ok('it admits what it does not model',
+    U.ASSUMPTIONS.some((a) => /competition|schedule/i.test(a)))
+  ok('the tab shipped', (() => {
+    const ui = readFileSync(join(root, 'src/ui/UseCase.jsx'), 'utf8')
+    return /What actually binds/i.test(ui) && /Before you believe any of it/i.test(ui)
+  })())
+}
+
 group('Provenance of the models')
 {
   const FE3 = await import(join(root, 'src/lib/fabengine.js'))

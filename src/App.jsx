@@ -30,6 +30,7 @@ const Acronyms = lazy(() => import('./ui/Acronyms.jsx'))
 const Sources = lazy(() => import('./ui/Sources.jsx'))
 const Trace = lazy(() => import('./ui/Trace.jsx'))
 const Matters = lazy(() => import('./ui/Matters.jsx'))
+const UseCase = lazy(() => import('./ui/UseCase.jsx'))
 const Guide = lazy(() => import('./ui/Guide.jsx'))
 const Operate = lazy(() => import('./ui/Operate.jsx'))
 const AIChips = lazy(() => import('./ui/AIChips.jsx'))
@@ -83,6 +84,8 @@ const TABS = [
 
   { id: 'chain', label: 'Value chain', icon: 'route', group: 'The industry',
     desc: 'Seven layers from instruction sets to packaging, and where the chokepoints are.' },
+  { id: 'usecase', label: 'Your case', icon: 'prober', group: 'The industry',
+    desc: 'Describe one real part and every model on this site answers about it at once.' },
   { id: 'economics', label: 'Economics', icon: 'chart', group: 'The industry',
     desc: 'Cost per good die, wafer to product, across eight real product shapes.' },
   { id: 'business', label: '0 → market', icon: 'money', group: 'The industry',
@@ -373,6 +376,7 @@ export default function App() {
         {tab === 'god' && <GodView cfg={cfg} snap={snap} goTab={go} />}
         {tab === 'trace' && <Trace goTab={go} />}
         {tab === 'matters' && <Matters goTab={go} />}
+        {tab === 'usecase' && <UseCase goTab={go} />}
         {tab === 'guide' && <Guide goTab={go} />}
         {tab === 'operate' && <Operate goTab={go} />}
         {tab === 'run' && <FabRun cfg={cfg} onSnapshot={setSnap} />}
