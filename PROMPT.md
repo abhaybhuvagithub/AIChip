@@ -1804,3 +1804,33 @@ Same shape as the Javy rename, and the same one thing that is easy to miss.
   while the second went missing.
 - **Module, component, tab id, tour step, styles, smoke harness and checks**,
   not just the label. `git mv` for the file so the history follows it.
+
+---
+
+## Fifty-seventh pass: the other side of the industry
+
+Asked to add a use case for a specific company. Fetching the site first changed
+what was worth building: PulseWave Semiconductor is a **design services** firm —
+RTL design, verification, FPGA, post-silicon validation. It has no die size, no
+volume and no selling price, so the product model on that tab does not describe
+it even slightly. Filling the existing form with invented numbers would have
+produced a confident answer to a question the company does not have.
+
+- **So the tab gained the supplier's view instead.** The same programme, read
+  as engineer-years rather than as a part. It reuses the node figures the
+  business tab already uses for NRE — the design cost that is a burden on one
+  side of the page is the market on the other, and that inversion is the whole
+  point of the section.
+- **The finding is which line is biggest.** Verification is about half the
+  effort, roughly two engineers checking for every one designing, and that
+  ratio is the most reliable rule of thumb in chip development. It exists for
+  the same reason as everything else on the tab: a bug found after tapeout
+  costs a mask set and a quarter of calendar.
+- **Naming a real third party raised the bar on what may be asserted.** Only
+  what the company publishes about itself appears — its four service lines and
+  its city. No revenue, no headcount, no customers, no founding date, because
+  none of that is public and inventing it to make a worked example tidier is
+  exactly what the sources tab exists to prevent. The note says plainly that
+  the numbers are this site's own and are not a claim about the company's
+  business, and three checks enforce it. I added an invented headcount and
+  revenue to confirm they fire.

@@ -166,3 +166,75 @@ export const ASSUMPTIONS = [
   'No capacity constraint is enforced — the model will happily tell you to build four fabs.',
   'Nothing here models competition, schedule slip, or whether the product is any good.',
 ]
+
+// ============================================ THE OTHER SIDE ============
+//
+// Everything above models a company that SELLS A PART. Most of the
+// semiconductor industry does not. Design services firms sell engineer-years:
+// RTL design, verification, FPGA work, post-silicon validation. They carry no
+// mask cost, no wafer cost and no inventory, and none of the arithmetic above
+// describes them.
+//
+// This matters for the site as a whole, because the NRE figure on the business
+// tab — six hundred engineer-years for a leading-edge design — is not a cost
+// from the services firm's point of view. It is the market.
+//
+// The discipline split below follows the service lines a working design
+// services company actually organises around. Verification dominating design
+// is the well-established rule of thumb in this industry, not a claim about
+// any particular firm.
+
+export const SERVICE_LINES = [
+  { id: 'rtl', name: 'RTL design', share: 0.22, icon: 'ipcore',
+    what: 'Architecture and micro-architecture, Verilog and VHDL, clock and reset domain crossing, linting, logical equivalence and synthesis.',
+    why: 'The part everyone pictures when they think of chip design, and the smaller half of the effort.' },
+  { id: 'dv', name: 'Design verification', share: 0.48, icon: 'metrology',
+    what: 'Testbenches, constrained-random stimulus, coverage closure, formal property checking, IP and subsystem and full-SoC verification.',
+    why: 'The largest single line by some distance. Roughly two engineers verify for every one that designs, because a bug found after tapeout costs a mask set and a quarter.' },
+  { id: 'fpga', name: 'FPGA design and prototyping', share: 0.15, icon: 'ipnoc',
+    what: 'Mapping the design into programmable logic so software and system integration can start before silicon exists.',
+    why: 'Buys schedule rather than silicon. On a four-year programme, software that starts a year early is a year of calendar nobody had to pay for twice.' },
+  { id: 'psv', name: 'Post-silicon validation', share: 0.15, icon: 'prober',
+    what: 'Bring-up and characterisation of manufactured parts: does it work, at what voltage and temperature, and where are the corners it fails.',
+    why: 'The only stage that tests the real thing. Everything before it tests a model of it, and section 20 of the science tab is a list of ways a model and a die disagree.' },
+]
+
+/**
+ * What a chip programme is worth as engineering work.
+ *
+ * Takes the same node-based engineer-year figure the business tab uses for
+ * NRE, and reads it from the supplier's side rather than the buyer's.
+ */
+export function servicesView({ node, ratePerEngineerYearUsd = 120000, durationYears = 2.5 }) {
+  const nre = totalNre({ node })
+  const years = nre.engineerYears
+  const lines = SERVICE_LINES.map((l) => ({
+    ...l,
+    engineerYears: years * l.share,
+    valueUsd: years * l.share * ratePerEngineerYearUsd,
+    headcount: (years * l.share) / durationYears,
+  }))
+  return {
+    node, engineerYears: years, durationYears,
+    lines,
+    totalValueUsd: years * ratePerEngineerYearUsd,
+    peakHeadcount: years / durationYears,
+    verificationShare: SERVICE_LINES.find((l) => l.id === 'dv').share,
+  }
+}
+
+/**
+ * The named example the site points at.
+ *
+ * Only what the company publishes about itself: the service lines it offers
+ * and where it is. No revenue, headcount or customer claims — those are not
+ * public, and inventing them to make a worked example tidier would be
+ * exactly the kind of thing the sources tab exists to prevent.
+ */
+export const SERVICES_EXAMPLE = {
+  name: 'PulseWave Semiconductor',
+  url: 'https://pulsewavesemi.com/',
+  where: 'Ahmedabad, Gujarat, India',
+  lines: ['RTL design', 'Design verification', 'FPGA design', 'Post-silicon validation'],
+  note: 'A design services company whose four published service lines map onto the four disciplines below. The numbers on this page are derived from this site\u2019s own node model, not from anything the company has published — it is used here as a real example of the category, and nothing here is a claim about its business.',
+}

@@ -1,5 +1,8 @@
 import React, { useState } from 'react'
-import { ARCHETYPES, MARKETS, marketKey, evaluate, bindingConstraint, ASSUMPTIONS } from '../lib/usecase.js'
+import {
+  ARCHETYPES, MARKETS, marketKey, evaluate, bindingConstraint, ASSUMPTIONS,
+  SERVICES_EXAMPLE, servicesView,
+} from '../lib/usecase.js'
 import { fmt } from '../lib/fab.js'
 import Icon from './Icon.jsx'
 
@@ -21,10 +24,13 @@ const usd = (v) => (Math.abs(v) >= 1e9 ? `$${(v / 1e9).toFixed(1)}B`
 
 export default function UseCase({ goTab }) {
   const [p, setP] = useState(ARCHETYPES[2])
+  const [rate, setRate] = useState(120000)
+  const [dur, setDur] = useState(2.5)
   const set = (k, v) => setP((x) => ({ ...x, [k]: v }))
 
   const r = evaluate(p)
   const b = bindingConstraint(r)
+  const sv = servicesView({ node: p.node, ratePerEngineerYearUsd: rate, durationYears: dur })
 
   return (
     <div>
@@ -170,6 +176,80 @@ export default function UseCase({ goTab }) {
             </div>
           </div>
           <p className="hint" style={{ marginTop: 8 }}>{p.note}</p>
+        </div>
+      </div>
+
+
+      {/* ------------------------------------------------- the other side */}
+      <h2 className="sec">The same project, seen from the other side</h2>
+      <p className="small" style={{ marginBottom: 14, maxWidth: '68ch' }}>
+        Everything above models a company that sells a part. Much of this industry does not — design
+        services firms sell engineer-years, carry no mask cost, no wafer cost and no inventory, and
+        none of the arithmetic above describes them. The design cost that is a burden on this page is
+        their market. Same {p.node} programme, read from the supplier&rsquo;s side.
+      </p>
+      <div className="grid" style={{ gridTemplateColumns: 'minmax(0,1fr) minmax(290px,350px)' }}>
+        <div>
+          <div className="grid g3">
+            <div className="stat">
+              <div className="k">Engineering in the programme</div>
+              <div className="v" style={{ fontSize: 23 }}>{fmt.n(sv.engineerYears)}</div>
+              <div className="sub">engineer-years at {p.node}</div>
+            </div>
+            <div className="stat">
+              <div className="k">Peak headcount</div>
+              <div className="v" style={{ fontSize: 23 }}>{fmt.n(sv.peakHeadcount, 0)}</div>
+              <div className="sub">over {dur} years</div>
+            </div>
+            <div className="stat hi">
+              <div className="k">Value of the work</div>
+              <div className="v" style={{ fontSize: 23 }}>{usd(sv.totalValueUsd)}</div>
+              <div className="sub">at {usd(rate)} per engineer-year</div>
+            </div>
+          </div>
+          <div className="tbl-wrap" style={{ marginTop: 12 }}>
+            <table className="tbl">
+              <thead><tr><th>Service line</th><th>Share</th><th>Engineer-years</th><th>People</th><th>Value</th><th style={{ width: '34%' }}>Why it is that size</th></tr></thead>
+              <tbody>
+                {sv.lines.map((l) => (
+                  <tr key={l.id}>
+                    <td><b className="iconrow"><Icon name={l.icon} size={20} />{l.name}</b></td>
+                    <td className="num" style={{ color: l.id === 'dv' ? 'var(--accent)' : undefined }}>{fmt.pct(l.share, 0)}</td>
+                    <td className="num">{fmt.n(l.engineerYears, 0)}</td>
+                    <td className="num">{fmt.n(l.headcount, 0)}</td>
+                    <td className="num">{usd(l.valueUsd)}</td>
+                    <td className="small">{l.why}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="small" style={{ marginTop: 10, maxWidth: '68ch' }}>
+            Note which line is largest. <b>Verification is roughly half the effort</b> — about two
+            engineers checking for every one designing — and that ratio is the most reliable rule of
+            thumb in chip development. It exists because a bug found after tapeout costs a mask set
+            and a quarter of calendar, which is the same arithmetic the panel above calls
+            non-recurring cost.
+          </p>
+        </div>
+        <div className="card" style={{ alignSelf: 'start' }}>
+          <Slider label="Rate per engineer-year" value={rate / 1000} set={(v) => setRate(v * 1000)}
+            min={40} max={300} step={5} fmtV={(v) => `$${v}k`}
+            hint="Varies enormously by region and by whether the work is fixed-price or time and materials." />
+          <Slider label="Programme duration" value={dur} set={setDur} min={1} max={5} step={0.5} unit=" years"
+            hint="The same engineer-years compressed into less calendar means more people at once, which is usually the harder constraint." />
+          <div className="card" style={{ marginTop: 10, borderColor: 'var(--accent)', padding: '12px 14px' }}>
+            <div className="eyebrow">A real example of the category</div>
+            <a href={SERVICES_EXAMPLE.url} target="_blank" rel="noopener noreferrer"
+              style={{ fontFamily: 'var(--font-display)', fontSize: 19, letterSpacing: '-.02em', display: 'block', marginTop: 6 }}>
+              {SERVICES_EXAMPLE.name} →
+            </a>
+            <div className="small" style={{ color: 'var(--muted)', marginTop: 2 }}>{SERVICES_EXAMPLE.where}</div>
+            <div className="row" style={{ gap: 5, marginTop: 8 }}>
+              {SERVICES_EXAMPLE.lines.map((l) => <span className="badge" key={l}>{l}</span>)}
+            </div>
+            <p className="small" style={{ marginTop: 10 }}>{SERVICES_EXAMPLE.note}</p>
+          </div>
         </div>
       </div>
 

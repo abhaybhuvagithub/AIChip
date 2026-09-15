@@ -3316,6 +3316,48 @@ group('Your case')
     const ui = readFileSync(join(root, 'src/ui/UseCase.jsx'), 'utf8')
     return /What actually binds/i.test(ui) && /Before you believe any of it/i.test(ui)
   })())
+
+  // The other side of the same industry: firms that sell engineer-years rather
+  // than parts. None of the product arithmetic above describes them, and the
+  // design cost that is a burden on this page is their market.
+  ok('the service lines sum to the whole effort',
+    near(U.SERVICE_LINES.reduce((n, l) => n + l.share, 0), 1, 1e-9))
+  ok('every service line explains its own size',
+    U.SERVICE_LINES.length === 4 && U.SERVICE_LINES.every((l) =>
+      l.name && l.icon && l.what.length > 60 && l.why.length > 60))
+  // The most reliable rule of thumb in chip development.
+  ok('verification is the largest line',
+    U.SERVICE_LINES.every((l) => l.id === 'dv' || l.share <= U.SERVICE_LINES.find((x) => x.id === 'dv').share))
+  ok('verification is roughly double design',
+    U.SERVICE_LINES.find((l) => l.id === 'dv').share >
+    U.SERVICE_LINES.find((l) => l.id === 'rtl').share * 1.8)
+  ok('the services view uses the same engineer-years as the NRE model',
+    U.servicesView({ node: '3 nm' }).engineerYears === U.evaluate({ ...soc, node: '3 nm' }).nre.engineerYears)
+  ok('a newer node is a larger engineering programme',
+    U.servicesView({ node: '3 nm' }).engineerYears > U.servicesView({ node: '28 nm' }).engineerYears)
+  ok('compressing the schedule raises peak headcount',
+    U.servicesView({ node: '7 nm', durationYears: 1.5 }).peakHeadcount >
+    U.servicesView({ node: '7 nm', durationYears: 4 }).peakHeadcount)
+  ok('line headcounts sum to the peak', (() => {
+    const v = U.servicesView({ node: '7 nm' })
+    return near(v.lines.reduce((n, l) => n + l.headcount, 0), v.peakHeadcount, 1e-6)
+  })())
+
+  // A named third party appears here, so the limits on what is claimed matter.
+  ok('the named example carries a link and a location',
+    /^https:\/\//.test(U.SERVICES_EXAMPLE.url) && U.SERVICES_EXAMPLE.where && U.SERVICES_EXAMPLE.name)
+  ok('only publicly published service lines are attributed to it',
+    U.SERVICES_EXAMPLE.lines.length === 4 &&
+    U.SERVICES_EXAMPLE.lines.every((l) => /RTL|verification|FPGA|validation/i.test(l)))
+  ok('no revenue, headcount or customer claim is made about the named company',
+    !/revenue|customers|employees|headcount of|founded|\$\d/i.test(U.SERVICES_EXAMPLE.note))
+  ok('the page says the numbers are the site\u2019s own, not the company\u2019s',
+    /not from anything the company has published/i.test(U.SERVICES_EXAMPLE.note) &&
+    /nothing here is a claim about its business/i.test(U.SERVICES_EXAMPLE.note))
+  ok('the services section reached the tab', (() => {
+    const ui = readFileSync(join(root, 'src/ui/UseCase.jsx'), 'utf8')
+    return /seen from the other side/i.test(ui) && /SERVICES_EXAMPLE/.test(ui)
+  })())
 }
 
 group('Provenance of the models')
