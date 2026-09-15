@@ -22,7 +22,7 @@ const TAB_NAME = {
   chain: 'Value chain', business: '0 → market', teams: 'Teams & roles', operate: 'Run & operate',
 }
 
-export default function GodView({ cfg, snap, goTab }) {
+export default function TopView({ cfg, snap, goTab }) {
   const run = computeRun(cfg)
   const trace = traceBack(cfg, run)
   const c = { ...DEFAULT_COMPUTE, ...(cfg.compute || {}) }
@@ -44,7 +44,7 @@ export default function GodView({ cfg, snap, goTab }) {
 
   return (
     <div>
-      <div className="eyebrow">God view ✨</div>
+      <div className="eyebrow">Top view ✨</div>
       <h1 className="title">One configuration.<br />Every consequence.</h1>
       <p className="lede">
         Every other tab isolates a question. This one refuses to. Change the die on the yield lab and

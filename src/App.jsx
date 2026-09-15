@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, lazy, Suspense } from 'react'
-import GodView from './ui/GodView.jsx'
+import TopView from './ui/TopView.jsx'
 import Assistant from './ui/Assistant.jsx'
 
 // Route-level code splitting. The whole site was shipping as one 238 kB chunk,
@@ -7,7 +7,7 @@ import Assistant from './ui/Assistant.jsx'
 // simulator, the causal graph and eighteen sections of device physics before
 // anything appeared. Each tab is now its own chunk, fetched when asked for.
 //
-// GodView stays eager: it is the overview, it is small, and a spinner on the
+// TopView stays eager: it is the overview, it is small, and a spinner on the
 // first thing someone sees is worse than the bytes it saves.
 const SandToSilicon = lazy(() => import('./ui/SandToSilicon.jsx'))
 const FabLine = lazy(() => import('./ui/FabLine.jsx'))
@@ -50,7 +50,7 @@ const TABS = [
   // navigation.
   { id: 'guide', label: 'Start here', icon: 'book', group: 'Orientation',
     desc: 'How a chip is made, in about five minutes, assuming no background at all.' },
-  { id: 'god', label: 'God view', icon: 'spark', group: 'Orientation',
+  { id: 'top', label: 'Top view', icon: 'spark', group: 'Orientation',
     desc: 'The whole pipeline on one screen, live. Every node clicks through.' },
   { id: 'matters', label: 'Why it matters', icon: 'atom', group: 'Orientation',
     desc: 'Silicon is almost never the expensive part — it is the part everything stops without.' },
@@ -164,7 +164,7 @@ export default function App() {
   // Renaming a tab renames its URL. An old link would otherwise fall through
   // the `some()` check below and land silently on a different tab, which reads
   // as the link being broken. Aliases are cheap; keep them when an id changes.
-  const TAB_ALIASES = { javy: 'operate' }
+  const TAB_ALIASES = { javy: 'operate', god: 'top' }
   const wanted = TAB_ALIASES[hash?.tab] || hash?.tab
   const [tab, setTab] = useState(wanted && TABS.some((t) => t.id === wanted) ? wanted : 'guide')
   const [palette, setPalette] = useState(() => {
@@ -373,7 +373,7 @@ export default function App() {
         <Suspense fallback={<div className="route-loading">Loading…</div>}>
         {tab === 'sand' && <SandToSilicon cfg={cfg} />}
         {tab === 'line' && <FabLine />}
-        {tab === 'god' && <GodView cfg={cfg} snap={snap} goTab={go} />}
+        {tab === 'top' && <TopView cfg={cfg} snap={snap} goTab={go} />}
         {tab === 'trace' && <Trace goTab={go} />}
         {tab === 'matters' && <Matters goTab={go} />}
         {tab === 'usecase' && <UseCase goTab={go} />}

@@ -551,7 +551,7 @@ p.lede { color: var(--muted); font-size: var(--fs-lede); line-height: 1.6; max-w
 .path-band-n { font-size: var(--fs-label); color: var(--muted); }
 .path-scrub { width: 100%; accent-color: var(--accent); margin: 12px 0 6px; cursor: pointer; }
 
-/* ---------- God view ---------- */
+/* ---------- Top view ---------- */
 .godflow { display: flex; align-items: stretch; gap: 4px; overflow-x: auto; padding-bottom: 8px; }
 .godflow::-webkit-scrollbar { height: 6px; }
 .godflow::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }

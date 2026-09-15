@@ -107,7 +107,7 @@ function Line({ cfg, counts, apc, metroSample, running, speed, setCount, setMetr
     return () => { alive = false; cancelAnimationFrame(raf) }
   }, [running, speed])
 
-  // Publish upward so God view and the assistant can read the live line
+  // Publish upward so Top view and the assistant can read the live line
   // without reaching into this component's state.
   useEffect(() => { onSnapshot?.(sim.snap) }, [sim.snap, onSnapshot])
 

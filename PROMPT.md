@@ -370,7 +370,7 @@ seventeen clickable process modules, which is a diagram, not a simulation.
 
 ---
 
-## Ninth pass: God view, travel path, assistant
+## Ninth pass: Top view, travel path, assistant
 
 - **"AI assistant" had a constraint worth naming rather than working around.**
   This is a static bundle on GitHub Pages — no server, no key, no runtime
@@ -1789,3 +1789,18 @@ about their own product.
   wrong made automotive look impossible when in reality it is reachable with
   enough test coverage, which is exactly the trade the discipline tab is about.
   Restoring the bug now fails four checks.
+
+---
+
+## Fifty-sixth pass: God view to Top view
+
+Same shape as the Javy rename, and the same one thing that is easy to miss.
+
+- **Renaming a tab renames its URL.** An old `#tab=god` link would have fallen
+  through the validity check and landed silently on the guide, which reads as
+  the link being broken rather than moved. It joins `javy: 'operate'` in the
+  alias map, and the existing check now asserts both aliases rather than the
+  first one — a check that only ever knew about one alias would have passed
+  while the second went missing.
+- **Module, component, tab id, tour step, styles, smoke harness and checks**,
+  not just the label. `git mv` for the file so the history follows it.

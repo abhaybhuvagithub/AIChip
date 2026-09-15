@@ -177,7 +177,7 @@ group('Content')
   ok('quiz answers all point at a real option', QUIZ.every((q) => q.opts[q.a] !== undefined))
   ok('every quiz question explains itself', QUIZ.every((q) => q.why && q.why.length > 40))
   ok('quiz options are distinct', QUIZ.every((q) => new Set(q.opts).size === q.opts.length))
-  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'god', 'science', 'clock', 'business', 'ethics', 'teams', 'unsolved', 'acronyms', 'trace', 'ai', 'operate', 'sources'].includes(t.tab)))
+  ok('tour steps point at real tabs', TOUR.every((t) => ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz', 'run', 'top', 'science', 'clock', 'business', 'ethics', 'teams', 'unsolved', 'acronyms', 'trace', 'ai', 'operate', 'sources'].includes(t.tab)))
   ok('the tour visits every tab', ['sand', 'line', 'wafer', 'economics', 'nodes', '3d', 'silicon', 'chain', 'compute', 'quantum', 'quiz']
     .every((t) => TOUR.some((s) => s.tab === t)))
   ok('quiz covers the material chain', QUIZ.some((q) => /purity|distill|polysilicon|particle/i.test(q.q)))
@@ -1927,7 +1927,7 @@ group('Trace')
     T.QUESTIONS.every((q) => T.node(q.node)), T.QUESTIONS.filter((q) => !T.node(q.node)).map((q) => q.node).join(', '))
   ok('there are enough entry points to explore from', T.QUESTIONS.length >= 8)
   ok('cross-references point at real tabs', (() => {
-    const TABS = ['god', 'trace', 'sand', 'line', 'run', 'wafer', 'science', 'clock', '3d', 'nodes',
+    const TABS = ['top', 'trace', 'sand', 'line', 'run', 'wafer', 'science', 'clock', '3d', 'nodes',
       'quantum', 'silicon', 'chain', 'compute', 'economics', 'business', 'ethics', 'unsolved',
       'acronyms', 'quiz']
     return T.NODES.filter((n) => n.tab).every((n) => TABS.includes(n.tab))
@@ -1970,7 +1970,7 @@ group('Acronym glossary')
   })())
 
   // Cross-references must point at tabs that exist, or they are dead ends.
-  const TABS = ['god', 'sand', 'line', 'run', 'wafer', 'science', 'clock', '3d', 'nodes',
+  const TABS = ['top', 'sand', 'line', 'run', 'wafer', 'science', 'clock', '3d', 'nodes',
     'quantum', 'silicon', 'chain', 'compute', 'economics', 'business', 'ethics', 'unsolved',
     'acronyms', 'quiz']
   ok('every cross-reference points at a real tab',
@@ -2662,7 +2662,7 @@ group('Themes and contrast')
     /<Suspense fallback=/.test(app2) && /<\/Suspense>/.test(app2))
   // A spinner on the first thing a visitor sees is worse than the bytes saved.
   ok('the overview stays eager so the landing view never waits',
-    /^import GodView from/m.test(app2))
+    /^import TopView from/m.test(app2))
   ok('narrow viewports scroll tables rather than squashing them',
     /@media \(max-width: 860px\)[\s\S]{0,200}\.tbl \{ min-width/.test(css))
   ok('a scrolling table says that it scrolls',
@@ -2764,7 +2764,7 @@ group('Themes and contrast')
   // Renaming a tab renames its URL, and an old link would otherwise land
   // silently on a different tab.
   ok('a renamed tab keeps an alias so old links still resolve',
-    /TAB_ALIASES/.test(app2) && /javy: 'operate'/.test(app2))
+    /TAB_ALIASES/.test(app2) && /javy: 'operate'/.test(app2) && /god: 'top'/.test(app2))
   ok('aliases resolve before the tab is validated', (() => {
     const i = app2.indexOf('TAB_ALIASES[hash?.tab]')
     const j = app2.indexOf('TABS.some((t) => t.id === wanted)')
@@ -3036,7 +3036,7 @@ group('Chart accessibility')
 /* ---------- meta ---------- */
 group('Reading path')
 {
-  const gv = readFileSync(join(root, 'src/ui/GodView.jsx'), 'utf8')
+  const gv = readFileSync(join(root, 'src/ui/TopView.jsx'), 'utf8')
   ok('the overview offers routes through rather than a flat list',
     /Three ways through/.test(gv) && /TAB_NAME/.test(gv))
   ok('every route step points at a real tab', (() => {
@@ -3940,7 +3940,7 @@ group('Build output')
         bundle.includes('Colour by speed bin') || bundle.includes('Blended selling price'))
       ok('the clock tab shipped', bundle.includes('f_max') || bundle.includes('Signal reach'))
       ok('the science tab shipped', bundle.includes('Subthreshold') || bundle.includes('subthreshold'))
-      ok('the God view shipped', bundle.includes('God view') || bundle.includes('godflow'))
+      ok('the Top view shipped', bundle.includes('Top view') || bundle.includes('godflow'))
       ok('the travel path shipped', bundle.includes('Travel path') || bundle.includes('Follow one wafer'))
       ok('the assistant states it is not a language model', /not a language model/i.test(bundle))
       ok('no API key or endpoint is baked into the bundle',
