@@ -1809,8 +1809,10 @@ Same shape as the Javy rename, and the same one thing that is easy to miss.
 
 ## Fifty-seventh pass: the other side of the industry
 
-Asked to add a use case for a specific company. Fetching the site first changed
-what was worth building: PulseWave Semiconductor is a **design services** firm —
+Asked to add a use case for a specific company, then asked to remove the
+company again. The named card is gone; the section it prompted stayed, because
+it never depended on naming anyone. Fetching the site first changed what was
+worth building: the company was a **design services** firm —
 RTL design, verification, FPGA, post-silicon validation. It has no die size, no
 volume and no selling price, so the product model on that tab does not describe
 it even slightly. Filling the existing form with invented numbers would have
@@ -1826,11 +1828,26 @@ produced a confident answer to a question the company does not have.
   ratio is the most reliable rule of thumb in chip development. It exists for
   the same reason as everything else on the tab: a bug found after tapeout
   costs a mask set and a quarter of calendar.
-- **Naming a real third party raised the bar on what may be asserted.** Only
-  what the company publishes about itself appears — its four service lines and
-  its city. No revenue, no headcount, no customers, no founding date, because
-  none of that is public and inventing it to make a worked example tidier is
-  exactly what the sources tab exists to prevent. The note says plainly that
-  the numbers are this site's own and are not a claim about the company's
-  business, and three checks enforce it. I added an invented headcount and
-  revenue to confirm they fire.
+- **Naming a real third party raised the bar on what could be asserted**, and
+  the removal was correspondingly easy: only publicly published facts had gone
+  in, so nothing had to be unpicked from the model. The four checks that
+  enforced those limits were deleted with the thing they guarded rather than
+  left pointing at a deleted export — a check whose subject is gone asserts
+  nothing.
+
+---
+
+## Fifty-eighth pass: removing the named company
+
+- **The model stayed, the name went.** The supplier's view was worth building
+  on its own merits and never depended on naming anyone, so removing the card
+  cost nothing but the card.
+- **The checks went with it.** Four checks existed to constrain what could be
+  claimed about a named third party. With no third party they assert nothing,
+  and leaving them behind pointing at a deleted export would have been worse
+  than having no checks — so they were removed rather than repointed.
+- **And the one that remained was anchored on the wrong thing.** It looked for
+  "Design verification" in the component source, but that string is rendered
+  from data at runtime and is not in the JSX at all. It had been passing
+  because the deleted card happened to contain the phrase. Re-anchored on prose
+  that is actually in the file.

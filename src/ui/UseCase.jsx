@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import {
   ARCHETYPES, MARKETS, marketKey, evaluate, bindingConstraint, ASSUMPTIONS,
-  SERVICES_EXAMPLE, servicesView,
+  servicesView,
 } from '../lib/usecase.js'
 import { fmt } from '../lib/fab.js'
 import Icon from './Icon.jsx'
@@ -238,18 +238,6 @@ export default function UseCase({ goTab }) {
             hint="Varies enormously by region and by whether the work is fixed-price or time and materials." />
           <Slider label="Programme duration" value={dur} set={setDur} min={1} max={5} step={0.5} unit=" years"
             hint="The same engineer-years compressed into less calendar means more people at once, which is usually the harder constraint." />
-          <div className="card" style={{ marginTop: 10, borderColor: 'var(--accent)', padding: '12px 14px' }}>
-            <div className="eyebrow">A real example of the category</div>
-            <a href={SERVICES_EXAMPLE.url} target="_blank" rel="noopener noreferrer"
-              style={{ fontFamily: 'var(--font-display)', fontSize: 19, letterSpacing: '-.02em', display: 'block', marginTop: 6 }}>
-              {SERVICES_EXAMPLE.name} →
-            </a>
-            <div className="small" style={{ color: 'var(--muted)', marginTop: 2 }}>{SERVICES_EXAMPLE.where}</div>
-            <div className="row" style={{ gap: 5, marginTop: 8 }}>
-              {SERVICES_EXAMPLE.lines.map((l) => <span className="badge" key={l}>{l}</span>)}
-            </div>
-            <p className="small" style={{ marginTop: 10 }}>{SERVICES_EXAMPLE.note}</p>
-          </div>
         </div>
       </div>
 

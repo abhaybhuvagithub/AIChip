@@ -222,19 +222,3 @@ export function servicesView({ node, ratePerEngineerYearUsd = 120000, durationYe
     verificationShare: SERVICE_LINES.find((l) => l.id === 'dv').share,
   }
 }
-
-/**
- * The named example the site points at.
- *
- * Only what the company publishes about itself: the service lines it offers
- * and where it is. No revenue, headcount or customer claims — those are not
- * public, and inventing them to make a worked example tidier would be
- * exactly the kind of thing the sources tab exists to prevent.
- */
-export const SERVICES_EXAMPLE = {
-  name: 'PulseWave Semiconductor',
-  url: 'https://pulsewavesemi.com/',
-  where: 'Ahmedabad, Gujarat, India',
-  lines: ['RTL design', 'Design verification', 'FPGA design', 'Post-silicon validation'],
-  note: 'A design services company whose four published service lines map onto the four disciplines below. The numbers on this page are derived from this site\u2019s own node model, not from anything the company has published — it is used here as a real example of the category, and nothing here is a claim about its business.',
-}

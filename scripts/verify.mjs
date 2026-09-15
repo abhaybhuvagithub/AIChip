@@ -3343,20 +3343,9 @@ group('Your case')
     return near(v.lines.reduce((n, l) => n + l.headcount, 0), v.peakHeadcount, 1e-6)
   })())
 
-  // A named third party appears here, so the limits on what is claimed matter.
-  ok('the named example carries a link and a location',
-    /^https:\/\//.test(U.SERVICES_EXAMPLE.url) && U.SERVICES_EXAMPLE.where && U.SERVICES_EXAMPLE.name)
-  ok('only publicly published service lines are attributed to it',
-    U.SERVICES_EXAMPLE.lines.length === 4 &&
-    U.SERVICES_EXAMPLE.lines.every((l) => /RTL|verification|FPGA|validation/i.test(l)))
-  ok('no revenue, headcount or customer claim is made about the named company',
-    !/revenue|customers|employees|headcount of|founded|\$\d/i.test(U.SERVICES_EXAMPLE.note))
-  ok('the page says the numbers are the site\u2019s own, not the company\u2019s',
-    /not from anything the company has published/i.test(U.SERVICES_EXAMPLE.note) &&
-    /nothing here is a claim about its business/i.test(U.SERVICES_EXAMPLE.note))
   ok('the services section reached the tab', (() => {
     const ui = readFileSync(join(root, 'src/ui/UseCase.jsx'), 'utf8')
-    return /seen from the other side/i.test(ui) && /SERVICES_EXAMPLE/.test(ui)
+    return /seen from the other side/i.test(ui) && /Verification is roughly half the effort/i.test(ui)
   })())
 }
 
